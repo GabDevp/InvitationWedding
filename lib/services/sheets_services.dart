@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SheetsService {
-  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbwOjAVnehV9x35TKBqZYXNhyjafVRIdM4drilX5-2PwiJowNyrUufvuzktg87n6bHrYaA/exec'; // tu URL
+  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbwsBmsAa7OuzmEuqwyuy75hcYBlgVcB-EEcUZTkUPVLjEW_94Or_7GlCvFgvFgBJHiTJA/exec'; // tu URL
   static const _token = 'mibodasecreta2025'; // el mismo TOKEN del script
 
   static Future<List<dynamic>> search(String query) async {
@@ -39,14 +39,17 @@ class SheetsService {
   }
 
   static Future<Map<String, dynamic>?> confirm(String name, {int consume = 1}) async {
-    // Usar GET para evitar preflight CORS en Flutter Web
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-      'action': 'confirm',
-      'name': name,
-      'consume': consume.toString(),
       'token': _token,
     });
-    final res = await http.get(uri, headers: {
+    final body = json.encode({
+      "action": "confirm",
+      "name": name,
+      "consume": consume,
+      "token": _token
+    });
+    final res = await http.post(uri, body: body, headers: {
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
     });
     if (res.statusCode == 200) {
