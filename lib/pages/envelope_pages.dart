@@ -1,7 +1,9 @@
 // ignore_for_file: unused_field
 
+import 'dart:ui' as ui; // For platformViewRegistry (web)
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:invitacion_boda/pages/pages.dart';
 
 class EnvelopeScreen extends StatefulWidget {
   const EnvelopeScreen({super.key});
@@ -56,11 +58,43 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
   }
 
   void _toggleEnvelope() async {
+    // Iniciar la animación de apertura
     setState(() => opened = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('presentacion');
-    }
+    
+    // Esperar a que la animación de apertura se complete
+    await Future.delayed(const Duration(seconds: 1));
+    
+    if (!mounted) return;
+    
+    // Navegar a la pantalla de invitación con un efecto de desenfoque
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const InvitacionPage(),
+        transitionDuration: const Duration(milliseconds: 1000),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          // Efecto de desenfoque durante la transición
+          final blur = Tween<double>(begin: 50, end: 0).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            ),
+          );
+          
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, _) {
+              return BackdropFilter(
+                filter: ui.ImageFilter.blur(
+                  sigmaX: blur.value,
+                  sigmaY: blur.value,
+                ),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -151,7 +185,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
               children: [
                 Center(
                   child: AnimatedScale(
-                    scale: opened ? 2.5 : 1.0,
+                    scale: opened ? 4 : 1.0,
                     duration: const Duration(seconds: 1),
                     curve: Curves.easeInOut,
                     child: ConstrainedBox(
