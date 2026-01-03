@@ -37,8 +37,23 @@ class _InvitacionPageState extends State<InvitacionPage> {
   bool _soldOut = false;
   Timer? _searchDebounce;
   bool _isConfirming = false;
+  // Control de búsqueda al seleccionar una sugerencia
+  String? _selectedNameDisplay;
+  bool _ignoreNextNameChange = false;
 
   void _onNameChanged() {
+    // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
+    if (_ignoreNextNameChange) {
+      _ignoreNextNameChange = false;
+      return;
+    }
+    final current = _nombreCtrl.text.trim();
+    if (_selectedNameDisplay != null && current == _selectedNameDisplay) {
+      // Mantener selección: no buscar
+      return;
+    }
+    // Si el usuario cambió el texto respecto a la selección, liberar selección y buscar
+    _selectedNameDisplay = null;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 200), _runNameSearch);
   }
@@ -650,10 +665,10 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 10),
                             FittedBox(
                               child: Text(
-                                "13 de diciembre de 2025 \n a las 05:00PM",
+                                "13 de diciembre de 2025 \n a las 04:30PM",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody,
+                                  fontSize: fontSizeBody + 1.5,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -730,24 +745,6 @@ Widget build(BuildContext context) {
                               ),
                               child: const Text("Ver en Google Maps"),
                             ),
-                            // Padding(
-                            //   padding: EdgeInsets.symmetric(horizontal:  size.width * 0.12),
-                            //   child: Column(
-                            //     mainAxisSize: MainAxisSize.min,
-                            //     children: [
-                            //       const SizedBox(height: 20),
-                            //       ClipRRect(
-                            //         borderRadius: BorderRadius.circular(20),
-                            //         child: Image.asset(
-                            //           "lib/assets/IMG_1540.jpg",
-                            //           width:  size.width > 600 ? size.width * 0.5 : size.width * 0.8,
-                            //           height:  size.width > 600 ? 400 : size.height * 0.80,
-                            //           fit: BoxFit.cover,
-                            //         ),
-                            //       ),
-                            //     ],
-                            //   ),
-                            // ),
                           ],
                         ),
                       ],
@@ -835,7 +832,7 @@ Widget build(BuildContext context) {
                                 ),
                               ),
                               TextSpan(
-                                text: "Cada momento ha sido preparado con amor y queremos\nque vivas la experiencia completa desde el inicio.",
+                                text: "Cada momento ha sido preparado con amor y queremos que vivas\nla experiencia completa desde el inicio.",
                                 style: GoogleFonts.nunito(
                                   fontSize: fontSizeBody - 0.5,
                                   color: Colors.white,
@@ -873,7 +870,7 @@ Widget build(BuildContext context) {
                                 ),
                               ),
                               TextSpan(
-                                text: "Este día está hecho para celebrar, compartir y\ncrear recuerdos que durarán para siempre. 🕺🏻💃🏼",
+                                text: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre. 🕺🏻💃🏼",
                                 style: GoogleFonts.nunito(
                                   fontSize: fontSizeBody - 0.5,
                                   color: Colors.white,
@@ -911,42 +908,42 @@ Widget build(BuildContext context) {
                                 ),
                               ),
                               TextSpan(
-                                text: "Te sugerimos vestir elegante y cómodo, acorde al\nencanto de este día tan especial.\n",
+                                text: "Elegancia cómoda ✨\nQueremos que te sientas especial, sin dejar de estar cómodo. Un toque formal, a tu estilo.",
                                 style: GoogleFonts.nunito(
                                   fontSize: fontSizeBody - 0.5,
                                   color: Colors.white,
                                 ),
                               ),
-                              TextSpan(
-                                text: "Hombres:",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: " Camisa - Pantalon 👔\n",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Mujeres:",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: " Vestido 👗",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              // TextSpan(
+                              //   text: "Hombres:",
+                              //   style: GoogleFonts.nunito(
+                              //     fontSize: fontSizeBody - 0.5,
+                              //     fontWeight: FontWeight.bold,
+                              //     color: Colors.white,
+                              //   ),
+                              // ),
+                              // TextSpan(
+                              //   text: " Camisa - Pantalon 👔\n",
+                              //   style: GoogleFonts.nunito(
+                              //     fontSize: fontSizeBody - 0.5,
+                              //     color: Colors.white,
+                              //   ),
+                              // ),
+                              // TextSpan(
+                              //   text: "Mujeres:",
+                              //   style: GoogleFonts.nunito(
+                              //     fontSize: fontSizeBody - 0.5,
+                              //     fontWeight: FontWeight.bold,
+                              //     color: Colors.white,
+                              //   ),
+                              // ),
+                              // TextSpan(
+                              //   text: " Vestido 👗",
+                              //   style: GoogleFonts.nunito(
+                              //     fontSize: fontSizeBody - 0.5,
+                              //     color: Colors.white,
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
@@ -979,7 +976,7 @@ Widget build(BuildContext context) {
                                 ),
                               ),
                               TextSpan(
-                                text: "Tu presencia es nuestro mejor regalo, pero sobre todo,\nven con la mejor energía y disposición para disfrutar.",
+                                text: "Tu presencia es nuestro mejor regalo, pero sobre todo, ven con la mejor\nenergía y disposición para disfrutar.",
                                 style: GoogleFonts.nunito(
                                   fontSize: fontSizeBody - 0.5,
                                   color: Colors.white,
@@ -1002,7 +999,7 @@ Widget build(BuildContext context) {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Regalo: Lluvia de sobres\n",
+                                text: "Regalo:\n",
                                 style: GoogleFonts.playfairDisplay(
                                   fontSize: fontSizeTitle,
                                   fontWeight: FontWeight.bold,
@@ -1044,7 +1041,7 @@ Widget build(BuildContext context) {
                                     ),
                                   ),
                                   TextSpan(
-                                    text: "Queremos que disfrutes plenamente este momento especial. ❤️\n",
+                                    text: "Amamos a los pequeños, pero esta vez queremos que los adultos puedan disfrutar y celebrar sin prisas. 💕\n Gracias por comprender que esta será una velada solo para adultos. ❤️\n",
                                     style: GoogleFonts.nunito(
                                       fontSize: fontSizeBody - 0.5,
                                       color: Colors.white,
@@ -1127,6 +1124,8 @@ Widget build(BuildContext context) {
                                       title: Text(display),
                                       onTap: () {
                                         setState(() {
+                                          _ignoreNextNameChange = true;
+                                          _selectedNameDisplay = display;
                                           _nombreCtrl.text = display;
                                           _nombreCtrl.selection = TextSelection.collapsed(offset: display.length);
                                           _passesForTypedName = passesRem;
