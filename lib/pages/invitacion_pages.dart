@@ -350,7 +350,7 @@ Widget build(BuildContext context) {
       children: [
         // 🔹 Fondo único en toda la pantalla
         Image.asset(
-          "lib/assets/fondo8.png",
+          "lib/assets/fondo1.jpg",
           fit: BoxFit.cover,
         ),
         Container(color: Colors.black.withOpacity(0.45)), // filtro oscuro
@@ -376,7 +376,7 @@ Widget build(BuildContext context) {
                         SizedBox(
                           // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
                           child: Image.asset(
-                            "lib/assets/Ad1.png",
+                            "lib/assets/",
                             height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
                           ),
                         ),

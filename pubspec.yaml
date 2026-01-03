@@ -28,27 +28,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - lib/assets/Ad1.png
-    - lib/assets/Ad2.png
-    - lib/assets/Ad3.png
-    - lib/assets/Ad4.png
     - lib/assets/anillos.png
     - lib/assets/fondo1.jpg
     - lib/assets/fondo7.png
     - lib/assets/fondo8.png
     - lib/assets/fondo9.png
-    - lib/assets/pareja1.jpg
-    - lib/assets/pareja2.jpg
-    - lib/assets/pareja3.jpg
-    - lib/assets/pareja4.jpg
-    - lib/assets/pareja5.jpg
-    - lib/assets/pareja6.jpg
-    - lib/assets/pareja7.jpg
-    - lib/assets/pareja8.jpg
-    - lib/assets/IMG_1536.jpg
-    - lib/assets/IMG_1537.jpg
-    - lib/assets/IMG_1538.jpg
-    - lib/assets/IMG_1540.jpg
     - lib/assets/noniños.gif
     - lib/assets/audio/TuPoeta.mp3
     - lib/assets/audio/CarinLeon.mp3
