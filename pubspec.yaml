@@ -1,6 +1,6 @@
 name: invitacion_boda
 description: Proyecto de invitación de boda - Flutter Web (ejemplo)
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -20,6 +20,7 @@ dependencies:
   smooth_page_indicator: ^1.2.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  universal_html: ^2.2.4
 
 dev_dependencies:
   flutter_test:
@@ -28,12 +29,13 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - lib/assets/anillos.png
     - lib/assets/fondo1.jpg
-    - lib/assets/fondo7.png
-    - lib/assets/fondo8.png
-    - lib/assets/fondo9.png
+    - lib/assets/sobre1.jpg
+    - lib/assets/sobre2.jpg
+    - lib/assets/sobre3.jpg
+    - lib/assets/sobre4.jpg
+    - lib/assets/qrphotos.jpeg
+    - lib/assets/hombres.png
+    - lib/assets/mujeres.png
     - lib/assets/noniños.gif
-    - lib/assets/audio/TuPoeta.mp3
-    - lib/assets/audio/CarinLeon.mp3
-    - lib/assets/audio/EnamorarteMilVeces.mp3
+    - lib/assets/audio/Fonseca.mp3

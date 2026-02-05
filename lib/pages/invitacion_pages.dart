@@ -5,9 +5,10 @@ import 'dart:html' as html; // For IFrameElement (web)
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // kIsWeb
 import 'package:google_fonts/google_fonts.dart';
-import 'package:invitacion_boda/widgets/carrusel.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
+
+import 'package:invitacion_boda/widgets/carrusel.dart';
 import 'package:invitacion_boda/services/sheets_services.dart';
 
 class InvitacionPage extends StatefulWidget {
@@ -126,7 +127,7 @@ class _InvitacionPageState extends State<InvitacionPage> {
   void _startCountdown() {
     void calc() {
       final now = DateTime.now();
-      final target = DateTime(2025, 12, 13);
+      final target = DateTime(2026, 7, 18);
       Duration diff = target.difference(now);
       if (diff.isNegative) diff = Duration.zero;
       final days = diff.inDays;
@@ -149,7 +150,7 @@ class _InvitacionPageState extends State<InvitacionPage> {
   }
   void _abrirGoogleMaps() async {
     const url =
-        "https://www.google.com/maps/place/4%C2%B007'40.7%22N+76%C2%B013'08.4%22W/@4.1279635,-76.2215614,17z/data=!3m1!4b1!4m4!3m3!8m2!3d4.1279635!4d-76.2189865?entry=ttu&g_ep=EgoyMDI1MTAwMS4wIKXMDSoASAFQAw%3D%3D"; // cámbialo por tu ubicación real
+        "https://www.google.com/maps?vet=12ahUKEwipyfnhh7uSAxXkmbAFHYyRBMcQ8UF6BAgoEAI..i&lei=ZrqAaan-HeSzwt0PjKOSuAw&cs=1&um=1&ie=UTF-8&fb=1&gl=co&sa=X&geocode=KY_shlMAxTmOMbBiVo-qEDCw&daddr=Narino,+Palomestizo,+Tulu%C3%A1,+Valle+del+Cauca"; // cámbialo por tu ubicación real
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -160,8 +161,8 @@ class _InvitacionPageState extends State<InvitacionPage> {
       return;
     }
     final String mensaje = acompanante.isEmpty
-        ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 13/12/25"
-        : "Hola! Soy $nombre y confirmo mi asistencia con $acompanante para asistir a este evento tan importante el día 13/12/25";
+        ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 18/07/26"
+        : "Hola! Soy $nombre y confirmo mi asistencia con $acompanante para asistir a este evento tan importante el día 18/07/26";
 
     // Previsualización del mensaje antes de enviar
     final bool? confirmar = await showDialog<bool>(
@@ -185,7 +186,7 @@ class _InvitacionPageState extends State<InvitacionPage> {
     if (confirmar != true) return;
 
     final url =
-        "https://wa.me/573217815442?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
+        "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -195,12 +196,11 @@ class _InvitacionPageState extends State<InvitacionPage> {
 @override
 void initState() {
   super.initState();
-  // Register Google Map iframe for web
   if (kIsWeb && !_mapRegistered) {
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory('gmap-iframe', (int viewId) {
       final iframe = html.IFrameElement()
-        ..src = 'https://www.google.com/maps?q=4.1279635,-76.2215614&z=16&output=embed'
+        ..src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.800881111111!2d-76.2290202!3d4.0894487!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e39c5005386ec8f%3A0xb03010aa8f5662b0!2sFinca%20Villa%20In%C3%A9s!5e0!3m2!1ses!2sco!4v1234567890123'
         ..style.border = '0'
         ..allowFullscreen = true;
       return iframe;
@@ -208,14 +208,11 @@ void initState() {
     _mapRegistered = true;
   }
   _startCountdown();
-  // Iniciar música en loop
   _player = AudioPlayer();
   _player.setReleaseMode(ReleaseMode.loop);
   if (kIsWeb) {
-    // En Web, intentar autoplay en silencio y luego hacer fade-in.
     _tryAutoplayWeb();
   } else {
-    // En móviles/escritorio sí podemos intentar autoplay
     _startAudio();
   }
 
@@ -255,7 +252,7 @@ Future<void> _tryAutoplayWeb() async {
   // Intenta reproducir en silencio y luego hacer fade-in
   try {
     await _player.setVolume(0.0);
-    await _player.play(UrlSource('assets/lib/assets/audio/TuPoeta.mp3'));
+    await _player.play(UrlSource('assets/lib/assets/audio/Fonseca.mp3'));
     // Fade-in suave a 1.0
     await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
   } catch (e) {
@@ -270,7 +267,7 @@ void _armFirstGestureToStart() {
   _firstGestureSub = html.document.onClick.listen((_) async {
     try {
       await _player.setVolume(0.0);
-      await _player.play(UrlSource('assets/lib/assets/audio/TuPoeta.mp3'));
+      await _player.play(UrlSource('assets/lib/assets/audio/Fonseca.mp3'));
       await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1000);
     } catch (e) {
       debugPrint('Autoplay after first gesture error: $e');
@@ -300,10 +297,10 @@ Future<void> _togglePlayPause() async {
       if (kIsWeb) {
         // En Web, iniciar reproducción explícita tras interacción del usuario
         await _player.setVolume(1.0);
-        await _player.play(UrlSource('assets/lib/assets/audio/TuPoeta.mp3'));
+        await _player.play(UrlSource('lib/assets/audio/Fonseca.mp3'));
       } else {
         if (_player.source == null) {
-          await _player.play(AssetSource('lib/assets/audio/TuPoeta.mp3'));
+          await _player.play(AssetSource('lib/assets/audio/Fonseca.mp3'));
         } else {
           await _player.resume();
         }
@@ -323,7 +320,7 @@ Future<void> _togglePlayPause() async {
 
 Future<void> _startAudio() async {
   try {
-    await _player.play(AssetSource('lib/assets/audio/TuPoeta.mp3'));
+    await _player.play(AssetSource('lib/assets/audio/Fonseca.mp3'));
     // _isPlaying se actualizará por el listener onPlayerStateChanged
   } catch (e) {
     debugPrint('Start audio error: $e');
@@ -357,7 +354,7 @@ Widget build(BuildContext context) {
       focusElevation: 10,
       highlightElevation: 10,
       hoverColor: Colors.white,
-      tooltip: "Tu Poeta - Alex Campo",
+      tooltip: "Fonseca - Que Suerte Tenerte",
       child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
     ),
     body: Stack(
@@ -391,17 +388,14 @@ Widget build(BuildContext context) {
                         SizedBox(
                           // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
                           child: Image.asset(
-                            "lib/assets/",
-                            height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
+                            "lib/assets/fondo1.jpg",
+                            height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
                           ),
                         ),
-                        const SizedBox(height: 25),
-                        // Carrusel más centrado y uniforme
-                        CarruselConDots(),
                         const SizedBox(height: 15),
                         FittedBox(
                           child: Text(
-                            "Estas invitado por nosotros",
+                            "Esta invitación es única,\nya que eres una de las personas\nmás importantes para nosotros.",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.parisienne(
                               fontSize: fontSizeTitle,
@@ -417,23 +411,7 @@ Widget build(BuildContext context) {
                         ),
                         FittedBox(
                           child: Text(
-                            "ANDRES & DEVY 💌",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.ropaSans(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 4,
-                                    offset: Offset(2, 2)),
-                              ],
-                            ),
-                          ),
-                        ),
-                        FittedBox(
-                          child: Text(
-                            "Para compartir\n este momento tan especial 💍",
+                            "Por eso queremos compartir\n este momento tan especial 💍",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.parisienne(
                               fontSize: fontSizeTitle,
@@ -453,165 +431,162 @@ Widget build(BuildContext context) {
                 ),
               ),
               // 🔔 Cuenta regresiva (reloj HH:MM:SS)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3.0),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Etiqueta superior
-                      FittedBox(
-                        child: Text(
-                          "Faltan:",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.ropaSans(
-                            fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.06,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            shadows: const [
-                              Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
-                            ],
-                          ),
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Etiqueta superior
+                    FittedBox(
+                      child: Text(
+                        "Faltan:",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.ropaSans(
+                          fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.06,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          shadows: const [
+                            Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
+                          ],
                         ),
                       ),
-                      // Reloj en bloques: Días | Horas | Minutos | Segundos
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Días
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  '$_d:',
-                                  style: GoogleFonts.robotoMono(
-                                    fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: const [
-                                      Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                'Días',
-                                style: GoogleFonts.roboto(
-                                  fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                    ),
+                    // Reloj en bloques: Días | Horas | Minutos | Segundos
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Días
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FittedBox(
+                              child: Text(
+                                '$_d:',
+                                style: GoogleFonts.robotoMono(
+                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
                                   color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: const [
+                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                          SizedBox(width: size.width > 600 ? 24 : 12),
-                          // Horas
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  '${_h.toString().padLeft(2, '0')}:',
-                                  style: GoogleFonts.robotoMono(
-                                    fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: const [
-                                      Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                    ],
-                                  ),
-                                ),
+                            ),
+                            Text(
+                              'Días',
+                              style: GoogleFonts.roboto(
+                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                                color: Colors.white,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Horas',
-                                style: GoogleFonts.roboto(
-                                  fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: size.width > 600 ? 24 : 12),
+                        // Horas
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FittedBox(
+                              child: Text(
+                                '${_h.toString().padLeft(2, '0')}:',
+                                style: GoogleFonts.robotoMono(
+                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
                                   color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: const [
+                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                          SizedBox(width: size.width > 600 ? 24 : 12),
-                          // Minutos
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  '${_m.toString().padLeft(2, '0')}:',
-                                  style: GoogleFonts.robotoMono(
-                                    fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: const [
-                                      Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                    ],
-                                  ),
-                                ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Horas',
+                              style: GoogleFonts.roboto(
+                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                                color: Colors.white,
                               ),
-                              Text(
-                                'Minutos',
-                                style: GoogleFonts.roboto(
-                                  fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: size.width > 600 ? 24 : 12),
+                        // Minutos
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FittedBox(
+                              child: Text(
+                                '${_m.toString().padLeft(2, '0')}:',
+                                style: GoogleFonts.robotoMono(
+                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
                                   color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: const [
+                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                          SizedBox(width: size.width > 600 ? 24 : 12),
-                          // Segundos
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FittedBox(
-                                child: Text(
-                                  _s.toString().padLeft(2, '0'),
-                                  style: GoogleFonts.robotoMono(
-                                    fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    shadows: const [
-                                      Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                    ],
-                                  ),
-                                ),
+                            ),
+                            Text(
+                              'Minutos',
+                              style: GoogleFonts.roboto(
+                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                                color: Colors.white,
                               ),
-                              Text(
-                                'Segundos',
-                                style: GoogleFonts.roboto(
-                                  fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: size.width > 600 ? 24 : 12),
+                        // Segundos
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FittedBox(
+                              child: Text(
+                                _s.toString().padLeft(2, '0'),
+                                style: GoogleFonts.robotoMono(
+                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
                                   color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: const [
+                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      // Etiqueta inferior
-                      FittedBox(
-                        child: Text(
-                          "Para este evento tan importante",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.ropaSans(
-                            fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.055,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            shadows: const [
-                              Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
-                            ],
-                          ),
+                            ),
+                            Text(
+                              'Segundos',
+                              style: GoogleFonts.roboto(
+                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Etiqueta inferior
+                    FittedBox(
+                      child: Text(
+                        "Para este evento tan importante",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.ropaSans(
+                          fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.055,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          shadows: const [
+                            Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 50),
               // 🔹 Sección 2
               Container(
-                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.0,
+                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.2,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -622,27 +597,12 @@ Widget build(BuildContext context) {
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              height: size.width > 600 ? size.height * 0.8 : size.height * 0.6,
-                              width: size.width > 600 ? size.width * 0.8 : size.width * 0.6,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 10,
-                                    offset: Offset(0, 5),
-                                  ),
-                                ],
-                                image: DecorationImage(
-                                  image: AssetImage("lib/assets/IMG_1536.jpg"),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
+                            // Carrusel más centrado y uniforme
+                            CarruselConDots(),
+                            const SizedBox(height: 50),
                             FittedBox(
                               child: Text(
-                                "Oseas 2:19",
+                                "Cantares 2:2",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.playfairDisplay(
                                   fontSize: fontSizeTitle,
@@ -653,11 +613,11 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 10),
                             FittedBox(
                               child: Text(
-                                "Te haré mi esposa para siempre.\nTe haré mi esposa con derecho y justicia,\nen gran amor y compasión",
+                                "Como el lirio entre \nlos espinos, así es mi amada \nentre las doncellas",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.dancingScript(
-                                  fontSize: fontSizeBody + 2,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontSizeBody + 8,
+                                  fontWeight: FontWeight.w600,
                                   color: Colors.amberAccent,
                                 ),
                               ),
@@ -665,18 +625,18 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 10),
                             FittedBox(
                               child: Text(
-                                "13 de diciembre de 2025 \n a las 04:30PM",
+                                "¡Aparta la fecha!",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody + 1.5,
+                                  fontSize: fontSizeTitle + 1.5,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
                             ),
                             const SizedBox(height: 20),
-                            // Calendario Diciembre 2025 con corazón en el 13
-                            _buildDecemberCalendar(),
+                            // Calendario Julio 2026 con corazón en el 18
+                            _buildCalendar(),
                             const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -689,7 +649,7 @@ Widget build(BuildContext context) {
                                 const SizedBox(width: 8),
                                 Flexible(
                                   child: Text(
-                                    "Villa Alicia",
+                                    "VILLA INES",
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.playfairDisplay(
                                       fontSize: fontSizeTitle,
@@ -758,17 +718,6 @@ Widget build(BuildContext context) {
                 child: Column(
                   children: [
                     Center(
-                      child: Text(
-                        "Recomendaciones",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: fontSizeTitle,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           maxWidth: size.width * 0.8,
@@ -778,17 +727,9 @@ Widget build(BuildContext context) {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "1. ",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
                                 text: "¿Tienes dudas o necesitas ayuda?\n",
                                 style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
+                                  fontSize: fontSizeTitle - 0.5,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -807,183 +748,20 @@ Widget build(BuildContext context) {
                     ),
                     const SizedBox(height: 10),
                     Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "2. ",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Llega a tiempo ⏰\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Cada momento ha sido preparado con amor y queremos que vivas\nla experiencia completa desde el inicio.",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
+                      child: ElevatedButton(
+                        onPressed: () => _showRecomendacionesDialog(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFB08D57),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
                           ),
+                          elevation: 5,
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "3. ",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Ríe, baila y disfruta 💃\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre. 🕺🏻💃🏼",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "4. ",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Código de vestimenta 👗🤵\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Elegancia cómoda ✨\nQueremos que te sientas especial, sin dejar de estar cómodo. Un toque formal, a tu estilo.",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              // TextSpan(
-                              //   text: "Hombres:",
-                              //   style: GoogleFonts.nunito(
-                              //     fontSize: fontSizeBody - 0.5,
-                              //     fontWeight: FontWeight.bold,
-                              //     color: Colors.white,
-                              //   ),
-                              // ),
-                              // TextSpan(
-                              //   text: " Camisa - Pantalon 👔\n",
-                              //   style: GoogleFonts.nunito(
-                              //     fontSize: fontSizeBody - 0.5,
-                              //     color: Colors.white,
-                              //   ),
-                              // ),
-                              // TextSpan(
-                              //   text: "Mujeres:",
-                              //   style: GoogleFonts.nunito(
-                              //     fontSize: fontSizeBody - 0.5,
-                              //     fontWeight: FontWeight.bold,
-                              //     color: Colors.white,
-                              //   ),
-                              // ),
-                              // TextSpan(
-                              //   text: " Vestido 👗",
-                              //   style: GoogleFonts.nunito(
-                              //     fontSize: fontSizeBody - 0.5,
-                              //     color: Colors.white,
-                              //   ),
-                              // ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "5. ",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Comparte con amor 💖\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeBody - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Tu presencia es nuestro mejor regalo, pero sobre todo, ven con la mejor\nenergía y disposición para disfrutar.",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
+                        child: const Text(
+                          "Ver Recomendaciones",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -1015,49 +793,6 @@ Widget build(BuildContext context) {
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Aviso: No niños + GIF
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Por favor, sin niños\n",
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: fontSizeBody - 0.2,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: "Amamos a los pequeños, pero esta vez queremos que los adultos puedan disfrutar y celebrar sin prisas. 💕\n Gracias por comprender que esta será una velada solo para adultos. ❤️\n",
-                                    style: GoogleFonts.nunito(
-                                      fontSize: fontSizeBody - 0.5,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // GIF informativo
-                            Image.asset(
-                              "lib/assets/noniños.gif",
-                              height: 90,
-                              fit: BoxFit.contain,
-                            ),
-                          ],
                         ),
                       ),
                     ),
@@ -1137,15 +872,16 @@ Widget build(BuildContext context) {
                                   },
                                 ),
                               ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 8),
                             if (_passesForTypedName != null)
                             SizedBox(
                               width: size.width > 600 ? 400 : size.width * 0.75,
                               child: Text(
-                                'Tienes ${_passesForTypedName} pases disponibles. Puedes añadir hasta ${((_passesForTypedName ?? 1) - 1).clamp(0, 3)} acompañantes.',
-                                style: GoogleFonts.roboto(color: Colors.white, fontSize: fontSizeBody * 0.55, fontWeight: FontWeight.w500),
+                                _passesForTypedName! > 1 ? 'Tienes ${_passesForTypedName} pases disponibles, el tuyo y el de ${((_passesForTypedName ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.' : 'El pase es solo para ti.',
+                                style: GoogleFonts.roboto(color: Colors.white, fontSize: fontSizeBody * 0.80, fontWeight: FontWeight.w500),
                               ),
                             ),
+                            const SizedBox(height: 10),
                             if (!_soldOut)
                               ...((){
                                 final p = _passesForTypedName ?? 0;
@@ -1290,11 +1026,213 @@ Widget build(BuildContext context) {
   );
 }
 
-  // 🔹 Calendario simple: Diciembre 2025 con corazón en el día 13
-  Widget _buildDecemberCalendar() {
+  //🔹 Metodo para mostrar recomendaciones
+  void _showRecomendacionesDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB08D57),
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Recomendaciones",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: MediaQuery.of(context).size.width * 0.07,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Your existing RichText widgets go here, each wrapped in a Padding
+                  _buildRecommendationItem(
+                    context,
+                    number: "1",
+                    title: "Llega a tiempo ⏰",
+                    description: "Cada momento es creado con amor y queremos que vivas\nla experiencia completa desde el inicio,\npor eso llega puntual a la hora.",
+                  ),
+                  _buildRecommendationItem(
+                    context,
+                    number: "2",
+                    title: "Disfruta, baila y comparte 💃",
+                    description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre\npor eso comparte tus recuerdos en este QR:",
+                    showQR: true,
+                  ),
+                  _buildRecommendationItem(
+                    context,
+                    number: "3",
+                    title: "Código de vestimenta 👗🤵",
+                    description: "Hombres: Camisa - Pantalon 👔\nMujeres: Vestido 👗",
+                    isDressCode: true,
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF8C6B1F),
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text("Cerrar"),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRecommendationItem(BuildContext context, {
+    required String number,
+    required String title,
+    required String description,
+    bool isDressCode = false,
+    bool showQR = false,  // New parameter for QR code
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        children: [
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "$number. ",
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: MediaQuery.of(context).size.width * 0.045,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                TextSpan(
+                  text: "$title\n",
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: MediaQuery.of(context).size.width * 0.045,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                if (!isDressCode) ...[
+                  TextSpan(
+                    text: description,
+                    style: GoogleFonts.nunito(
+                      fontSize: MediaQuery.of(context).size.width * 0.035,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (isDressCode) ...[
+            Text(
+              "Los colores son de muestra pero el\nCOLOR BLANCO RESERVADO PARA LA NOVIA",
+              style: GoogleFonts.nunito(
+                fontSize: MediaQuery.of(context).size.width * 0.035,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      "Hombres",
+                      style: GoogleFonts.nunito(
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Container(
+                      width: 80,
+                      height: 160,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('lib/assets/hombres.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      "Mujeres",
+                      style: GoogleFonts.nunito(
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Container(
+                      width: 80,
+                      height: 160,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('lib/assets/mujeres.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ] else if (showQR) ...[
+            Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white24),
+                image: DecorationImage(
+                  image: AssetImage('lib/assets/qrphotos.jpeg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Text(
+              "Escanéame para compartir tus fotos",
+              style: GoogleFonts.nunito(
+                fontSize: MediaQuery.of(context).size.width * 0.030,
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+  // 🔹 Calendario simple: Julio 2026 con corazón en el día 18
+  Widget _buildCalendar() {
     final size = MediaQuery.of(context).size;
-    final monthStart = DateTime(2025, 12, 1);
-    final daysInMonth = DateTime(2026, 1, 0).day; // 31
+    final monthStart = DateTime(2026, 7, 1);
+    final daysInMonth = DateTime(2026, 8, 0).day; // 31
     final startWeekday = monthStart.weekday; // 1=Lun ... 7=Dom
 
     final leadingEmpty = startWeekday - 1; // celdas vacías antes del 1
@@ -1316,7 +1254,7 @@ Widget build(BuildContext context) {
     );
 
     Widget dayCell(int? day) {
-      final isMarked = day == 13;
+      final isMarked = day == 18;
       return Container(
         margin: const EdgeInsets.all(2),
         decoration: BoxDecoration(
@@ -1350,7 +1288,7 @@ Widget build(BuildContext context) {
         // Título del mes
         FittedBox(
           child: Text(
-            'Diciembre 2025',
+            'Julio 2026 - 4:00 PM',
             style: GoogleFonts.playfairDisplay(
               color: Colors.white,
               fontSize: size.width > 600 ? 28 : 22,
@@ -1391,43 +1329,43 @@ Widget build(BuildContext context) {
     );
   }
 
-// 🔹 Método para no repetir barras doradas
-Widget _buildSideBars(Size size) {
-  return Positioned.fill(
-    child: Row(
-      children: [
-        Container(
-          width: size.width * 0.1,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFA7C7E7), // Azul celeste
-                Color(0xFF001F54), // Azul navy
-                Color(0xFF0A0A23), // Azul oscuro
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+  // 🔹 Método para no repetir barras doradas
+  Widget _buildSideBars(Size size) {
+    return Positioned.fill(
+      child: Row(
+        children: [
+          Container(
+            width: size.width * 0.1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                Color(0xFFFFE08A), // Dorado brillante
+                Color(0xFFD4AF37), // Gold clásico
+                Color(0xFF8C6B1F), // Dorado oscuro profundo
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
           ),
-        ),
-        const Spacer(),
-        Container(
-          width: size.width * 0.1,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFA7C7E7), // Azul celeste
-                Color(0xFF001F54), // Azul navy
-                Color(0xFF0A0A23), // Azul oscuro
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+          const Spacer(),
+          Container(
+            width: size.width * 0.1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                Color(0xFFFFE08A), // Dorado brillante
+                Color(0xFFD4AF37), // Gold clásico
+                Color(0xFF8C6B1F), // Dorado oscuro profundo
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
 }

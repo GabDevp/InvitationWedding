@@ -1,4 +1,4 @@
-// TODO: Reemplaza este archivo ejecutando:
+// Reemplaza este archivo ejecutando:
 // flutterfire configure
 // Esto generará la clase DefaultFirebaseOptions con la configuración real de tu proyecto.
 

@@ -3,21 +3,37 @@ import 'package:invitacion_boda/pages/pages.dart';
 
 class RouteGenerator {
     static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+     final path = settings.name ?? '';
+    final segments = path.split('/').where((s) => s.isNotEmpty).toList();
+ 
+    if (segments.isNotEmpty && segments[0] == 'sobre' && segments.length > 1) {
+      // Maneja ambos formatos:
+      // - /sobre/nombre
+      // - /sobre/nombre1 y nombre2
+      final nombre = segments.sublist(1).join('/');
+      final nombreInvitado = nombre.replaceAll('%20%', '');
+      
+      return GeneratePageRoute(
+        widget: EnvelopeScreen(nombreInvitado: nombreInvitado),
+        routeName: 'sobre',
+      );
+    }
+ 
+    switch (path) {
       case 'sobre':
         return GeneratePageRoute(
           widget: const EnvelopeScreen(),
-          routeName: settings.name!,
+          routeName: 'sobre',
         );
       case 'presentacion':
         return GeneratePageRoute(
-          widget: const InvitacionPage(), // Aquí pones tu página de invitación
-          routeName: settings.name!,
+          widget: const InvitacionPage(),
+          routeName: 'presentacion',
         );
       default:
         return GeneratePageRoute(
           widget: const EnvelopeScreen(),
-          routeName: settings.name!,
+          routeName: 'home',
         );
     }
   }

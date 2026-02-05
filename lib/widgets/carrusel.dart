@@ -17,14 +17,14 @@ class _CarruselConDotsState extends State<CarruselConDots> {
   int _activeIndex = 0;
 
   final List<Map<String, String>> items = [
-    {"path": "lib/assets/", "caption": "💍"},
-    {"path": "lib/assets/", "caption": "Un comienzo 🥰"},
-    {"path": "lib/assets/", "caption": "Una promesa 💌"},
-    {"path": "lib/assets/", "caption": "Un deseo ✨"},
-    {"path": "lib/assets/", "caption": "Un sentimiento 👨🏽‍❤️‍💋‍👩🏾"},
-    {"path": "lib/assets/", "caption": "Un amor 💌"},
-    {"path": "lib/assets/", "caption": "Un siempre juntos 💐"},
-    {"path": "lib/assets/", "caption": "Un toda la vida 🥰"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "💍"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "Un comienzo 🥰"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "Una promesa 💌"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "Un deseo ✨"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "Un sentimiento 👨🏽‍❤️‍💋‍👩🏾"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "Un amor 💌"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "Un siempre juntos 💐"},
+    {"path": "lib/assets/fondo1.jpg", "caption": "Un toda la vida 🥰"},
     // {"path": "lib/assets/pareja6.jpg", "caption": "Un amor eterno ❤️"},
   ];
 
