@@ -21,6 +21,7 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   universal_html: ^2.2.4
+  video_player: ^2.5.1
 
 dev_dependencies:
   flutter_test:
@@ -39,3 +40,4 @@ flutter:
     - lib/assets/mujeres.png
     - lib/assets/noniños.gif
     - lib/assets/audio/Fonseca.mp3
+    - lib/assets/video/invitacion.mp4

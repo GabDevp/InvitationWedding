@@ -10,6 +10,7 @@ import 'package:audioplayers/audioplayers.dart';
 
 import 'package:invitacion_boda/widgets/carrusel.dart';
 import 'package:invitacion_boda/services/sheets_services.dart';
+import 'package:video_player/video_player.dart';
 
 class InvitacionPage extends StatefulWidget {
   const InvitacionPage({super.key});
@@ -17,7 +18,7 @@ class InvitacionPage extends StatefulWidget {
   @override
   State<InvitacionPage> createState() => _InvitacionPageState();
 }
-class _InvitacionPageState extends State<InvitacionPage> {
+class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStateMixin {
     // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 13 de diciembre de 2025
   Timer? _countdownTimer;
   int _d = 0, _h = 0, _m = 0, _s = 0;
@@ -28,6 +29,10 @@ class _InvitacionPageState extends State<InvitacionPage> {
   bool _isPlaying = false;
   StreamSubscription<PlayerState>? _playerStateSub;
   StreamSubscription<html.Event>? _firstGestureSub;
+
+  // Video
+  late final VideoPlayerController _videoController;
+
   // Form controllers
   final TextEditingController _nombreCtrl = TextEditingController();
   final TextEditingController _acompananteCtrl = TextEditingController();
@@ -148,6 +153,7 @@ class _InvitacionPageState extends State<InvitacionPage> {
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) => calc());
   }
+  
   void _abrirGoogleMaps() async {
     const url =
         "https://www.google.com/maps?vet=12ahUKEwipyfnhh7uSAxXkmbAFHYyRBMcQ8UF6BAgoEAI..i&lei=ZrqAaan-HeSzwt0PjKOSuAw&cs=1&um=1&ie=UTF-8&fb=1&gl=co&sa=X&geocode=KY_shlMAxTmOMbBiVo-qEDCw&daddr=Narino,+Palomestizo,+Tulu%C3%A1,+Valle+del+Cauca"; // cámbialo por tu ubicación real
@@ -216,6 +222,13 @@ void initState() {
     _startAudio();
   }
 
+  _videoController = VideoPlayerController.asset('lib/assets/video/invitacion.mp4',videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),)..initialize().then((_) {
+    setState(() {});
+    _videoController.setLooping(true);
+    _videoController.setVolume(0); // sin sonido
+    _videoController.play();
+  });
+
   // Escuchar cambios de estado del reproductor para reflejar _isPlaying
   _playerStateSub = _player.onPlayerStateChanged.listen((state) {
     final playing = state == PlayerState.playing;
@@ -245,6 +258,7 @@ void dispose() {
   _acompanante2Ctrl.dispose();
   _acompanante3Ctrl.dispose();
   _searchDebounce?.cancel();
+  _videoController.dispose();
   super.dispose();
 }
 
@@ -361,11 +375,23 @@ Widget build(BuildContext context) {
       fit: StackFit.expand,
       children: [
         // 🔹 Fondo único en toda la pantalla
-        Image.asset(
-          "lib/assets/fondo1.jpg",
-          fit: BoxFit.cover,
+        if (_videoController.value.isInitialized)
+        SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: size.width,
+              height: size.height,
+              child: VideoPlayer(_videoController),
+            ),
+          ),
         ),
-        Container(color: Colors.black.withOpacity(0.45)), // filtro oscuro
+        // else
+        //   Image.asset(
+        //     "lib/assets/fondo1.jpg",
+        //     fit: BoxFit.cover,
+        //   ),
+        Container(color: Colors.black.withOpacity(0.30)), // filtro oscuro
         _buildSideBars(size),
         // 🔹 Contenido desplazable encima
         SingleChildScrollView(
