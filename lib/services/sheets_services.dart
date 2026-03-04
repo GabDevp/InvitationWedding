@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SheetsService {
-  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbwOjAVnehV9x35TKBqZYXNhyjafVRIdM4drilX5-2PwiJowNyrUufvuzktg87n6bHrYaA/exec'; // tu URL
-  static const _token = 'mibodasecreta2025'; // el mismo TOKEN del script
+  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbzhZaAvc0Al9Ebs-Zx37xD50bvb14AFSIvZ1Myjl53YSp9uIk64t_4_FTxfJGAcqw-HyQ/exec'; // tu URL
+  static const _token = 'mibodasecreta210326'; // el mismo TOKEN del script
 
   static Future<List<dynamic>> search(String query) async {
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {
@@ -49,6 +49,24 @@ class SheetsService {
     final res = await http.get(uri, headers: {
       'Accept': 'application/json',
     });
+    if (res.statusCode == 200) {
+      return json.decode(res.body);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> decline(String name) async {
+    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
+      'action': 'decline',
+      'name': name,
+      'token': _token,
+    });
+
+    final res = await http.get(uri, headers: {
+      'Accept': 'application/json',
+    });
+
     if (res.statusCode == 200) {
       return json.decode(res.body);
     } else {

@@ -132,7 +132,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   void _startCountdown() {
     void calc() {
       final now = DateTime.now();
-      final target = DateTime(2026, 7, 18);
+      final target = DateTime(2026, 3, 21);
       Duration diff = target.difference(now);
       if (diff.isNegative) diff = Duration.zero;
       final days = diff.inDays;
@@ -155,8 +155,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   }
   
   void _abrirGoogleMaps() async {
-    const url =
-        "https://www.google.com/maps?vet=12ahUKEwipyfnhh7uSAxXkmbAFHYyRBMcQ8UF6BAgoEAI..i&lei=ZrqAaan-HeSzwt0PjKOSuAw&cs=1&um=1&ie=UTF-8&fb=1&gl=co&sa=X&geocode=KY_shlMAxTmOMbBiVo-qEDCw&daddr=Narino,+Palomestizo,+Tulu%C3%A1,+Valle+del+Cauca"; // cámbialo por tu ubicación real
+    const url = "https://www.google.com/maps?q=4.08949613571167,-76.23393249511719&z=17&hl=en";
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -167,8 +166,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
       return;
     }
     final String mensaje = acompanante.isEmpty
-        ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 18/07/26"
-        : "Hola! Soy $nombre y confirmo mi asistencia con $acompanante para asistir a este evento tan importante el día 18/07/26";
+        ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 21/03/26"
+        : "Hola! Soy $nombre y confirmo mi asistencia con $acompanante para asistir a este evento tan importante el día 21/03/26";
 
     // Previsualización del mensaje antes de enviar
     final bool? confirmar = await showDialog<bool>(
@@ -192,7 +191,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     if (confirmar != true) return;
 
     final url =
-        "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
+        "https://wa.me/573173668908?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -206,7 +205,7 @@ void initState() {
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory('gmap-iframe', (int viewId) {
       final iframe = html.IFrameElement()
-        ..src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.800881111111!2d-76.2290202!3d4.0894487!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e39c5005386ec8f%3A0xb03010aa8f5662b0!2sFinca%20Villa%20In%C3%A9s!5e0!3m2!1ses!2sco!4v1234567890123'
+        ..src = 'https://www.openstreetmap.org/export/embed.html?bbox=-76.2379325%2C4.0884961%2C-76.2299325%2C4.0904961&layer=mapnik&marker=4.0894961%2C-76.2339325'
         ..style.border = '0'
         ..allowFullscreen = true;
       return iframe;
@@ -612,7 +611,7 @@ Widget build(BuildContext context) {
               const SizedBox(height: 50),
               // 🔹 Sección 2
               Container(
-                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.2,
+                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.6,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -628,7 +627,7 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 50),
                             FittedBox(
                               child: Text(
-                                "Cantares 2:2",
+                                "Provervios 19:6",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.playfairDisplay(
                                   fontSize: fontSizeTitle,
@@ -639,7 +638,7 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 10),
                             FittedBox(
                               child: Text(
-                                "Como el lirio entre \nlos espinos, así es mi amada \nentre las doncellas",
+                                "El corazón del hombre\ntraza su rumbo, pero sus\npasos los dirige el SEÑOR.",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.dancingScript(
                                   fontSize: fontSizeBody + 8,
@@ -661,28 +660,148 @@ Widget build(BuildContext context) {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            // Calendario Julio 2026 con corazón en el 18
+                            // Calendario Marzo 2026 con corazón en el 21
                             _buildCalendar(),
                             const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            Text(
+                              "CEREMONIA",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: fontSizeTitle + 2,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            // seccion de Eucaristía
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.location_pin,
-                                  color: Colors.amberAccent,
-                                  size: fontSizeTitle + 5
-                                ),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    "VILLA INES",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: fontSizeTitle,
-                                      color: Colors.white,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.church_outlined,
+                                      color: Colors.amberAccent,
+                                      size: 100,
                                     ),
-                                  ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        // Nombre de la iglesia
+                                        Text(
+                                          "Parroquia del Salesianos",
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.playfairDisplay(
+                                            fontSize: fontSizeBody,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // Hora de la eucaristía
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.access_time,
+                                              color: Colors.amberAccent,
+                                              size: fontSizeTitle,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "3:00 PM",
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.playfairDisplay(
+                                                fontSize: fontSizeTitle,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    )
+                                  ],
                                 ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.location_pin,
+                                      color: Colors.amberAccent,
+                                      size: fontSizeTitle,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        "Carrera 26 #34-18, Barrio Salesianos",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: fontSizeBody,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "RECEPCIÓN",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: fontSizeTitle + 2,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.location_pin,
+                                      color: Colors.amberAccent,
+                                      size: fontSizeTitle
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        "VILLA GABRIELA",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: fontSizeBody,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.access_time_filled_outlined,
+                                      color: Colors.amberAccent,
+                                      size: fontSizeBody
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "5:30 PM",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: fontSizeBody,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  ],
+                                )
                               ],
                             ),
                             const SizedBox(height: 12),
@@ -731,6 +850,7 @@ Widget build(BuildContext context) {
                               ),
                               child: const Text("Ver en Google Maps"),
                             ),
+                            const SizedBox(height: 30),
                           ],
                         ),
                       ],
@@ -1254,11 +1374,12 @@ Widget build(BuildContext context) {
       ),
     );
   }
-  // 🔹 Calendario simple: Julio 2026 con corazón en el día 18
+  
+  // 🔹 Calendario simple: Marzo 2026 con corazón en el día 21
   Widget _buildCalendar() {
     final size = MediaQuery.of(context).size;
-    final monthStart = DateTime(2026, 7, 1);
-    final daysInMonth = DateTime(2026, 8, 0).day; // 31
+    final monthStart = DateTime(2026, 3, 1);
+    final daysInMonth = DateTime(2026, 4, 0).day; // 31
     final startWeekday = monthStart.weekday; // 1=Lun ... 7=Dom
 
     final leadingEmpty = startWeekday - 1; // celdas vacías antes del 1
@@ -1280,7 +1401,7 @@ Widget build(BuildContext context) {
     );
 
     Widget dayCell(int? day) {
-      final isMarked = day == 18;
+      final isMarked = day == 21;
       return Container(
         margin: const EdgeInsets.all(2),
         decoration: BoxDecoration(
@@ -1314,7 +1435,7 @@ Widget build(BuildContext context) {
         // Título del mes
         FittedBox(
           child: Text(
-            'Julio 2026 - 4:00 PM',
+            'Marzo 2026 - 3:00 PM',
             style: GoogleFonts.playfairDisplay(
               color: Colors.white,
               fontSize: size.width > 600 ? 28 : 22,
@@ -1354,7 +1475,6 @@ Widget build(BuildContext context) {
       ],
     );
   }
-
   // 🔹 Método para no repetir barras doradas
   Widget _buildSideBars(Size size) {
     return Positioned.fill(

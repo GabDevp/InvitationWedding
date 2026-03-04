@@ -38,6 +38,7 @@ flutter:
     - lib/assets/qrphotos.jpeg
     - lib/assets/hombres.png
     - lib/assets/mujeres.png
+    - lib/assets/iglesia.png
     - lib/assets/noniños.gif
     - lib/assets/audio/Fonseca.mp3
     - lib/assets/video/invitacion.mp4
