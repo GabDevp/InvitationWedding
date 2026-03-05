@@ -43,8 +43,23 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   bool _soldOut = false;
   Timer? _searchDebounce;
   bool _isConfirming = false;
+  // Control de búsqueda al seleccionar una sugerencia
+  String? _selectedNameDisplay;
+  bool _ignoreNextNameChange = false;
 
   void _onNameChanged() {
+    // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
+    if (_ignoreNextNameChange) {
+      _ignoreNextNameChange = false;
+      return;
+    }
+    final current = _nombreCtrl.text.trim();
+    if (_selectedNameDisplay != null && current == _selectedNameDisplay) {
+      // Mantener selección: no buscar
+      return;
+    }
+    // Si el usuario cambió el texto respecto a la selección, liberar selección y buscar
+    _selectedNameDisplay = null;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 200), _runNameSearch);
   }
@@ -398,7 +413,7 @@ Widget build(BuildContext context) {
                         SizedBox(
                           // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
                           child: Image.asset(
-                            "lib/assets/fondo1.jpg",
+                            "lib/assets/5.jpeg",
                             height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
                           ),
                         ),
@@ -596,7 +611,7 @@ Widget build(BuildContext context) {
               const SizedBox(height: 50),
               // 🔹 Sección 2
               Container(
-                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.6,
+                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.7,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -750,38 +765,51 @@ Widget build(BuildContext context) {
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Icon(
-                                      Icons.location_pin,
-                                      color: Colors.amberAccent,
-                                      size: fontSizeTitle
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        "VILLA GABRIELA",
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.playfairDisplay(
-                                          fontSize: fontSizeBody,
-                                          color: Colors.white,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.location_pin,
+                                          color: Colors.amberAccent,
+                                          size: fontSizeTitle
                                         ),
-                                      ),
+                                        const SizedBox(width: 8),
+                                        Flexible(
+                                          child: Text(
+                                            "VILLA GABRIELA",
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.playfairDisplay(
+                                              fontSize: fontSizeBody,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.access_time_filled_outlined,
+                                          color: Colors.amberAccent,
+                                          size: fontSizeBody
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "5:30 PM",
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.playfairDisplay(
+                                            fontSize: fontSizeBody,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      ],
                                     ),
-                                    const SizedBox(width: 8),
-                                    Icon(
-                                      Icons.access_time_filled_outlined,
-                                      color: Colors.amberAccent,
-                                      size: fontSizeBody
-                                    ),
-                                    const SizedBox(width: 8),
                                     Text(
-                                      "5:30 PM",
+                                      "Parcelación El Llanito casa 25 Nariño",
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.playfairDisplay(
                                         fontSize: fontSizeBody,
-                                        fontWeight: FontWeight.bold,
                                         color: Colors.white,
                                       ),
                                     )
@@ -908,7 +936,7 @@ Widget build(BuildContext context) {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Regalo: Lluvia de sobres\n",
+                                text: "Regalo:\n",
                                 style: GoogleFonts.playfairDisplay(
                                   fontSize: fontSizeTitle,
                                   fontWeight: FontWeight.bold,
@@ -990,6 +1018,8 @@ Widget build(BuildContext context) {
                                       title: Text(display),
                                       onTap: () {
                                         setState(() {
+                                          _ignoreNextNameChange = true;
+                                          _selectedNameDisplay = display;
                                           _nombreCtrl.text = display;
                                           _nombreCtrl.selection = TextSelection.collapsed(offset: display.length);
                                           _passesForTypedName = passesRem;
@@ -1198,7 +1228,7 @@ Widget build(BuildContext context) {
                     context,
                     number: "2",
                     title: "Disfruta, baila y comparte 💃",
-                    description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre\npor eso comparte tus recuerdos en este QR:",
+                    description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre",
                     showQR: true,
                   ),
                   _buildRecommendationItem(
@@ -1330,27 +1360,6 @@ Widget build(BuildContext context) {
                   ],
                 ),
               ],
-            ),
-          ] else if (showQR) ...[
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white24),
-                image: DecorationImage(
-                  image: AssetImage('lib/assets/qrphotos.jpeg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Text(
-              "Escanéame para compartir tus fotos",
-              style: GoogleFonts.nunito(
-                fontSize: MediaQuery.of(context).size.width * 0.030,
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-              ),
             ),
           ],
         ],

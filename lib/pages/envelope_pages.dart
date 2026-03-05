@@ -189,7 +189,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
               child: Column(
                 children: [
                   Text(
-                    "Hola ${_nombreInvitado.trim()} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 18 de julio de 2026' : '\nEstás invitado a nuestra boda\nel 18 de julio de 2026'},",
+                    "Hola ${_nombreInvitado.trim()} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'},",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.parisienne(
                       fontSize: isMobile ? 30 : 34,

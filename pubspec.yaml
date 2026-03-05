@@ -36,6 +36,12 @@ flutter:
     - lib/assets/sobre3.jpg
     - lib/assets/sobre4.jpg
     - lib/assets/qrphotos.jpeg
+    - lib/assets/1.jpeg
+    - lib/assets/2.jpeg
+    - lib/assets/3.jpeg
+    - lib/assets/4.jpeg
+    - lib/assets/5.jpeg
+    - lib/assets/6.jpeg
     - lib/assets/hombres.png
     - lib/assets/mujeres.png
     - lib/assets/iglesia.png
