@@ -43,23 +43,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   bool _soldOut = false;
   Timer? _searchDebounce;
   bool _isConfirming = false;
-  // Control de búsqueda al seleccionar una sugerencia
-  String? _selectedNameDisplay;
-  bool _ignoreNextNameChange = false;
 
   void _onNameChanged() {
-    // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
-    if (_ignoreNextNameChange) {
-      _ignoreNextNameChange = false;
-      return;
-    }
-    final current = _nombreCtrl.text.trim();
-    if (_selectedNameDisplay != null && current == _selectedNameDisplay) {
-      // Mantener selección: no buscar
-      return;
-    }
-    // Si el usuario cambió el texto respecto a la selección, liberar selección y buscar
-    _selectedNameDisplay = null;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 200), _runNameSearch);
   }
@@ -923,7 +908,7 @@ Widget build(BuildContext context) {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Regalo:\n",
+                                text: "Regalo: Lluvia de sobres\n",
                                 style: GoogleFonts.playfairDisplay(
                                   fontSize: fontSizeTitle,
                                   fontWeight: FontWeight.bold,
@@ -1005,8 +990,6 @@ Widget build(BuildContext context) {
                                       title: Text(display),
                                       onTap: () {
                                         setState(() {
-                                          _ignoreNextNameChange = true;
-                                          _selectedNameDisplay = display;
                                           _nombreCtrl.text = display;
                                           _nombreCtrl.selection = TextSelection.collapsed(offset: display.length);
                                           _passesForTypedName = passesRem;

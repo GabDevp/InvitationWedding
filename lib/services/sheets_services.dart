@@ -39,14 +39,17 @@ class SheetsService {
   }
 
   static Future<Map<String, dynamic>?> confirm(String name, {int consume = 1}) async {
-    // Usar GET para evitar preflight CORS en Flutter Web
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-      'action': 'confirm',
-      'name': name,
-      'consume': consume.toString(),
       'token': _token,
     });
-    final res = await http.get(uri, headers: {
+    final body = json.encode({
+      "action": "confirm",
+      "name": name,
+      "consume": consume,
+      "token": _token
+    });
+    final res = await http.post(uri, body: body, headers: {
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
     });
     if (res.statusCode == 200) {
