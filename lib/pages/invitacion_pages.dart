@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' as ui; // For platformViewRegistry (web)
+import 'dart:ui_web' as ui; // For platformViewRegistry (web)
 import 'dart:html' as html; // For IFrameElement (web)
 
 import 'package:flutter/material.dart';
