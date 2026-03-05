@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:invitacion_boda/pages/pages.dart';
+import 'package:invitacion_boda/services/sheets_services.dart';
 
 class EnvelopeScreen extends StatefulWidget {
   final String? nombreInvitado;
@@ -20,6 +21,8 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
 
   bool opened = false;
   String _nombreInvitado = '';
+  String? _guestName;
+  int? _guestPasses;
 
   @override
   void initState() {
@@ -38,6 +41,25 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
         curve: Curves.easeInOut,
       ),
     );
+    
+    // Obtener datos del invitado si hay nombre
+    _getGuestData();
+  }
+  
+  Future<void> _getGuestData() async {
+    if (_nombreInvitado.isNotEmpty) {
+      try {
+        final guestData = await SheetsService.getGuest(_nombreInvitado);
+        if (guestData != null) {
+          setState(() {
+            _guestName = guestData['display'] ?? _nombreInvitado;
+            _guestPasses = int.tryParse(guestData['passesRemaining'].toString()) ?? 0;
+          });
+        }
+      } catch (e) {
+        print('Error obteniendo datos del invitado: $e');
+      }
+    }
   }
 
   @override
@@ -57,7 +79,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 900),
-        pageBuilder: (_, animation, __) => const InvitacionPage(),
+        pageBuilder: (_, animation, __) => InvitacionPage(
+          guestName: _guestName,
+          guestPasses: _guestPasses,
+        ),
         transitionsBuilder: (_, animation, __, child) {
           final blur = Tween<double>(begin: 25, end: 0).animate(animation);
           return AnimatedBuilder(
