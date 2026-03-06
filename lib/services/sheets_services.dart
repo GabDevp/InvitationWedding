@@ -40,16 +40,12 @@ class SheetsService {
 
   static Future<Map<String, dynamic>?> confirm(String name, {int consume = 1}) async {
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-      'token': _token,
-    });
-    final body = json.encode({
       "action": "confirm",
       "name": name,
-      "consume": consume,
+      "consume": consume.toString(),
       "token": _token
     });
-    final res = await http.post(uri, body: body, headers: {
-      'Content-Type': 'application/json',
+    final res = await http.get(uri, headers: {
       'Accept': 'application/json',
     });
     if (res.statusCode == 200) {

@@ -14,9 +14,10 @@ import 'package:video_player/video_player.dart';
 
 class InvitacionPage extends StatefulWidget {
   final String? guestName;
+  final String? guestDisplayName;
   final int? guestPasses;
   
-  const InvitacionPage({super.key, this.guestName, this.guestPasses});
+  const InvitacionPage({super.key, this.guestName, this.guestDisplayName, this.guestPasses});
 
   @override
   State<InvitacionPage> createState() => _InvitacionPageState();
@@ -26,6 +27,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   Timer? _countdownTimer;
   int _d = 0, _h = 0, _m = 0, _s = 0;
   bool _mapRegistered = false;
+
+  bool _alreadyConfirmed = false;
   
   // Audio
   late final AudioPlayer _player;
@@ -52,6 +55,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   
   // Datos del invitado desde la ruta del envelope
   String? _guestNameFromRoute;
+  String? _guestDisplayNameFromRoute;
   int? _guestPassesFromRoute;
 
   void _onNameChanged() {
@@ -172,9 +176,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     if (nombre.isEmpty) {
       return;
     }
-    final String mensaje = acompanante.isEmpty
+    final String mensaje = _guestPassesFromRoute! < 1 
         ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 21/03/26"
-        : "Hola! Soy $nombre y confirmo mi asistencia con $acompanante para asistir a este evento tan importante el día 21/03/26";
+        : "Hola! Soy $nombre y confirmo mi asistencia con $_guestPassesFromRoute pases para asistir a este evento tan importante el día 21/03/26";
 
     // Previsualización del mensaje antes de enviar
     final bool? confirmar = await showDialog<bool>(
@@ -206,7 +210,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   
   // Nueva función de confirmación con datos de la ruta
   void _confirmarAsistenciaDesdeRuta() async {
-    if (_guestNameFromRoute == null) return;
+    if (_guestDisplayNameFromRoute == null) return;
     
     // Verificar si está dentro del plazo de 5 días
     final now = DateTime.now();
@@ -222,7 +226,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Invitado: $_guestNameFromRoute'),
+            Text('Invitado: $_guestDisplayNameFromRoute'),
             Text('Pases disponibles: $_guestPassesFromRoute'),
             SizedBox(height: 10),
             if (daysRemaining < 0)
@@ -255,12 +259,12 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Cerrar'),
           ),
-          if (daysRemaining >= 0)
+          (daysRemaining >= 0 && !_alreadyConfirmed) ?
             ElevatedButton(
               onPressed: () async {
                 // Descontar pases automáticamente
                 try {
-                  await SheetsService.confirm(_guestNameFromRoute!, consume: _guestPassesFromRoute!);
+                  await SheetsService.confirm(_guestNameFromRoute!, consume:  int.parse(_guestPassesFromRoute.toString()));
                   Navigator.of(ctx).pop(true);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -268,6 +272,11 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                       backgroundColor: Colors.green,
                     ),
                   );
+                  setState(() {
+                    _alreadyConfirmed = true;
+                  });
+                  // Enviar WhatsApp después de confirmar
+                  _enviarWhatsApp(_guestDisplayNameFromRoute!, "");
                 } catch (e) {
                   Navigator.of(ctx).pop(false);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -279,10 +288,38 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                 }
               },
               child: const Text('Confirmar'),
+            ) : Text(
+              "Muchas gracias por confirmar.\nNos vemos pronto 💍",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 22,
+                color: Colors.greenAccent,
+                fontWeight: FontWeight.bold,
+              ),
             ),
         ],
       ),
     );
+  }
+
+  Future<void> _checkIfConfirmed() async {
+    if (_guestNameFromRoute == null) return;
+
+    try {
+      final guest = await SheetsService.getGuest(_guestNameFromRoute!);
+
+      if (guest != null) {
+        final passes = int.tryParse(guest['passesRemaining'].toString()) ?? 0;
+
+        if (mounted) {
+          setState(() {
+            _alreadyConfirmed = passes == 0;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Error verificando confirmación: $e");
+    }
   }
 
 // 🔹 Ciclo de vida y build (ajustado)
@@ -293,6 +330,7 @@ void initState() {
   // Inicializar datos del invitado desde la ruta
   _guestNameFromRoute = widget.guestName;
   _guestPassesFromRoute = widget.guestPasses;
+  _guestDisplayNameFromRoute = widget.guestDisplayName;
   
   // Si hay nombre desde la ruta, establecerlo en el campo
   if (_guestNameFromRoute != null) {
@@ -343,6 +381,8 @@ void initState() {
   _nombreCtrl.addListener(_onNameChanged);
   // Estado inicial de cupos
   _refreshSoldOutFromSheets();
+  // Consulta pases disponibles
+  _checkIfConfirmed();
 }
 
 @override
@@ -474,22 +514,22 @@ Widget build(BuildContext context) {
       fit: StackFit.expand,
       children: [
         // 🔹 Fondo único en toda la pantalla
-        if (_videoController.value.isInitialized)
-        SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: VideoPlayer(_videoController),
-            ),
-          ),
-        ),
-        // else
-        //   Image.asset(
-        //     "lib/assets/fondo1.jpg",
+        // if (_videoController.value.isInitialized)
+        // SizedBox.expand(
+        //   child: FittedBox(
         //     fit: BoxFit.cover,
+        //     child: SizedBox(
+        //       width: size.width,
+        //       height: size.height,
+        //       child: VideoPlayer(_videoController),
+        //     ),
         //   ),
+        // ),
+        // else
+        Image.asset(
+          "lib/assets/fondo1.jpg",
+          fit: BoxFit.cover,
+        ),
         Container(color: Colors.black.withOpacity(0.30)), // filtro oscuro
         _buildSideBars(size),
         // 🔹 Contenido desplazable encima
@@ -1114,7 +1154,7 @@ Widget build(BuildContext context) {
                                         ),
                                       ),
                                       const SizedBox(height: 12),
-                                      ElevatedButton(
+                                      (!_alreadyConfirmed) ? ElevatedButton(
                                         onPressed: _confirmarAsistenciaDesdeRuta,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.green[900],
@@ -1127,6 +1167,14 @@ Widget build(BuildContext context) {
                                         child: const Text(
                                           "Confirmar mi asistencia 💌",
                                           style: TextStyle(fontSize: 16, color: Colors.white),
+                                        ),
+                                      ) : Text(
+                                        "Muchas gracias por confirmar.\nNos vemos pronto 💍",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: 22,
+                                          color: Colors.green[900],
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ],

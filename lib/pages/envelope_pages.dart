@@ -14,13 +14,14 @@ class EnvelopeScreen extends StatefulWidget {
   State<EnvelopeScreen> createState() => _EnvelopeScreenState();
 }
 
-class _EnvelopeScreenState extends State<EnvelopeScreen>
-    with TickerProviderStateMixin {
+class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStateMixin {
+  bool _alreadyConfirmed = false;
   late AnimationController _arrowController;
   late Animation<double> _arrowAnimation;
 
   bool opened = false;
   String _nombreInvitado = '';
+  String? _guestDisplayName;
   String? _guestName;
   int? _guestPasses;
 
@@ -52,7 +53,8 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
         final guestData = await SheetsService.getGuest(_nombreInvitado);
         if (guestData != null) {
           setState(() {
-            _guestName = guestData['display'] ?? _nombreInvitado;
+            _guestName = guestData['key_normalized'] ?? _nombreInvitado;
+            _guestDisplayName = guestData['display'] ?? _nombreInvitado;
             _guestPasses = int.tryParse(guestData['passesRemaining'].toString()) ?? 0;
           });
         }
@@ -81,6 +83,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
         transitionDuration: const Duration(milliseconds: 900),
         pageBuilder: (_, animation, __) => InvitacionPage(
           guestName: _guestName,
+          guestDisplayName: _guestDisplayName,
           guestPasses: _guestPasses,
         ),
         transitionsBuilder: (_, animation, __, child) {
@@ -214,7 +217,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
               child: Column(
                 children: [
                   Text(
-                    "Hola ${_nombreInvitado.trim()} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'},",
+                    "Hola ${_guestDisplayName!.trim()} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'},",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.parisienne(
                       fontSize: isMobile ? 30 : 34,
