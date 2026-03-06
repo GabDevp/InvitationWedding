@@ -17,10 +17,15 @@ RUN flutter build web --release
 
 
 # ---------- Etapa 2: Servidor Caddy ----------
-FROM caddy:alpine
+FROM nginx:alpine
 
 # copiar build de flutter
-COPY --from=build /app/build/web /usr/share/caddy
+COPY --from=build /app/build/web /usr/share/nginx/html
+
+# copiar configuración nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # puerto usado por render
 EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
