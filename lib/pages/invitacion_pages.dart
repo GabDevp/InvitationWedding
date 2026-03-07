@@ -519,18 +519,6 @@ Widget build(BuildContext context) {
       fit: StackFit.expand,
       children: [
         // 🔹 Fondo único en toda la pantalla
-        // if (_videoController.value.isInitialized)
-        // SizedBox.expand(
-        //   child: FittedBox(
-        //     fit: BoxFit.cover,
-        //     child: SizedBox(
-        //       width: size.width,
-        //       height: size.height,
-        //       child: VideoPlayer(_videoController),
-        //     ),
-        //   ),
-        // ),
-        // else
         Image.asset(
           "lib/assets/fondo1.jpg",
           fit: BoxFit.cover,
@@ -1432,8 +1420,8 @@ Widget build(BuildContext context) {
                   _buildRecommendationItem(
                     context,
                     number: "2",
-                    title: "Disfruta, baila y comparte 💃",
-                    description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre",
+                    title: "Disfruta la cena 🍽️",
+                    description: "Prepárate para una cena especial donde cada platillo está seleccionado con amor.\nDisfruta de la buena comida y la compañía en esta noche memorable.",
                     showQR: true,
                   ),
                   _buildRecommendationItem(
@@ -1510,7 +1498,7 @@ Widget build(BuildContext context) {
           ),
           if (isDressCode) ...[
             Text(
-              "Los colores son de muestra pero los\ncolores: Gris, Marfil y sobre todo\n El BLANCO RESERVADO PARA LA NOVIA",
+              "Los colores que ven son de muestra pero los colores como: Gris y Marfil, preferimos reservarlos y sobre todo\n El BLANCO, EXCLUSIVO PARA LA NOVIA",
               style: GoogleFonts.nunito(
                 fontSize: MediaQuery.of(context).size.width * 0.035,
                 color: Colors.white,
