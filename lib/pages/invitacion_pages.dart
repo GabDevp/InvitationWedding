@@ -176,7 +176,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     if (nombre.isEmpty) {
       return;
     }
-    final String mensaje = _guestPassesFromRoute! < 1 
+    final String mensaje = _guestPassesFromRoute! == 1 
         ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 21/03/26"
         : "Hola! Soy $nombre y confirmo mi asistencia con $_guestPassesFromRoute pases para asistir a este evento tan importante el día 21/03/26";
 
@@ -192,7 +192,12 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
+            onPressed: () {
+              setState(() {
+                _guestPassesFromRoute = 0; // Actualizar pases a 0 después de confirmar
+              });
+                Navigator.of(ctx).pop(true);
+            },
             child: const Text('Enviar'),
           ),
         ],
@@ -264,7 +269,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
               onPressed: () async {
                 // Descontar pases automáticamente
                 try {
-                  await SheetsService.confirm(_guestNameFromRoute!, consume:  int.parse(_guestPassesFromRoute.toString()));
+                  await SheetsService.confirm(_guestNameFromRoute!, consume: int.parse(_guestPassesFromRoute.toString()));
                   Navigator.of(ctx).pop(true);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -500,16 +505,16 @@ Widget build(BuildContext context) {
 
   return Scaffold(
     floatingActionButton: FloatingActionButton(
-      onPressed: _togglePlayPause,
-      backgroundColor: Color(0xFF001F54), // Azul navy
-      elevation: 5,
-      hoverElevation: 10,
-      focusElevation: 10,
-      highlightElevation: 10,
-      hoverColor: Colors.white,
-      tooltip: "Fonseca - Que Suerte Tenerte",
-      child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
-    ),
+          onPressed: _togglePlayPause,
+          backgroundColor: Color(0xFF001F54), // Azul navy
+          elevation: 5,
+          hoverElevation: 10,
+          focusElevation: 10,
+          highlightElevation: 10,
+          hoverColor: Colors.white,
+          tooltip: "Fonseca - Que Suerte Tenerte",
+          child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
+        ),
     body: Stack(
       fit: StackFit.expand,
       children: [
@@ -1136,7 +1141,7 @@ Widget build(BuildContext context) {
                                   child: Column(
                                     children: [
                                       Text(
-                                        '¡Hola $_guestNameFromRoute! 👋',
+                                        '¡Hola $_guestDisplayNameFromRoute! 👋',
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.playfairDisplay(
                                           color: Colors.white,
@@ -1173,7 +1178,7 @@ Widget build(BuildContext context) {
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.playfairDisplay(
                                           fontSize: 22,
-                                          color: Colors.green[900],
+                                          color: Colors.white,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -1505,7 +1510,7 @@ Widget build(BuildContext context) {
           ),
           if (isDressCode) ...[
             Text(
-              "Los colores son de muestra pero el\nCOLOR BLANCO RESERVADO PARA LA NOVIA",
+              "Los colores son de muestra pero los\ncolores: Gris, Marfil y sobre todo\n El BLANCO RESERVADO PARA LA NOVIA",
               style: GoogleFonts.nunito(
                 fontSize: MediaQuery.of(context).size.width * 0.035,
                 color: Colors.white,
