@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, unused_local_variable
+
 import 'dart:async';
 import 'dart:ui_web' as ui; // For platformViewRegistry (web)
 import 'dart:html' as html; // For IFrameElement (web)
@@ -1115,7 +1117,7 @@ Widget build(BuildContext context) {
                             )
                           else
                           // Botón de confirmación rápida si viene desde la ruta
-                          if (_guestNameFromRoute != null)
+                          if (_guestNameFromRoute != null && _guestPassesFromRoute != 0)
                             Column(
                               children: [
                                 Container(

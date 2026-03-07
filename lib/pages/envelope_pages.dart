@@ -78,6 +78,81 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
 
+    // Verificar si el invitado tiene pases disponibles
+    if (_guestPasses == null || _guestPasses == 0) {
+      // Mostrar mensaje especial para invitados sin pases
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(
+            'Gracias por estar en nuestros corazones 💝',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 24,
+              color: Colors.pink[800],
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'Sabemos que en esta oportunidad no puedes estar,\npero igualmente estás presente en nuestra mente y corazón.\n\nTe enviamos todo nuestro cariño y agradecemos\ntu presencia espiritual en este día tan especial.\n\nPuedes ver toda nuestra invitación a continuación.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(
+              fontSize: 16,
+              color: Colors.grey[700],
+            ),
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop(); // Cerrar diálogo
+                  // Continuar navegación a la invitación
+                  Navigator.of(context).pushReplacement(
+                    PageRouteBuilder(
+                      transitionDuration: const Duration(milliseconds: 900),
+                      pageBuilder: (_, animation, __) => InvitacionPage(
+                        guestName: _guestName,
+                        guestDisplayName: _guestDisplayName,
+                        guestPasses: _guestPasses, // Pasar null o 0
+                      ),
+                      transitionsBuilder: (_, animation, __, child) {
+                        final blur = Tween<double>(begin: 25, end: 0).animate(animation);
+                        return AnimatedBuilder(
+                          animation: animation,
+                          builder: (_, __) {
+                            return BackdropFilter(
+                              filter: ui.ImageFilter.blur(
+                                sigmaX: blur.value,
+                                sigmaY: blur.value,
+                              ),
+                              child: Opacity(
+                                opacity: animation.value,
+                                child: child,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink[600],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: const Text('Ver invitación'),
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 900),
