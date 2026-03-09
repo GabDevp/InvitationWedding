@@ -95,8 +95,25 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Text(
+          content: 
+          !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
+          !(_nombreInvitado.toLowerCase().contains('cata')) &&
+          !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
+          !(_nombreInvitado.toLowerCase().contains('valentina')) &&
+          !(_nombreInvitado.toLowerCase().contains('rosario')) &&
+          !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
+          !(_nombreInvitado.toLowerCase().contains('promotora')) &&
+          !(_nombreInvitado.toLowerCase().contains('elsy')) ?
+          Text(
             'Sabemos que en esta oportunidad no puedes estar,\npero igualmente estás presente en nuestra mente y corazón.\n\nTe enviamos todo nuestro cariño y agradecemos\ntu presencia espiritual en este día tan especial.\n\nPuedes ver toda nuestra invitación a continuación.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(
+              fontSize: 16,
+              color: Colors.grey[700],
+            ),
+          ):
+          Text(
+            'Queremos compartir contigo este momento tan especial\naunque no podamos contar con tu presencia física.\n\nTu cariño y buenos deseos son importantes para nosotros,\ny por eso queremos que te sientas incluido en nuestra celebración.\n\nTe hemos preparado este detalle para que no te sientas excluido de nuestro gran día.',
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(
               fontSize: 16,
@@ -293,8 +310,30 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
               right: 20,
               child: Column(
                 children: [
-                  Text(
-                    "Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'}",
+                  !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
+                  !(_nombreInvitado.toLowerCase().contains('cata')) &&
+                  !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
+                  !(_nombreInvitado.toLowerCase().contains('valentina')) &&
+                  !(_nombreInvitado.toLowerCase().contains('rosario')) &&
+                  !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
+                  !(_nombreInvitado.toLowerCase().contains('promotora')) &&
+                  !(_nombreInvitado.toLowerCase().contains('elsy')) ?
+                  Text("Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'}",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.parisienne(
+                      fontSize: isMobile ? 30 : 34,
+                      color: Colors.white,
+                      decorationColor: Colors.black,
+                      decorationThickness: 2,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ):Text("Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nQueremos que conozcan sobre nuestro matrimonio\nel 21 de Marzo de 2026' : '\nQueremos que conozcas sobre nuestro matrimonio\nel 21 de Marzo de 2026'}",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.parisienne(
                       fontSize: isMobile ? 30 : 34,

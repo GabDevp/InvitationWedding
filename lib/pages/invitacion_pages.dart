@@ -360,11 +360,9 @@ void initState() {
   _startCountdown();
   _player = AudioPlayer();
   _player.setReleaseMode(ReleaseMode.loop);
-  if (kIsWeb) {
-    _tryAutoplayWeb();
-  } else {
-    _startAudio();
-  }
+  
+  // Reiniciar música cada vez que se entra a la página
+  _restartMusic();
 
   _videoController = VideoPlayerController.asset('lib/assets/video/invitacion.mp4',videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),)..initialize().then((_) {
     setState(() {});
@@ -478,6 +476,31 @@ Future<void> _togglePlayPause() async {
   }
 }
 
+Future<void> _restartMusic() async {
+  try {
+    // Detener cualquier reproducción anterior
+    await _player.stop();
+    
+    // Reiniciar desde el principio según la plataforma
+    if (kIsWeb) {
+      await _player.setVolume(0.0);
+      await _player.play(UrlSource('lib/assets/audio/Fonseca.mp3'));
+      // Fade-in suave
+      await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
+    } else {
+      await _player.play(AssetSource('lib/assets/audio/Fonseca.mp3'));
+    }
+  } catch (e) {
+    debugPrint('Restart music error: $e');
+    // Si falla el reinicio, intentar el método normal
+    if (kIsWeb) {
+      _tryAutoplayWeb();
+    } else {
+      _startAudio();
+    }
+  }
+}
+
 Future<void> _startAudio() async {
   try {
     await _player.play(AssetSource('lib/assets/audio/Fonseca.mp3'));
@@ -533,7 +556,15 @@ Widget build(BuildContext context) {
             children: [
               // 🔹 Sección 1
               Container(
-                height:  size.width > 600 ? size.height * 2.1 : size.height * 1.1,
+                height:  size.width > 600 ? size.height * 2.1 :
+                !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 1.1 : size.height * 0.8,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -553,6 +584,14 @@ Widget build(BuildContext context) {
                           ),
                         ),
                         const SizedBox(height: 15),
+                        if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
                         FittedBox(
                           child: Text(
                             "Esta invitación es única,\nya que eres una de las personas\nmás importantes para nosotros.",
@@ -569,6 +608,14 @@ Widget build(BuildContext context) {
                             ),
                           ),
                         ),
+                        if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
                         FittedBox(
                           child: Text(
                             "Por eso queremos compartir\n este momento tan especial 💍",
