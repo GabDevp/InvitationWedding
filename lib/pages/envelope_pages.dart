@@ -24,6 +24,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
   String? _guestDisplayName;
   String? _guestName;
   int? _guestPasses;
+  int? _guestPassesConfirmed;
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
             _guestName = guestData['key_normalized'] ?? _nombreInvitado;
             _guestDisplayName = guestData['display'] ?? _nombreInvitado;
             _guestPasses = int.tryParse(guestData['passesRemaining'].toString()) ?? 0;
+            _guestPassesConfirmed = int.tryParse(guestData['confirmedCount'].toString()) ?? 0;
           });
         }
       } catch (e) {
@@ -79,7 +81,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
     if (!mounted) return;
 
     // Verificar si el invitado tiene pases disponibles
-    if (_guestPasses == null || _guestPasses == 0) {
+    if (_guestPasses == null || _guestPasses == 0 && _guestPassesConfirmed == 0) {
       // Mostrar mensaje especial para invitados sin pases
       await showDialog(
         context: context,
@@ -235,7 +237,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
           ),
 
           /// 🟡 SELLO DORADO
-          if (!opened)
+          if (!opened && _guestDisplayName != null)
             Positioned(
               top: size.height * 0.37,
               left: 0,
@@ -284,7 +286,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
             ),
 
           /// 💬 TEXTO INFERIOR
-          if (!opened && _nombreInvitado.isNotEmpty)
+          if (!opened && _guestDisplayName != null)
             Positioned(
               bottom: size.height * 0.12,
               left: 20,
@@ -292,7 +294,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
               child: Column(
                 children: [
                   Text(
-                    "Hola ${_guestDisplayName!.trim()} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'},",
+                    "Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'}",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.parisienne(
                       fontSize: isMobile ? 30 : 34,

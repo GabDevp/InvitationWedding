@@ -746,268 +746,315 @@ Widget build(BuildContext context) {
               const SizedBox(height: 50),
               // 🔹 Sección 2
               Container(
-                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.7,
+                height: size.width > 600 ? size.height * 4.2 : 
+                !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 2.7 : size.height * 2.0,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
                     Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        // Carrusel más centrado y uniforme
+                        CarruselConDots(),
+                        const SizedBox(height: 50),
+                        FittedBox(
+                          child: Text(
+                            "Provervios 19:6",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: fontSizeTitle,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        FittedBox(
+                          child: Text(
+                            "El corazón del hombre\ntraza su rumbo, pero sus\npasos los dirige el SEÑOR.",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.dancingScript(
+                              fontSize: fontSizeBody + 8,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.amberAccent,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        FittedBox(
+                          child: Text(
+                            "¡Aparta la fecha!",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: fontSizeTitle + 1.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Calendario Marzo 2026 con corazón en el 21
+                        _buildCalendar(),
+                        const SizedBox(height: 20),
+                        Text(
+                          "CEREMONIA",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: fontSizeTitle + 2,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // seccion de Eucaristía
                         Column(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Carrusel más centrado y uniforme
-                            CarruselConDots(),
-                            const SizedBox(height: 50),
-                            FittedBox(
-                              child: Text(
-                                "Provervios 19:6",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FittedBox(
-                              child: Text(
-                                "El corazón del hombre\ntraza su rumbo, pero sus\npasos los dirige el SEÑOR.",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.dancingScript(
-                                  fontSize: fontSizeBody + 8,
-                                  fontWeight: FontWeight.w600,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.church_outlined,
                                   color: Colors.amberAccent,
+                                  size: 100,
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FittedBox(
-                              child: Text(
-                                "¡Aparta la fecha!",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle + 1.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            // Calendario Marzo 2026 con corazón en el 21
-                            _buildCalendar(),
-                            const SizedBox(height: 20),
-                            Text(
-                              "CEREMONIA",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.playfairDisplay(
-                                fontSize: fontSizeTitle + 2,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            // seccion de Eucaristía
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.church_outlined,
-                                      color: Colors.amberAccent,
-                                      size: 100,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        // Nombre de la iglesia
-                                        Text(
-                                          "Parroquia del Salesianos",
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.playfairDisplay(
-                                            fontSize: fontSizeBody,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        // Hora de la eucaristía
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.access_time,
-                                              color: Colors.amberAccent,
-                                              size: fontSizeTitle,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              "3:00 PM",
-                                              textAlign: TextAlign.center,
-                                              style: GoogleFonts.playfairDisplay(
-                                                fontSize: fontSizeTitle,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.location_pin,
-                                      color: Colors.amberAccent,
-                                      size: fontSizeTitle,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        "Carrera 26 #34-18, Barrio Salesianos",
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.playfairDisplay(
-                                          fontSize: fontSizeBody,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "RECEPCIÓN",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: fontSizeTitle + 2,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
+                                    // Nombre de la iglesia
+                                    Text(
+                                      "Parroquia del Salesianos",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: fontSizeBody,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    // Hora de la eucaristía
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Icon(
-                                          Icons.location_pin,
+                                          Icons.access_time,
                                           color: Colors.amberAccent,
-                                          size: fontSizeTitle
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Flexible(
-                                          child: Text(
-                                            "VILLA GABRIELA",
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.playfairDisplay(
-                                              fontSize: fontSizeBody,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          Icons.access_time_filled_outlined,
-                                          color: Colors.amberAccent,
-                                          size: fontSizeBody
+                                          size: fontSizeTitle,
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          "5:30 PM",
+                                          "3:00 PM",
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.playfairDisplay(
-                                            fontSize: fontSizeBody,
-                                            fontWeight: FontWeight.bold,
+                                            fontSize: fontSizeTitle,
                                             color: Colors.white,
                                           ),
-                                        )
+                                        ),
                                       ],
-                                    ),
-                                    Text(
-                                      "Parcelación El Llanito casa 25 Nariño",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: fontSizeBody,
-                                        color: Colors.white,
-                                      ),
                                     )
                                   ],
                                 )
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            // Mapa embebido (solo Web)
-                            if (kIsWeb)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
-                                  height: 320,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.white24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.location_pin,
+                                  color: Colors.amberAccent,
+                                  size: fontSizeTitle,
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    "Carrera 26 #34-18, Barrio Salesianos",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: fontSizeBody,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  child: const HtmlElementView(viewType: 'gmap-iframe'),
                                 ),
-                              )
-                            else
-                            Container(
-                              width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
-                              height: 200,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white24),
-                              ),
-                              child: Text(
-                                'El mapa embebido está disponible en la versión Web.',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.roboto(
-                                  color: Colors.white,
-                                  fontSize: fontSizeBody,
-                                ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(height: 15),
-                            ElevatedButton(
-                              onPressed: _abrirGoogleMaps,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.amber.shade400,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: const Text("Ver en Google Maps"),
-                            ),
-                            const SizedBox(height: 30),
                           ],
                         ),
+                        const SizedBox(height: 20),
+                        // Ocultar sección de recepción para ciertos invitados
+                        if (!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "RECEPCIÓN",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: fontSizeTitle + 2,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.location_pin,
+                                        color: Colors.amberAccent,
+                                        size: fontSizeTitle
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          "VILLA GABRIELA",
+                                          textAlign: TextAlign.center,
+                                          style: GoogleFonts.playfairDisplay(
+                                            fontSize: fontSizeBody,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Icon(
+                                        Icons.access_time_filled_outlined,
+                                        color: Colors.amberAccent,
+                                        size: fontSizeBody
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "5:30 PM",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: fontSizeBody,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  Text(
+                                    "Parcelación El Llanito casa 25 Nariño",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: fontSizeBody,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        const SizedBox(height: 12),
+                        // Mapa embebido (solo Web) - Ocultar para ciertos invitados
+                        if (kIsWeb && 
+                        !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
+                            )
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
+                              height: 320,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.white24),
+                              ),
+                              child: const HtmlElementView(viewType: 'gmap-iframe'),
+                            ),
+                          )
+                        else if (!kIsWeb &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
+                        )
+                        Container(
+                          width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
+                          height: 200,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: Text(
+                            'El mapa embebido está disponible en la versión Web.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.roboto(
+                              color: Colors.white,
+                              fontSize: fontSizeBody,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
+                        ElevatedButton(
+                          onPressed: _abrirGoogleMaps,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber.shade400,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: const Text("Ver en Google Maps"),
+                        ),
+                        const SizedBox(height: 30),
                       ],
                     ),
                   ],
                 ),
               ),
               // 🔹 Sección 3
-              Container(
+              if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
+                Container(
                 width: double.infinity,
                 child: Column(
                   children: [
@@ -1096,7 +1143,15 @@ Widget build(BuildContext context) {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 20),
-                          if (_soldOut)
+                          if (_soldOut || _guestPassesFromRoute == 0 && 
+                          !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
                             Container(
                               width: size.width > 600 ? 480 : size.width * 0.85,
                               padding: const EdgeInsets.all(16),
@@ -1118,253 +1173,66 @@ Widget build(BuildContext context) {
                           else
                           // Botón de confirmación rápida si viene desde la ruta
                           if (_guestNameFromRoute != null && _guestPassesFromRoute != 0)
-                            Column(
-                              children: [
-                                Container(
-                                  width: size.width > 600 ? 480 : size.width * 0.95,
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.white24),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '¡Hola $_guestDisplayNameFromRoute! 👋',
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.playfairDisplay(
-                                          color: Colors.white,
-                                          fontSize: fontSizeTitle,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Tienes $_guestPassesFromRoute pases disponibles',
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.roboto(
-                                          color: Colors.white,
-                                          fontSize: fontSizeBody,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      (!_alreadyConfirmed) ? ElevatedButton(
-                                        onPressed: _confirmarAsistenciaDesdeRuta,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.green[900],
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 30, vertical: 15),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(25),
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          "Confirmar mi asistencia 💌",
-                                          style: TextStyle(fontSize: 16, color: Colors.white),
-                                        ),
-                                      ) : Text(
-                                        "Muchas gracias por confirmar.\nNos vemos pronto 💍",
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.playfairDisplay(
-                                          fontSize: 22,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                          Column(
+                            children: [
+                              Container(
+                                width: size.width > 600 ? 480 : size.width * 0.95,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white24),
                                 ),
-                                const SizedBox(height: 20),
-                              ],
-                            )
-                          // else
-                          // SizedBox(
-                          //   width:  size.width > 600 ? 400 : size.width * 0.75,
-                          //   child: TextField(
-                          //     controller: nombreCtrl,
-                          //     decoration: const InputDecoration(
-                          //       labelText: "Tu nombre",
-                          //       filled: true,
-                          //       fillColor: Colors.white70,
-                          //     ),
-                          //   ),
-                          // ),
-                          // // Sugerencias de nombre (typeahead desde Sheets)
-                          // if (_nameSuggestions.isNotEmpty)
-                          //   Container(
-                          //     width: size.width > 600 ? 400 : size.width * 0.75,
-                          //     constraints: const BoxConstraints(maxHeight: 180),
-                          //     margin: const EdgeInsets.only(top: 6),
-                          //     decoration: BoxDecoration(
-                          //       color: Colors.white,
-                          //       borderRadius: BorderRadius.circular(8),
-                          //       boxShadow: const [
-                          //         BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
-                          //       ],
-                          //     ),
-                          //     child: ListView.builder(
-                          //       itemCount: _nameSuggestions.length,
-                          //       itemBuilder: (context, index) {
-                          //         final item = _nameSuggestions[index];
-                          //         final display = (item['display'] ?? '').toString();
-                          //         final passesRem = int.tryParse(item['passesRemaining']?.toString() ?? '');
-                          //         return ListTile(
-                          //           dense: true,
-                          //           title: Text(display),
-                          //           onTap: () {
-                          //             setState(() {
-                          //               _ignoreNextNameChange = true;
-                          //               _selectedNameDisplay = display;
-                          //               _nombreCtrl.text = display;
-                          //               _nombreCtrl.selection = TextSelection.collapsed(offset: display.length);
-                          //               _passesForTypedName = passesRem;
-                          //               _nameSuggestions = [];
-                          //               if ((passesRem ?? 0) < 2) _acompananteCtrl.clear();
-                          //             });
-                          //           },
-                          //         );
-                          //       },
-                          //     ),
-                          //   ),
-                          // const SizedBox(height: 8),
-                          // if (_passesForTypedName != null)
-                          // SizedBox(
-                          //   width: size.width > 600 ? 400 : size.width * 0.75,
-                          //   child: Text(
-                          //     _passesForTypedName! > 1 ? 'Tienes ${_passesForTypedName} pases disponibles, el tuyo y el de ${((_passesForTypedName ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.' : 'El pase es solo para ti.',
-                          //     style: GoogleFonts.roboto(color: Colors.white, fontSize: fontSizeBody * 0.80, fontWeight: FontWeight.w500),
-                          //   ),
-                          // ),
-                          // const SizedBox(height: 10),
-                          // if (!_soldOut)
-                          //   ...((){
-                          //     final p = _passesForTypedName ?? 0;
-                          //     final maxCompanions = (p - 1).clamp(0, 3);
-                          //     final widgets = <Widget>[];
-                          //     if (maxCompanions >= 1) {
-                          //       widgets.add(SizedBox(
-                          //         width: size.width > 600 ? 400 : size.width * 0.75,
-                          //         child: TextField(
-                          //           controller: acompananteCtrl,
-                          //           decoration: const InputDecoration(
-                          //             labelText: "Acompañante 1",
-                          //             filled: true,
-                          //             fillColor: Colors.white70,
-                          //           ),
-                          //         ),
-                          //       ));
-                          //       widgets.add(const SizedBox(height: 8));
-                          //     }
-                          //     if (maxCompanions >= 2) {
-                          //       widgets.add(SizedBox(
-                          //         width: size.width > 600 ? 400 : size.width * 0.75,
-                          //         child: TextField(
-                          //           controller: _acompanante2Ctrl,
-                          //           decoration: const InputDecoration(
-                          //             labelText: "Acompañante 2",
-                          //             filled: true,
-                          //             fillColor: Colors.white70,
-                          //           ),
-                          //         ),
-                          //       ));
-                          //       widgets.add(const SizedBox(height: 8));
-                          //     }
-                          //     if (maxCompanions >= 3) {
-                          //       widgets.add(SizedBox(
-                          //         width: size.width > 600 ? 400 : size.width * 0.75,
-                          //         child: TextField(
-                          //           controller: _acompanante3Ctrl,
-                          //           decoration: const InputDecoration(
-                          //             labelText: "Acompañante 3",
-                          //             filled: true,
-                          //             fillColor: Colors.white70,
-                          //           ),
-                          //         ),
-                          //       ));
-                          //     }
-                          //     return widgets;
-                          //   }()),
-                          // const SizedBox(height: 20),
-                          // if (!_soldOut)
-                          // ElevatedButton(
-                          //   onPressed: _isConfirming ? null : () async {
-                          //     final nombre = nombreCtrl.text.trim();
-                          //     final acomp1 = acompananteCtrl.text.trim();
-                          //     final acomp2 = _acompanante2Ctrl.text.trim();
-                          //     final acomp3 = _acompanante3Ctrl.text.trim();
-                          //     if (nombre.isEmpty) {
-                          //       ScaffoldMessenger.of(context).showSnackBar(
-                          //         const SnackBar(content: Text('Ingresa tu nombre para confirmar.'), duration: Duration(seconds: 2), width: 200, backgroundColor: Colors.red,),
-                          //       );
-                          //       return;
-                          //     }
-                          //     setState(() => _isConfirming = true);
-                          //     try {
-                          //       // Consultar invitado en Sheets
-                          //       final guest = await SheetsService.getGuest(nombre);
-                          //       if (guest == null) {
-                          //         ScaffoldMessenger.of(context).showSnackBar(
-                          //           const SnackBar(content: Text('No encontramos tu nombre. Escríbelo exactamente como aparece en la invitación.'), duration: Duration(seconds: 2), width: 200, backgroundColor: Colors.red,),
-                          //         );
-                          //         return;
-                          //       }
-                      
-                          //       final passes = int.tryParse(guest['passesRemaining']?.toString() ?? '0') ?? 0;
-                          //       if (passes <= 0) {
-                          //         await _refreshSoldOutFromSheets();
-                          //         ScaffoldMessenger.of(context).showSnackBar(
-                          //           const SnackBar(content: Text('Ya no quedan pases disponibles para este nombre.'), duration: Duration(seconds: 2), width: 260, backgroundColor: Colors.red,),
-                          //         );
-                          //         return;
-                          //       }
-                      
-                          //       // Consumir pases considerando hasta 3 acompañantes
-                          //       final companionsInput = [acomp1, acomp2, acomp3]
-                          //           .where((s) => s.isNotEmpty)
-                          //           .toList();
-                          //       int desired = 1 + companionsInput.length; // invitado + acompañantes
-                          //       if (desired > passes) {
-                          //         // recortar acompañantes a los cupos disponibles
-                          //         final allowedCompanions = (passes - 1).clamp(0, 3);
-                          //         companionsInput.removeRange(allowedCompanions, companionsInput.length);
-                          //         desired = 1 + companionsInput.length;
-                          //       }
-                          //       final updated = await SheetsService.confirm(nombre, consume: desired);
-                          //       if (updated == null) {
-                          //         ScaffoldMessenger.of(context).showSnackBar(
-                          //           const SnackBar(content: Text('No se pudo confirmar. Intenta de nuevo.'), duration: Duration(seconds: 2), width: 240, backgroundColor: Colors.red,),
-                          //         );
-                          //         return;
-                          //       }
-                      
-                          //       String acompFinal = '';
-                          //       if (companionsInput.isNotEmpty) {
-                          //         acompFinal = _humanJoin(companionsInput);
-                          //       }
-                          //       _enviarWhatsApp(nombre, acompFinal);
-                          //       // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
-                          //       if (mounted) {
-                          //         setState(() {
-                          //           _soldOut = false;
-                          //         });
-                          //       }
-                          //       await _refreshSoldOutFromSheets();
-                          //     } finally {
-                          //       if (mounted) setState(() => _isConfirming = false);
-                          //     }
-                          //   },
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Colors.green,
-                          //     padding: const EdgeInsets.symmetric(
-                          //         horizontal: 20, vertical: 12),
-                          //     shape: RoundedRectangleBorder(
-                          //       borderRadius: BorderRadius.circular(15),
-                          //     ),
-                          //   ),
-                          //   child: const Text("Confirmar asistencia 💌"),
-                          // ),
-                          // const SizedBox(height: 20),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      '¡Hola $_guestDisplayNameFromRoute! 👋',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.playfairDisplay(
+                                        color: Colors.white,
+                                        fontSize: fontSizeTitle,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Tienes $_guestPassesFromRoute pases disponibles',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.roboto(
+                                        color: Colors.white,
+                                        fontSize: fontSizeBody,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    (!_alreadyConfirmed) ? ElevatedButton(
+                                      onPressed: _confirmarAsistenciaDesdeRuta,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green[900],
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 30, vertical: 15),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(25),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        "Confirmar mi asistencia 💌",
+                                        style: TextStyle(fontSize: 16, color: Colors.white),
+                                      ),
+                                    ) : Text(
+                                      "Muchas gracias por confirmar.\nNos vemos pronto 💍",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: 22,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                          )
                         ],
                       ),
                     ),
