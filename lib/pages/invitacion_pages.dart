@@ -234,7 +234,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Invitado: $_guestDisplayNameFromRoute'),
-            Text('Pases disponibles: $_guestPassesFromRoute'),
+            _guestPassesFromRoute != null && _guestPassesFromRoute! > 1 
+                ? Text('Pases disponibles: $_guestPassesFromRoute') 
+                : Text('Pase disponible: $_guestPassesFromRoute'),
             SizedBox(height: 10),
             if (daysRemaining < 0)
               Text(
@@ -1242,8 +1244,17 @@ Widget build(BuildContext context) {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
+                                    _guestPassesFromRoute != null && _guestPassesFromRoute! > 1 ?
                                     Text(
                                       'Tienes $_guestPassesFromRoute pases disponibles',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.roboto(
+                                        color: Colors.white,
+                                        fontSize: fontSizeBody,
+                                      ),
+                                    ) : 
+                                    Text(
+                                      'Tienes $_guestPassesFromRoute pase disponible',
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.roboto(
                                         color: Colors.white,

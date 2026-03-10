@@ -81,7 +81,15 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
     if (!mounted) return;
 
     // Verificar si el invitado tiene pases disponibles
-    if (_guestPasses == null || _guestPasses == 0 && _guestPassesConfirmed == 0) {
+    if ((_guestPasses == null || _guestPasses == 0 && _guestPassesConfirmed == 0) && 
+    !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
+      !(_nombreInvitado.toLowerCase().contains('cata')) &&
+      !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
+      !(_nombreInvitado.toLowerCase().contains('valentina')) &&
+      !(_nombreInvitado.toLowerCase().contains('rosario')) &&
+      !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
+      !(_nombreInvitado.toLowerCase().contains('promotora')) &&
+      !(_nombreInvitado.toLowerCase().contains('elsy')) ) {
       // Mostrar mensaje especial para invitados sin pases
       await showDialog(
         context: context,
@@ -96,24 +104,8 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
             ),
           ),
           content: 
-          !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
-          !(_nombreInvitado.toLowerCase().contains('cata')) &&
-          !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
-          !(_nombreInvitado.toLowerCase().contains('valentina')) &&
-          !(_nombreInvitado.toLowerCase().contains('rosario')) &&
-          !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
-          !(_nombreInvitado.toLowerCase().contains('promotora')) &&
-          !(_nombreInvitado.toLowerCase().contains('elsy')) ?
           Text(
             'Sabemos que en esta oportunidad no puedes estar,\npero igualmente estás presente en nuestra mente y corazón.\n\nTe enviamos todo nuestro cariño y agradecemos\ntu presencia espiritual en este día tan especial.\n\nPuedes ver toda nuestra invitación a continuación.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.nunito(
-              fontSize: 16,
-              color: Colors.grey[700],
-            ),
-          ):
-          Text(
-            'Queremos compartir contigo este momento tan especial\naunque no podamos contar con tu presencia física.\n\nTu cariño y buenos deseos son importantes para nosotros,\ny por eso queremos que te sientas incluido en nuestra celebración.\n\nTe hemos preparado este detalle para que no te sientas excluido de nuestro gran día.',
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(
               fontSize: 16,
