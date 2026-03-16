@@ -25,7 +25,7 @@ class InvitacionPage extends StatefulWidget {
   State<InvitacionPage> createState() => _InvitacionPageState();
 }
 class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStateMixin {
-    // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 13 de diciembre de 2025
+  // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 21 de marzo de 2026
   Timer? _countdownTimer;
   int _d = 0, _h = 0, _m = 0, _s = 0;
   bool _mapRegistered = false;
@@ -219,12 +219,12 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   void _confirmarAsistenciaDesdeRuta() async {
     if (_guestDisplayNameFromRoute == null) return;
     
-    // Verificar si está dentro del plazo de 5 días
+    // Verificar si está dentro del plazo de 3 días
     final now = DateTime.now();
-    final deadline = DateTime(2026, 3, 16); // 5 días antes del evento
+    final deadline = DateTime(2026, 3, 18); // 3 días antes del evento
     final daysRemaining = deadline.difference(now).inDays;
     
-    // Mostrar diálogo de confirmación con mensaje de 5 días
+    // Mostrar diálogo de confirmación con mensaje de 3 días
     final bool? confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -561,9 +561,10 @@ Widget build(BuildContext context) {
                 height:  size.width > 600 ? size.height * 2.1 :
                 !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 1.1 : size.height * 0.8,
@@ -588,9 +589,10 @@ Widget build(BuildContext context) {
                         const SizedBox(height: 15),
                         if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
@@ -612,9 +614,10 @@ Widget build(BuildContext context) {
                         ),
                         if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
@@ -798,9 +801,10 @@ Widget build(BuildContext context) {
                 height: size.width > 600 ? size.height * 4.2 : 
                 !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 2.7 : size.height * 2.0,
@@ -940,9 +944,10 @@ Widget build(BuildContext context) {
                         // Ocultar sección de recepción para ciertos invitados
                         if (!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
@@ -1021,9 +1026,10 @@ Widget build(BuildContext context) {
                         if (kIsWeb && 
                         !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
@@ -1042,9 +1048,10 @@ Widget build(BuildContext context) {
                         else if (!kIsWeb &&
                         !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
@@ -1070,9 +1077,10 @@ Widget build(BuildContext context) {
                         const SizedBox(height: 15),
                         if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
@@ -1097,9 +1105,10 @@ Widget build(BuildContext context) {
               // 🔹 Sección 3
               if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
@@ -1195,9 +1204,10 @@ Widget build(BuildContext context) {
                           if (_soldOut || _guestPassesFromRoute == 0 && 
                           !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
+                          !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('rosario') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))

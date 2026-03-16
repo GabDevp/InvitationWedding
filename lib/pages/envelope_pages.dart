@@ -84,9 +84,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
     if ((_guestPasses == null || _guestPasses == 0 && _guestPassesConfirmed == 0) && 
     !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
       !(_nombreInvitado.toLowerCase().contains('cata')) &&
+      !(_nombreInvitado.toLowerCase().contains('asesoria')) &&
+      !(_nombreInvitado.toLowerCase().contains('edwin')) &&
       !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
       !(_nombreInvitado.toLowerCase().contains('valentina')) &&
-      !(_nombreInvitado.toLowerCase().contains('rosario')) &&
       !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
       !(_nombreInvitado.toLowerCase().contains('promotora')) &&
       !(_nombreInvitado.toLowerCase().contains('elsy')) ) {
@@ -304,9 +305,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
                 children: [
                   !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
                   !(_nombreInvitado.toLowerCase().contains('cata')) &&
+                  !(_nombreInvitado.toLowerCase().contains('asesoria')) &&
+                  !(_nombreInvitado.toLowerCase().contains('edwin')) &&
                   !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
                   !(_nombreInvitado.toLowerCase().contains('valentina')) &&
-                  !(_nombreInvitado.toLowerCase().contains('rosario')) &&
                   !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
                   !(_nombreInvitado.toLowerCase().contains('promotora')) &&
                   !(_nombreInvitado.toLowerCase().contains('elsy')) ?
