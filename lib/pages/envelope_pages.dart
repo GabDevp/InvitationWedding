@@ -90,7 +90,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
       !(_nombreInvitado.toLowerCase().contains('valentina')) &&
       !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
       !(_nombreInvitado.toLowerCase().contains('promotora')) &&
-      !(_nombreInvitado.toLowerCase().contains('elsy')) ) {
+      !(_nombreInvitado.toLowerCase().contains('elsy')) && _guestDisplayName != null ) {
       // Mostrar mensaje especial para invitados sin pases
       await showDialog(
         context: context,
@@ -247,7 +247,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
           ),
 
           /// 🟡 SELLO DORADO
-          if (!opened && _guestDisplayName != null)
+          if (!opened)
             Positioned(
               top: size.height * 0.37,
               left: 0,
@@ -296,56 +296,57 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
             ),
 
           /// 💬 TEXTO INFERIOR
-          if (!opened && _guestDisplayName != null)
-            Positioned(
-              bottom: size.height * 0.12,
-              left: 20,
-              right: 20,
-              child: Column(
-                children: [
-                  !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
-                  !(_nombreInvitado.toLowerCase().contains('cata')) &&
-                  !(_nombreInvitado.toLowerCase().contains('asesoria')) &&
-                  !(_nombreInvitado.toLowerCase().contains('edwin')) &&
-                  !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
-                  !(_nombreInvitado.toLowerCase().contains('valentina')) &&
-                  !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
-                  !(_nombreInvitado.toLowerCase().contains('promotora')) &&
-                  !(_nombreInvitado.toLowerCase().contains('elsy')) ?
-                  Text("Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'}",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.parisienne(
-                      fontSize: isMobile ? 30 : 34,
-                      color: Colors.white,
-                      decorationColor: Colors.black,
-                      decorationThickness: 2,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 12,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  ):Text("Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nQueremos que conozcan sobre nuestro matrimonio\nel 21 de Marzo de 2026' : '\nQueremos que conozcas sobre nuestro matrimonio\nel 21 de Marzo de 2026'}",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.parisienne(
-                      fontSize: isMobile ? 30 : 34,
-                      color: Colors.white,
-                      decorationColor: Colors.black,
-                      decorationThickness: 2,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 12,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
+          !opened && _guestDisplayName != null ?
+          Positioned(
+            bottom: size.height * 0.12,
+            left: 20,
+            right: 20,
+            child: Column(
+              children: [
+                !(_nombreInvitado.toLowerCase().contains('carolinal')) &&
+                !(_nombreInvitado.toLowerCase().contains('cata')) &&
+                !(_nombreInvitado.toLowerCase().contains('asesoria')) &&
+                !(_nombreInvitado.toLowerCase().contains('edwin')) &&
+                !(_nombreInvitado.toLowerCase().contains('luistafur')) &&
+                !(_nombreInvitado.toLowerCase().contains('valentina')) &&
+                !(_nombreInvitado.toLowerCase().contains('sanjose')) &&
+                !(_nombreInvitado.toLowerCase().contains('promotora')) &&
+                !(_nombreInvitado.toLowerCase().contains('elsy')) ?
+                Text("Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nEstán invitados a nuestra boda\nel 21 de Marzo de 2026' : '\nEstás invitado a nuestra boda\nel 21 de Marzo de 2026'}",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.parisienne(
+                    fontSize: isMobile ? 30 : 34,
+                    color: Colors.white,
+                    decorationColor: Colors.black,
+                    decorationThickness: 2,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ):Text("Hola ${_guestDisplayName?.trim() ?? _nombreInvitado} ${_nombreInvitado.contains(' y ') ? '\nQueremos que conozcan sobre nuestro matrimonio\nel 21 de Marzo de 2026' : '\nQueremos que conozcas sobre nuestro matrimonio\nel 21 de Marzo de 2026'}",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.parisienne(
+                    fontSize: isMobile ? 30 : 34,
+                    color: Colors.white,
+                    decorationColor: Colors.black,
+                    decorationThickness: 2,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+          ):
+          const SizedBox.shrink(),
         ],
       ),
     );

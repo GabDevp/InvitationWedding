@@ -532,16 +532,16 @@ Widget build(BuildContext context) {
 
   return Scaffold(
     floatingActionButton: FloatingActionButton(
-          onPressed: _togglePlayPause,
-          backgroundColor: Color(0xFF001F54), // Azul navy
-          elevation: 5,
-          hoverElevation: 10,
-          focusElevation: 10,
-          highlightElevation: 10,
-          hoverColor: Colors.white,
-          tooltip: "Fonseca - Que Suerte Tenerte",
-          child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
-        ),
+      onPressed: _togglePlayPause,
+      backgroundColor: Color(0xFF001F54), // Azul navy
+      elevation: 5,
+      hoverElevation: 10,
+      focusElevation: 10,
+      highlightElevation: 10,
+      hoverColor: Colors.white,
+      tooltip: "Fonseca - Que Suerte Tenerte",
+      child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
+    ),
     body: Stack(
       fit: StackFit.expand,
       children: [
@@ -553,6 +553,7 @@ Widget build(BuildContext context) {
         Container(color: Colors.black.withOpacity(0.30)), // filtro oscuro
         _buildSideBars(size),
         // 🔹 Contenido desplazable encima
+        (_guestNameFromRoute != null && !_guestNameFromRoute!.toLowerCase().contains('asesoria')) ?
         SingleChildScrollView(
           child: Column(
             children: [
@@ -561,7 +562,6 @@ Widget build(BuildContext context) {
                 height:  size.width > 600 ? size.height * 2.1 :
                 !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -589,7 +589,6 @@ Widget build(BuildContext context) {
                         const SizedBox(height: 15),
                         if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -614,7 +613,6 @@ Widget build(BuildContext context) {
                         ),
                         if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -801,7 +799,6 @@ Widget build(BuildContext context) {
                 height: size.width > 600 ? size.height * 4.2 : 
                 !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -944,7 +941,6 @@ Widget build(BuildContext context) {
                         // Ocultar sección de recepción para ciertos invitados
                         if (!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -1026,7 +1022,6 @@ Widget build(BuildContext context) {
                         if (kIsWeb && 
                         !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -1048,7 +1043,6 @@ Widget build(BuildContext context) {
                         else if (!kIsWeb &&
                         !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -1077,7 +1071,6 @@ Widget build(BuildContext context) {
                         const SizedBox(height: 15),
                         if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                         !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -1105,7 +1098,6 @@ Widget build(BuildContext context) {
               // 🔹 Sección 3
               if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -1204,7 +1196,6 @@ Widget build(BuildContext context) {
                           if (_soldOut || _guestPassesFromRoute == 0 && 
                           !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('asesoria') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
                           !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
@@ -1309,6 +1300,45 @@ Widget build(BuildContext context) {
                 ),
               ),
             ],
+          ),
+        ) : 
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Text(
+                  "Te participo mi matrimonio",
+                  style: GoogleFonts.parisienne(color: Colors.white, fontSize: fontSizeTitle + 12),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "El corazón del hombre traza\nsu rumbo, pero sus pasos\nlos dirige el Señor.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.dancingScript(
+                    color: Colors.amberAccent,
+                    fontSize: fontSizeBody + 8,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Proverbios 19:6",
+                  style: GoogleFonts.playfairDisplay(color: Colors.white70, fontSize: fontSizeBody + 2),
+                ),
+                const SizedBox(height: 20),
+                Divider(color: Color(0xFFD4AF37)),
+                const SizedBox(height: 20),
+                Text(
+                  "21 de Marzo de 2026",
+                  style: GoogleFonts.playfairDisplay(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSizeBody + 2,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ]
