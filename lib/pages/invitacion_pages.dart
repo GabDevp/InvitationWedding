@@ -4,8 +4,10 @@ import 'dart:async';
 import 'dart:ui_web' as ui; // For platformViewRegistry (web)
 import 'dart:html' as html; // For IFrameElement (web)
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // kIsWeb
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -13,6 +15,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:invitacion_boda/widgets/carrusel.dart';
 import 'package:invitacion_boda/services/sheets_services.dart';
 import 'package:video_player/video_player.dart';
+import '../widgets/pdf_export_button.dart'; // Import for PdfExportButton
 
 class InvitacionPage extends StatefulWidget {
   final String? guestName;
@@ -59,6 +62,12 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   String? _guestNameFromRoute;
   String? _guestDisplayNameFromRoute;
   int? _guestPassesFromRoute;
+
+  //Repaint para PDF
+  final GlobalKey _pdftKey = GlobalKey();
+  final GlobalKey _section1Key = GlobalKey();
+  final GlobalKey _section2Key = GlobalKey();
+  final GlobalKey _section3Key = GlobalKey();
 
   void _onNameChanged() {
     // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
@@ -512,14 +521,6 @@ Future<void> _startAudio() async {
   }
 }
 
-String _humanJoin(List<String> items) {
-  if (items.isEmpty) return '';
-  if (items.length == 1) return items.first;
-  if (items.length == 2) return '${items[0]} y ${items[1]}';
-  final head = items.sublist(0, items.length - 1).join(', ');
-  return '$head y ${items.last}';
-}
-
 // 🔹 Dentro del build (ajustado)
 @override
 Widget build(BuildContext context) {
@@ -531,16 +532,30 @@ Widget build(BuildContext context) {
   final TextEditingController acompananteCtrl = _acompananteCtrl;
 
   return Scaffold(
-    floatingActionButton: FloatingActionButton(
-      onPressed: _togglePlayPause,
-      backgroundColor: Color(0xFF001F54), // Azul navy
-      elevation: 5,
-      hoverElevation: 10,
-      focusElevation: 10,
-      highlightElevation: 10,
-      hoverColor: Colors.white,
-      tooltip: "Fonseca - Que Suerte Tenerte",
-      child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
+    floatingActionButton: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Botón de música
+        FloatingActionButton(
+          heroTag: "musicButton",  // ✅ Tag única
+          onPressed: _togglePlayPause,
+          backgroundColor: Color(0xFF001F54), // Azul navy
+          elevation: 5,
+          hoverElevation: 10,
+          focusElevation: 10,
+          highlightElevation: 10,
+          hoverColor: Colors.white,
+          tooltip: "Fonseca - Que Suerte Tenerte",
+          child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
+        ),
+        const SizedBox(width: 10),
+        // Botón de exportación PDF
+        PdfExportButton(sections: [
+          _section1Key,
+          _section2Key,
+          _section3Key,
+        ]),
+      ],
     ),
     body: Stack(
       fit: StackFit.expand,
@@ -558,86 +573,92 @@ Widget build(BuildContext context) {
           child: Column(
             children: [
               // 🔹 Sección 1
-              Container(
-                height:  size.width > 600 ? size.height * 2.1 :
-                !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 1.1 : size.height * 0.8,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Barras laterales
-                    // Contenido
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+              RepaintBoundary(
+                key: _section1Key,
+                child: _pdfSectionWrapper(
+                  size: size,
+                  child: Container(
+                    height:  size.width > 600 ? size.height * 2.1 :
+                    !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 1.1 : size.height * 0.8,
+                    width: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
                       children: [
-                        const SizedBox(height: 20), 
-                        // Monograma fijo antes del texto
-                        SizedBox(
-                          // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
-                          child: Image.asset(
-                            "lib/assets/5.jpeg",
-                            height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
-                        FittedBox(
-                          child: Text(
-                            "Esta invitación es única,\nya que eres una de las personas\nmás importantes para nosotros.",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.parisienne(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 4,
-                                    offset: Offset(2, 2)),
-                              ],
+                        // Barras laterales
+                        // Contenido
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 20), 
+                            // Monograma fijo antes del texto
+                            SizedBox(
+                              // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
+                              child: Image.asset(
+                                "lib/assets/5.jpeg",
+                                height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
+                              ),
                             ),
-                          ),
-                        ),
-                        if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
-                        FittedBox(
-                          child: Text(
-                            "Por eso queremos compartir\n este momento tan especial 💍",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.parisienne(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 4,
-                                    offset: Offset(2, 2)),
-                              ],
+                            const SizedBox(height: 15),
+                            if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
+                            FittedBox(
+                              child: Text(
+                                "Esta invitación es única,\nya que eres una de las personas\nmás importantes para nosotros.",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.parisienne(
+                                  fontSize: fontSizeTitle,
+                                  color: Colors.white,
+                                  shadows: const [
+                                    Shadow(
+                                        color: Colors.black45,
+                                        blurRadius: 4,
+                                        offset: Offset(2, 2)),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
+                            if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
+                            FittedBox(
+                              child: Text(
+                                "Por eso queremos compartir\n este momento tan especial 💍",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.parisienne(
+                                  fontSize: fontSizeTitle,
+                                  color: Colors.white,
+                                  shadows: const [
+                                    Shadow(
+                                        color: Colors.black45,
+                                        blurRadius: 4,
+                                        offset: Offset(2, 2)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               // 🔔 Cuenta regresiva (reloj HH:MM:SS)
@@ -795,304 +816,310 @@ Widget build(BuildContext context) {
               ),
               const SizedBox(height: 50),
               // 🔹 Sección 2
-              Container(
-                height: size.width > 600 ? size.height * 4.2 : 
-                !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 2.7 : size.height * 2.0,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+              RepaintBoundary(
+                key: _section2Key,
+                child: _pdfSectionWrapper(
+                  size: size,
+                  child: Container(
+                    height: size.width > 600 ? size.height * 4.2 : 
+                    !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                    !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false) ? size.height * 2.7 : size.height * 2.0,
+                    width: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
                       children: [
-                        // Carrusel más centrado y uniforme
-                        CarruselConDots(),
-                        const SizedBox(height: 50),
-                        FittedBox(
-                          child: Text(
-                            "Provervios 19:6",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        FittedBox(
-                          child: Text(
-                            "El corazón del hombre\ntraza su rumbo, pero sus\npasos los dirige el SEÑOR.",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.dancingScript(
-                              fontSize: fontSizeBody + 8,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.amberAccent,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        FittedBox(
-                          child: Text(
-                            "¡Aparta la fecha!",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: fontSizeTitle + 1.5,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        // Calendario Marzo 2026 con corazón en el 21
-                        _buildCalendar(),
-                        const SizedBox(height: 20),
-                        Text(
-                          "CEREMONIA",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: fontSizeTitle + 2,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        // seccion de Eucaristía
                         Column(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.church_outlined,
-                                  color: Colors.amberAccent,
-                                  size: 100,
+                            // Carrusel más centrado y uniforme
+                            CarruselConDots(),
+                            const SizedBox(height: 50),
+                            FittedBox(
+                              child: Text(
+                                "Provervios 19:6",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: fontSizeTitle,
+                                  color: Colors.white,
                                 ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FittedBox(
+                              child: Text(
+                                "El corazón del hombre\ntraza su rumbo, pero sus\npasos los dirige el SEÑOR.",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dancingScript(
+                                  fontSize: fontSizeBody + 8,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.amberAccent,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            FittedBox(
+                              child: Text(
+                                "¡Aparta la fecha!",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: fontSizeTitle + 1.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            // Calendario Marzo 2026 con corazón en el 21
+                            _buildCalendar(),
+                            const SizedBox(height: 20),
+                            Text(
+                              "CEREMONIA",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: fontSizeTitle + 2,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            // seccion de Eucaristía
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    // Nombre de la iglesia
-                                    Text(
-                                      "Parroquia del Salesianos",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: fontSizeBody,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                    Icon(
+                                      Icons.church_outlined,
+                                      color: Colors.amberAccent,
+                                      size: 100,
                                     ),
-                                    const SizedBox(width: 8),
-                                    // Hora de la eucaristía
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        Icon(
-                                          Icons.access_time,
-                                          color: Colors.amberAccent,
-                                          size: fontSizeTitle,
-                                        ),
-                                        const SizedBox(width: 8),
+                                        // Nombre de la iglesia
                                         Text(
-                                          "3:00 PM",
+                                          "Parroquia del Salesianos",
                                           textAlign: TextAlign.center,
                                           style: GoogleFonts.playfairDisplay(
-                                            fontSize: fontSizeTitle,
+                                            fontSize: fontSizeBody,
+                                            fontWeight: FontWeight.bold,
                                             color: Colors.white,
                                           ),
                                         ),
+                                        const SizedBox(width: 8),
+                                        // Hora de la eucaristía
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.access_time,
+                                              color: Colors.amberAccent,
+                                              size: fontSizeTitle,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              "3:00 PM",
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.playfairDisplay(
+                                                fontSize: fontSizeTitle,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        )
                                       ],
                                     )
                                   ],
-                                )
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.location_pin,
+                                      color: Colors.amberAccent,
+                                      size: fontSizeTitle,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        "Carrera 26 #34-18, Barrio Salesianos",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: fontSizeBody,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.location_pin,
-                                  color: Colors.amberAccent,
-                                  size: fontSizeTitle,
-                                ),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    "Carrera 26 #34-18, Barrio Salesianos",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: fontSizeBody,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        // Ocultar sección de recepción para ciertos invitados
-                        if (!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "RECEPCIÓN",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: fontSizeTitle + 2,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(height: 10),
+                            const SizedBox(height: 20),
+                            // Ocultar sección de recepción para ciertos invitados
+                            if (!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
-                                        Icons.location_pin,
-                                        color: Colors.amberAccent,
-                                        size: fontSizeTitle
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Flexible(
-                                        child: Text(
-                                          "VILLA GABRIELA",
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.playfairDisplay(
-                                            fontSize: fontSizeBody,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Icon(
-                                        Icons.access_time_filled_outlined,
-                                        color: Colors.amberAccent,
-                                        size: fontSizeBody
-                                      ),
-                                      const SizedBox(width: 8),
                                       Text(
-                                        "5:30 PM",
+                                        "RECEPCIÓN",
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.playfairDisplay(
-                                          fontSize: fontSizeBody,
+                                          fontSize: fontSizeTitle + 2,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
                                       )
                                     ],
                                   ),
-                                  Text(
-                                    "Parcelación El Llanito casa 25 Nariño",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: fontSizeBody,
-                                      color: Colors.white,
-                                    ),
+                                  const SizedBox(height: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.location_pin,
+                                            color: Colors.amberAccent,
+                                            size: fontSizeTitle
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Flexible(
+                                            child: Text(
+                                              "VILLA GABRIELA",
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.playfairDisplay(
+                                                fontSize: fontSizeBody,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Icon(
+                                            Icons.access_time_filled_outlined,
+                                            color: Colors.amberAccent,
+                                            size: fontSizeBody
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "5:30 PM",
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.playfairDisplay(
+                                              fontSize: fontSizeBody,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      Text(
+                                        "Parcelación El Llanito casa 25 Nariño",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: fontSizeBody,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    ],
                                   )
                                 ],
+                              ),
+                            const SizedBox(height: 12),
+                            // Mapa embebido (solo Web) - Ocultar para ciertos invitados
+                            if (kIsWeb && 
+                            !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
+                                )
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
+                                  height: 320,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.white24),
+                                  ),
+                                  child: const HtmlElementView(viewType: 'gmap-iframe'),
+                                ),
                               )
-                            ],
-                          ),
-                        const SizedBox(height: 12),
-                        // Mapa embebido (solo Web) - Ocultar para ciertos invitados
-                        if (kIsWeb && 
-                        !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
+                            else if (!kIsWeb &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
                             )
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
+                            Container(
                               width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
-                              height: 320,
+                              height: 200,
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: Colors.white24),
                               ),
-                              child: const HtmlElementView(viewType: 'gmap-iframe'),
+                              child: Text(
+                                'El mapa embebido está disponible en la versión Web.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.roboto(
+                                  color: Colors.white,
+                                  fontSize: fontSizeBody,
+                                ),
+                              ),
                             ),
-                          )
-                        else if (!kIsWeb &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false)
-                        )
-                        Container(
-                          width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
-                          height: 200,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          child: Text(
-                            'El mapa embebido está disponible en la versión Web.',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.roboto(
-                              color: Colors.white,
-                              fontSize: fontSizeBody,
+                            const SizedBox(height: 15),
+                            if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                            !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
+                            ElevatedButton(
+                              onPressed: _abrirGoogleMaps,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.amber.shade400,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: const Text("Ver en Google Maps"),
                             ),
-                          ),
+                            const SizedBox(height: 30),
+                          ],
                         ),
-                        const SizedBox(height: 15),
-                        if(!(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                        !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
-                        ElevatedButton(
-                          onPressed: _abrirGoogleMaps,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber.shade400,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                          ),
-                          child: const Text("Ver en Google Maps"),
-                        ),
-                        const SizedBox(height: 30),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
               // 🔹 Sección 3
@@ -1104,212 +1131,228 @@ Widget build(BuildContext context) {
                 !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
                 !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
-                Container(
-                width: double.infinity,
-                child: Column(
-                  children: [
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "¿Tienes dudas o necesitas ayuda?\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "¡Contáctanos! Estamos aquí para acompañarte y \nresolver cualquier detalle con todo el cariño. 💌",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () => _showRecomendacionesDialog(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB08D57),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          elevation: 5,
-                        ),
-                        child: const Text(
-                          "Ver Recomendaciones",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Aviso: Lluvia de sobres
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Regalo:\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Si deseas honrarnos con un detalle, agradecemos una lluvia de sobres. 💌\n",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Center(
+                RepaintBoundary(
+                  key: _section3Key,
+                  child: _pdfSectionWrapper(
+                  size: size,
+                    child: Container(
+                      width: double.infinity,
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(height: 20),
-                          if (_soldOut || _guestPassesFromRoute == 0 && 
-                          !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
-                          !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
-                            Container(
-                              width: size.width > 600 ? 480 : size.width * 0.85,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white24),
+                          Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: size.width * 0.8,
                               ),
-                              child: Text(
-                                '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto para vivir este día inolvidable! 🥳💍',
+                              child: RichText(
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.roboto(
-                                  color: Colors.white,
-                                  fontSize: fontSizeBody,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            )
-                          else
-                          // Botón de confirmación rápida si viene desde la ruta
-                          if (_guestNameFromRoute != null && _guestPassesFromRoute != 0)
-                          Column(
-                            children: [
-                              Container(
-                                width: size.width > 600 ? 480 : size.width * 0.95,
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white24),
-                                ),
-                                child: Column(
+                                text: TextSpan(
                                   children: [
-                                    Text(
-                                      '¡Hola $_guestDisplayNameFromRoute! 👋',
-                                      textAlign: TextAlign.center,
+                                    TextSpan(
+                                      text: "¿Tienes dudas o necesitas ayuda?\n",
                                       style: GoogleFonts.playfairDisplay(
-                                        color: Colors.white,
-                                        fontSize: fontSizeTitle,
+                                        fontSize: fontSizeTitle - 0.5,
                                         fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    _guestPassesFromRoute != null && _guestPassesFromRoute! > 1 ?
-                                    Text(
-                                      'Tienes $_guestPassesFromRoute pases disponibles',
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.roboto(
+                                    TextSpan(
+                                      text: "¡Contáctanos! Estamos aquí para acompañarte y \nresolver cualquier detalle con todo el cariño. 💌",
+                                      style: GoogleFonts.nunito(
+                                        fontSize: fontSizeBody - 0.5,
                                         color: Colors.white,
-                                        fontSize: fontSizeBody,
-                                      ),
-                                    ) : 
-                                    Text(
-                                      'Tienes $_guestPassesFromRoute pase disponible',
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.roboto(
-                                        color: Colors.white,
-                                        fontSize: fontSizeBody,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    (!_alreadyConfirmed) ? ElevatedButton(
-                                      onPressed: _confirmarAsistenciaDesdeRuta,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green[900],
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 30, vertical: 15),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(25),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        "Confirmar mi asistencia 💌",
-                                        style: TextStyle(fontSize: 16, color: Colors.white),
-                                      ),
-                                    ) : Text(
-                                      "Muchas gracias por confirmar.\nNos vemos pronto 💍",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 22,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 20),
-                            ],
-                          )
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () => _showRecomendacionesDialog(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFB08D57),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                elevation: 5,
+                              ),
+                              child: const Text(
+                                "Ver Recomendaciones",
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          // Aviso: Lluvia de sobres
+                          Center(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: size.width * 0.8,
+                              ),
+                              child: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "Regalo:\n",
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: fontSizeTitle,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: "Si deseas honrarnos con un detalle, agradecemos una lluvia de sobres. 💌\n",
+                                      style: GoogleFonts.nunito(
+                                        fontSize: fontSizeBody - 0.5,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(height: 20),
+                                if (_soldOut || _guestPassesFromRoute == 0 && 
+                                !(_guestNameFromRoute?.toLowerCase().contains('carolinal') ?? false) &&
+                                !(_guestNameFromRoute?.toLowerCase().contains('cata') ?? false) &&
+                                !(_guestNameFromRoute?.toLowerCase().contains('edwin') ?? false) &&
+                                !(_guestNameFromRoute?.toLowerCase().contains('luistafur') ?? false) &&
+                                !(_guestNameFromRoute?.toLowerCase().contains('valentina') ?? false) &&
+                                !(_guestNameFromRoute?.toLowerCase().contains('sanjose') ?? false) &&
+                                !(_guestNameFromRoute?.toLowerCase().contains('promotora') ?? false) &&
+                                !(_guestNameFromRoute?.toLowerCase().contains('elsy') ?? false))
+                                  Container(
+                                    width: size.width > 600 ? 480 : size.width * 0.85,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.white24),
+                                    ),
+                                    child: Text(
+                                      '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto para vivir este día inolvidable! 🥳💍',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.roboto(
+                                        color: Colors.white,
+                                        fontSize: fontSizeBody,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                // Botón de confirmación rápida si viene desde la ruta
+                                if (_guestNameFromRoute != null && _guestPassesFromRoute != 0)
+                                Column(
+                                  children: [
+                                    Container(
+                                      width: size.width > 600 ? 480 : size.width * 0.95,
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: Colors.white24),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            '¡Hola $_guestDisplayNameFromRoute! 👋',
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.playfairDisplay(
+                                              color: Colors.white,
+                                              fontSize: fontSizeTitle,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          _guestPassesFromRoute != null && _guestPassesFromRoute! > 1 ?
+                                          Text(
+                                            'Tienes $_guestPassesFromRoute pases disponibles',
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.roboto(
+                                              color: Colors.white,
+                                              fontSize: fontSizeBody,
+                                            ),
+                                          ) : 
+                                          Text(
+                                            'Tienes $_guestPassesFromRoute pase disponible',
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.roboto(
+                                              color: Colors.white,
+                                              fontSize: fontSizeBody,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          (!_alreadyConfirmed) ? ElevatedButton(
+                                            onPressed: _confirmarAsistenciaDesdeRuta,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green[900],
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 30, vertical: 15),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(25),
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              "Confirmar mi asistencia 💌",
+                                              style: TextStyle(fontSize: 16, color: Colors.white),
+                                            ),
+                                          ) : Text(
+                                            "Muchas gracias por confirmar.\nNos vemos pronto 💍",
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.playfairDisplay(
+                                              fontSize: 22,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                  ],
+                  ),
                 ),
-              ),
             ],
           ),
         ) : 
         Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
+          child: Container(
+            margin: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Column(
               children: [
                 Text(
-                  "Te participo mi matrimonio",
-                  style: GoogleFonts.parisienne(color: Colors.white, fontSize: fontSizeTitle + 12),
+                  "Ricardo y Socorro",
+                  style: GoogleFonts.playfairDisplay(color: Colors.white, fontSize: fontSizeTitle + 8),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Y queremos participarte de nuestro matrimonio",
+                  style: GoogleFonts.parisienne(color: Colors.white.withOpacity(0.9), fontSize: fontSizeTitle + 4),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -1317,7 +1360,7 @@ Widget build(BuildContext context) {
                   "El corazón del hombre traza\nsu rumbo, pero sus pasos\nlos dirige el Señor.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.dancingScript(
-                    color: Colors.amberAccent,
+                    color: Colors.white,
                     fontSize: fontSizeBody + 8,
                   ),
                 ),
@@ -1667,4 +1710,33 @@ Widget build(BuildContext context) {
     );
   }
 
+  Widget _pdfSectionWrapper({
+  required Widget child,
+  required Size size,
+  }) {
+    return Stack(
+      children: [
+        // 🔹 Fondo
+        Positioned.fill(
+          child: Image.asset(
+            "lib/assets/fondo1.jpg",
+            fit: BoxFit.cover,
+          ),
+        ),
+
+        // 🔹 Overlay oscuro
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withOpacity(0.30),
+          ),
+        ),
+
+        // 🔹 Barras laterales (usa tu método actual)
+        _buildSideBars(size),
+
+        // 🔹 Contenido encima
+        child,
+      ],
+    );
+  }
 }
