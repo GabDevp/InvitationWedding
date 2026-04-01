@@ -55,10 +55,11 @@ class SheetsService {
     }
   }
 
-  static Future<Map<String, dynamic>?> decline(String name) async {
+  static Future<Map<String, dynamic>?> noConfirm(String name, {int consume = 1}) async {
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {
       'action': 'decline',
       'name': name,
+      'consume': consume.toString(),
       'token': _token,
     });
 

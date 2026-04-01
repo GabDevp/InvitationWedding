@@ -136,96 +136,79 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
           /// 💬 TEXTO SUPERIROR
           !opened && _guestDisplayName != null ?
           Positioned(
-            bottom: size.height * 0.55,
-            left: 20,
-            right: 20,
-            child: Center(
-              child: RichText(
-                textAlign: TextAlign.center,
-
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "¡Hola ${_guestDisplayName ?? _nombreInvitado}! 🎉",
-                      style: GoogleFonts.baloo2(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        decorationColor: Colors.black,
-                        decorationThickness: 2,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+            bottom: size.height * 0.51,
+            left: 22,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("¡Hola ${_guestDisplayName ?? _nombreInvitado}!",
+                  style: GoogleFonts.baloo2(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    const TextSpan(text: "\n"),
-                    TextSpan(
-                      text: "Estás invitado a celebrar los",
-                      style: GoogleFonts.baloo2(
-                        fontSize: 26,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const TextSpan(text: "\n"),
-                    TextSpan(
-                      text: "5",
-                      style: GoogleFonts.baloo2(
-                        fontSize: 35,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const TextSpan(text: "\n"),
-                    TextSpan(
-                      text: "años de Jerónimo",
-                      style: GoogleFonts.baloo2(
-                        fontSize: 26,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const TextSpan(text: "\n"),
-                    TextSpan(
-                      text: "Ven a divertirte con nosotros",
-                      style: GoogleFonts.baloo2(
-                        fontSize: 26,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  )
                 ),
-              ),
+                Text("Estás invitado a celebrar los",
+                  style: GoogleFonts.baloo2(
+                    fontSize: 26,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                Text("5 años",
+                  style: GoogleFonts.baloo2(
+                    fontSize: 35,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                Text("de Jerónimo",
+                  style: GoogleFonts.baloo2(
+                    fontSize: 26,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                Text("¡Ven a divertirte con nosotros!",
+                  style: GoogleFonts.baloo2(
+                    fontSize: 26,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ):
           const SizedBox.shrink(),
@@ -263,8 +246,8 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
           /// 🟡 SELLO DORADO
           if (!opened)
           Positioned(
-            top: size.height * 0.48, // Mover más arriba
-            right: size.width * 0.30, // Mover más hacia la derecha
+            top: size.height * 0.50, // Mover más arriba
+            right: size.width * 0.35, // Mover más hacia la derecha
             child: GestureDetector(
               onTap: _toggleEnvelope,
               child: AnimatedBuilder(

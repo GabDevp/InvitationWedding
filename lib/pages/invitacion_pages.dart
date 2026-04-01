@@ -157,13 +157,6 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
       });
     });
   }
-  
-  void _abrirGoogleMaps() async {
-    const url = "https://www.google.com/maps?q=4.08949613571167,-76.23393249511719&z=17&hl=en";
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    }
-  }
 
   void _enviarWhatsApp(String nombre, String acompanante) async {
     if (nombre.isEmpty) {
@@ -198,7 +191,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     if (confirmar != true) return;
 
     final url =
-        "https://wa.me/573173668908?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
+        "https://wa.me/573188618159?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -208,12 +201,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   void _confirmarAsistenciaDesdeRuta() async {
     if (_guestDisplayNameFromRoute == null) return;
     
-    // Verificar si está dentro del plazo de 3 días
-    final now = DateTime.now();
-    final deadline = DateTime(2026, 3, 18); // 3 días antes del evento
-    final daysRemaining = deadline.difference(now).inDays;
-    
-    // Mostrar diálogo de confirmación con mensaje de 3 días
+    // Mostrar diálogo de confirmación
     final bool? confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -227,29 +215,6 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                 ? Text('Pases disponibles: $_guestPassesFromRoute') 
                 : Text('Pase disponible: $_guestPassesFromRoute'),
             SizedBox(height: 10),
-            if (daysRemaining < 0)
-              Text(
-                'El plazo para confirmar ha finalizado',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            else
-              Text(
-                daysRemaining > 0 
-                  ? 'Tienes $daysRemaining días para confirmar tu asistencia'
-                  : 'Último día para confirmar',
-                style: TextStyle(
-                  color: daysRemaining > 2 ? Colors.green : Colors.orange,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            SizedBox(height: 10),
-            if (daysRemaining < 0)
-              Text('Ya no es posible confirmar la asistencia.')
-            else
-              Text('¿Deseas confirmar tu asistencia?'),
           ],
         ),
         actions: [
@@ -257,44 +222,90 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Cerrar'),
           ),
-          (daysRemaining >= 0 && !_alreadyConfirmed) ?
-            ElevatedButton(
-              onPressed: () async {
-                // Descontar pases automáticamente
-                try {
-                  await SheetsService.confirm(_guestNameFromRoute!, consume: int.parse(_guestPassesFromRoute.toString()));
-                  Navigator.of(ctx).pop(true);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('¡Asistencia confirmada! $_guestPassesFromRoute pases descontados'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                  setState(() {
-                    _alreadyConfirmed = true;
-                  });
-                  // Enviar WhatsApp después de confirmar
-                  _enviarWhatsApp(_guestDisplayNameFromRoute!, "");
-                } catch (e) {
-                  Navigator.of(ctx).pop(false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error al confirmar: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: const Text('Confirmar'),
-            ) : Text(
-              "Muchas gracias por confirmar.\n¡Nos vemos en la fiesta! 🎉",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.baloo2(
-                fontSize: 22,
-                color: Colors.greenAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          ElevatedButton(
+            onPressed: () async {
+              // Descontar pases automáticamente
+              try {
+                await SheetsService.confirm(_guestNameFromRoute!, consume: int.parse(_guestPassesFromRoute.toString()));
+                Navigator.of(ctx).pop(true);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('¡Asistencia confirmada! ${_guestPassesFromRoute != null && _guestPassesFromRoute! > 1 ? 'pases descontados' : 'pase descontado'}'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                setState(() {
+                  _alreadyConfirmed = true;
+                });
+                // Enviar WhatsApp después de confirmar
+                _enviarWhatsApp(_guestDisplayNameFromRoute!, "");
+              } catch (e) {
+                Navigator.of(ctx).pop(false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error al confirmar: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Confirmar'),
+          )
+        ],
+      ),
+    );
+  }
+
+  // Nueva función para no confirmar asistencia
+  void _noConfirmarAsistenciaDesdeRuta() async {
+    if (_guestDisplayNameFromRoute == null) return;
+    
+    // Mostrar diálogo de confirmación
+    final bool? confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('No Confirmar Asistencia'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Invitado: $_guestDisplayNameFromRoute'),
+            Text('¿Estás seguro de que no podrás asistir a la fiesta?'),
+            SizedBox(height: 10),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                await SheetsService.noConfirm(_guestNameFromRoute!, consume: _guestPassesFromRoute!);
+                Navigator.of(ctx).pop(true);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('¡Gracias por informarnos! Te extrañaremos en la fiesta '),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                setState(() {
+                  _alreadyConfirmed = true; // Marcar como procesado
+                  _guestPassesFromRoute = 0; // Actualizar pases a 0
+                });
+              } catch (e) {
+                Navigator.of(ctx).pop(false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error al procesar: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('No Asistiré'),
+          )
         ],
       ),
     );
@@ -416,16 +427,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                         // Contenido
                         Container(
                           margin: EdgeInsets.only(top: 50, left: 20, right: 20),
-                          child: Image.asset("lib/assets/1.png", fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                          child: Image.asset("lib/assets/1.png"),
                           height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
                         ),
-                        // SizedBox(
-                        //       // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
-                        //       child: Image.asset(
-                        //         "lib/assets/1.png",
-                        //         height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
-                        //       ),
-                        //     ),
                         const SizedBox(height: 50),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -738,22 +742,42 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  (!_alreadyConfirmed) ? ElevatedButton(
-                                    onPressed: _confirmarAsistenciaDesdeRuta,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green[900],
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 30, vertical: 15),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
+                                  (!_alreadyConfirmed) ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: _confirmarAsistenciaDesdeRuta,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green[900],
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 15),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(25),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Sí, iré 🎉",
+                                          style: TextStyle(fontSize: 14, color: Colors.white),
+                                        ),
                                       ),
-                                    ),
-                                    child: const Text(
-                                      "Confirmar mi asistencia 🎉",
-                                      style: TextStyle(fontSize: 16, color: Colors.white),
-                                    ),
+                                      ElevatedButton(
+                                        onPressed: _noConfirmarAsistenciaDesdeRuta,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red[900],
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 15),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(25),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "No puedo ir 😔",
+                                          style: TextStyle(fontSize: 14, color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ) : Text(
-                                    "Muchas gracias por confirmar.\nNos vemos pronto",
+                                    "Muchas gracias por responder.\nNos vemos pronto",
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.baloo2(
                                       fontSize: 22,
