@@ -6,10 +6,10 @@ import 'dart:html' as html; // For IFrameElement (web)
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // kIsWeb
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:universal_html/html.dart' as html;
 
 import 'package:invitacion_boda/services/sheets_services.dart';
 import 'package:video_player/video_player.dart';
@@ -25,7 +25,7 @@ class InvitacionPage extends StatefulWidget {
   State<InvitacionPage> createState() => _InvitacionPageState();
 }
 class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStateMixin {
-  // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 21 de marzo de 2026
+  // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 26 de abirl de 2026
   Timer? _countdownTimer;
   int _d = 0, _h = 0, _m = 0, _s = 0;
   bool _mapRegistered = false;
@@ -35,6 +35,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   // Audio
   late final AudioPlayer _player;
   bool _isPlaying = false;
+  bool _isLoading = false;
   StreamSubscription<PlayerState>? _playerStateSub;
   StreamSubscription<html.Event>? _firstGestureSub;
 
@@ -331,6 +332,110 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     }
   }
 
+  Future<void> _tryAutoplayWeb() async {
+    // Intenta reproducir en silencio y luego hacer fade-in
+    try {
+      await _player.setVolume(0.0);
+      await _player.play(UrlSource('assets/lib/assets/audio/Blippi.mp3'));
+      // Fade-in suave a 1.0
+      await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
+    } catch (e) {
+      // Si el navegador lo bloquea, armar listener del primer gesto global
+      _armFirstGestureToStart();
+    }
+  }
+
+  void _armFirstGestureToStart() {
+    // Escuchamos el primer click en el documento para iniciar el audio sin overlay
+    _firstGestureSub?.cancel();
+    _firstGestureSub = html.document.onClick.listen((_) async {
+      try {
+        await _player.setVolume(0.0);
+        await _player.play(UrlSource('assets/lib/assets/audio/Blippi.mp3'));
+        await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1000);
+      } catch (e) {
+        debugPrint('Autoplay after first gesture error: $e');
+      } finally {
+        _firstGestureSub?.cancel();
+        _firstGestureSub = null;
+      }
+    });
+  }
+
+  Future<void> _fadeInVolume({required double target, int steps = 8, int totalDurationMs = 800}) async {
+    final double start = 0.0;
+    final double delta = (target - start) / steps;
+    final int stepDelay = (totalDurationMs / steps).round();
+    for (int i = 1; i <= steps; i++) {
+      await Future.delayed(Duration(milliseconds: stepDelay));
+      await _player.setVolume((start + delta * i).clamp(0.0, 1.0));
+    }
+  }
+
+  Future<void> _togglePlayPause() async {
+    try {
+      if (_isPlaying) {
+        await _player.pause();
+      } else {
+        // Si nunca inició por bloqueo, intenta reproducir desde el asset
+        if (kIsWeb) {
+          // En Web, iniciar reproducción explícita tras interacción del usuario
+          await _player.setVolume(1.0);
+          await _player.play(UrlSource('assets/lib/assets/audio/Blippi.mp3'));
+        } else {
+          if (_player.source == null) {
+            await _player.play(UrlSource('assets/lib/assets/audio/Blippi.mp3'));
+          } else {
+            await _player.resume();
+          }
+        }
+      }
+      // _isPlaying se actualiza por el listener onPlayerStateChanged
+    } catch (e) {
+      debugPrint('Play/Pause error: $e');
+      // Opcional: mostrar un SnackBar con el error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo reproducir/pausar el audio.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _restartMusic() async {
+    try {
+      // Detener cualquier reproducción anterior
+      await _player.stop();
+      
+      // Reiniciar desde el principio según la plataforma
+      if (kIsWeb) {
+        await _player.setVolume(0.0);
+        await _player.play(UrlSource('assets/lib/assets/audio/Blippi.mp3'));
+        // Fade-in suave
+        await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
+      } else {
+        await _player.play(UrlSource('assets/lib/assets/audio/Blippi.mp3'));
+      }
+    } catch (e) {
+      debugPrint('Restart music error: $e');
+      // Si falla el reinicio, intentar el método normal
+      if (kIsWeb) {
+        _tryAutoplayWeb();
+      } else {
+        _startAudio();
+      }
+    }
+  }
+
+  Future<void> _startAudio() async {
+    try {
+      await _player.play(UrlSource('assets/lib/assets/audio/Blippi.mp3'));
+      // _isPlaying se actualizará por el listener onPlayerStateChanged
+    } catch (e) {
+      debugPrint('Start audio error: $e');
+    }
+  }
+
   // 🔹 Ciclo de vida y build (ajustado)
   @override
   void initState() {
@@ -362,6 +467,22 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     _startCountdown();
     _player = AudioPlayer();
     _player.setReleaseMode(ReleaseMode.loop);
+    
+    // Reiniciar música cada vez que se entra a la página
+    _restartMusic();
+
+    // Escuchar cambios de estado del reproductor para reflejar _isPlaying
+    _playerStateSub = _player.onPlayerStateChanged.listen((state) {
+      final playing = state == PlayerState.playing;
+      if (mounted && playing != _isPlaying) {
+        setState(() {
+          _isPlaying = playing;
+        });
+      }
+    }, onError: (e, st) {
+      debugPrint('Audio state error: $e');
+    });
+    
     // Escuchar cambios en el nombre para mostrar/ocultar acompañante
     _nombreCtrl.addListener(_onNameChanged);
     // Estado inicial de cupos
@@ -397,11 +518,21 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     final TextEditingController acompananteCtrl = _acompananteCtrl;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        heroTag: "musicButton",
+        onPressed: _togglePlayPause,
+        backgroundColor: Color(0xFF001F54), // Azul navy
+        elevation: 5,
+        hoverElevation: 10,
+        focusElevation: 10,
+        highlightElevation: 10,
+        hoverColor: Colors.white,
+        tooltip: "Blippi - Canción Infantil",
+        child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          _buildSideBars(size),
-          // 🔹 Contenido desplazable encima
           Container(
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.40),

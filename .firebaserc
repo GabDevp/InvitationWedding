@@ -1,7 +1,6 @@
 {
   "projects": {
-    "default": "invitaciones-boda-13bdf",
-    "prod": "jeronimo-cf55e"
+    "default": "jeronimo-10074"
   },
   "targets": {},
   "etags": {}
