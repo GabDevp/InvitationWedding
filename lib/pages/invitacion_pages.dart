@@ -7,10 +7,11 @@ import 'package:flutter/foundation.dart'; // kIsWeb
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:video_player/video_player.dart';
 
 import 'package:invitacion_boda/widgets/carrusel.dart';
 import 'package:invitacion_boda/services/sheets_services.dart';
-import 'package:video_player/video_player.dart';
+import 'package:invitacion_boda/widgets/form.dart';
 
 class InvitacionPage extends StatefulWidget {
   const InvitacionPage({super.key});
@@ -374,25 +375,8 @@ Widget build(BuildContext context) {
     body: Stack(
       fit: StackFit.expand,
       children: [
-        // 🔹 Fondo único en toda la pantalla
-        if (_videoController.value.isInitialized)
-        SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: VideoPlayer(_videoController),
-            ),
-          ),
-        ),
-        // else
-        //   Image.asset(
-        //     "lib/assets/fondo1.jpg",
-        //     fit: BoxFit.cover,
-        //   ),
         Container(color: Colors.black.withOpacity(0.30)), // filtro oscuro
-        _buildSideBars(size),
+        // _buildSideBars(size),
         // 🔹 Contenido desplazable encima
         SingleChildScrollView(
           child: Column(
@@ -850,18 +834,83 @@ Widget build(BuildContext context) {
                                 ),
                               )
                             else
-                            SizedBox(
-                              width:  size.width > 600 ? 400 : size.width * 0.75,
-                              child: TextField(
-                                controller: nombreCtrl,
-                                decoration: const InputDecoration(
-                                  labelText: "Tu nombre",
-                                  filled: true,
-                                  fillColor: Colors.white70,
-                                ),
-                              ),
+                            // 🔹 Widget nuevo
+                            InvitadosForm(
+                              size: size,
+                              fontSizeBody: fontSizeBody,
+                              nombreCtrl: _nombreCtrl,
+                              acomp1Ctrl: _acompananteCtrl,
+                              acomp2Ctrl: _acompanante2Ctrl,
+                              acomp3Ctrl: _acompanante3Ctrl,
+                              passes: _passesForTypedName,
+                              soldOut: _soldOut,
+                              onNameChanged: (_) => _onNameChanged(),
+                              onConfirm: () async {
+                                final nombre = _nombreCtrl.text.trim();
+                                final acomp1 = _acompananteCtrl.text.trim();
+                                final acomp2 = _acompanante2Ctrl.text.trim();
+                                final acomp3 = _acompanante3Ctrl.text.trim();
+                                if (nombre.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Ingresa tu nombre para confirmar.'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setState(() => _isConfirming = true);
+                                try {
+                                  final guest = await SheetsService.getGuest(nombre);
+                                  if (guest == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('No encontramos tu nombre.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  final passes = int.tryParse(guest['passesRemaining']?.toString() ?? '0') ?? 0;
+                                  if (passes <= 0) {
+                                    await _refreshSoldOutFromSheets();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Ya no quedan pases disponibles.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  final companions = [acomp1, acomp2, acomp3]
+                                      .where((e) => e.isNotEmpty)
+                                      .toList();
+                                  int desired = 1 + companions.length;
+                                  if (desired > passes) {
+                                    companions.removeRange((passes - 1).clamp(0, 3), companions.length);
+                                    desired = 1 + companions.length;
+                                  }
+                                  final updated = await SheetsService.confirm(nombre, consume: desired);
+                                  if (updated == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('No se pudo confirmar.'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  final acompFinal =
+                                      companions.isNotEmpty ? _humanJoin(companions) : '';
+                                  _enviarWhatsApp(nombre, acompFinal);
+                                  if (mounted) setState(() => _soldOut = false);
+                                  await _refreshSoldOutFromSheets();
+                                } finally {
+                                  if (mounted) setState(() => _isConfirming = false);
+                                }
+                              },
                             ),
-                            // Sugerencias de nombre (typeahead desde Sheets)
+                            // 🔹 Sugerencias (SE QUEDAN)
                             if (_nameSuggestions.isNotEmpty)
                               Container(
                                 width: size.width > 600 ? 400 : size.width * 0.75,
@@ -891,150 +940,12 @@ Widget build(BuildContext context) {
                                           _nombreCtrl.selection = TextSelection.collapsed(offset: display.length);
                                           _passesForTypedName = passesRem;
                                           _nameSuggestions = [];
-                                          if ((passesRem ?? 0) < 2) _acompananteCtrl.clear();
                                         });
                                       },
                                     );
                                   },
                                 ),
                               ),
-                            const SizedBox(height: 8),
-                            if (_passesForTypedName != null)
-                            SizedBox(
-                              width: size.width > 600 ? 400 : size.width * 0.75,
-                              child: Text(
-                                _passesForTypedName! > 1 ? 'Tienes ${_passesForTypedName} pases disponibles, el tuyo y el de ${((_passesForTypedName ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.' : 'El pase es solo para ti.',
-                                style: GoogleFonts.roboto(color: Colors.white, fontSize: fontSizeBody * 0.80, fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            if (!_soldOut)
-                              ...((){
-                                final p = _passesForTypedName ?? 0;
-                                final maxCompanions = (p - 1).clamp(0, 3);
-                                final widgets = <Widget>[];
-                                if (maxCompanions >= 1) {
-                                  widgets.add(SizedBox(
-                                    width: size.width > 600 ? 400 : size.width * 0.75,
-                                    child: TextField(
-                                      controller: acompananteCtrl,
-                                      decoration: const InputDecoration(
-                                        labelText: "Acompañante 1",
-                                        filled: true,
-                                        fillColor: Colors.white70,
-                                      ),
-                                    ),
-                                  ));
-                                  widgets.add(const SizedBox(height: 8));
-                                }
-                                if (maxCompanions >= 2) {
-                                  widgets.add(SizedBox(
-                                    width: size.width > 600 ? 400 : size.width * 0.75,
-                                    child: TextField(
-                                      controller: _acompanante2Ctrl,
-                                      decoration: const InputDecoration(
-                                        labelText: "Acompañante 2",
-                                        filled: true,
-                                        fillColor: Colors.white70,
-                                      ),
-                                    ),
-                                  ));
-                                  widgets.add(const SizedBox(height: 8));
-                                }
-                                if (maxCompanions >= 3) {
-                                  widgets.add(SizedBox(
-                                    width: size.width > 600 ? 400 : size.width * 0.75,
-                                    child: TextField(
-                                      controller: _acompanante3Ctrl,
-                                      decoration: const InputDecoration(
-                                        labelText: "Acompañante 3",
-                                        filled: true,
-                                        fillColor: Colors.white70,
-                                      ),
-                                    ),
-                                  ));
-                                }
-                                return widgets;
-                              }()),
-                            const SizedBox(height: 20),
-                            if (!_soldOut)
-                            ElevatedButton(
-                              onPressed: _isConfirming ? null : () async {
-                                final nombre = nombreCtrl.text.trim();
-                                final acomp1 = acompananteCtrl.text.trim();
-                                final acomp2 = _acompanante2Ctrl.text.trim();
-                                final acomp3 = _acompanante3Ctrl.text.trim();
-                                if (nombre.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Ingresa tu nombre para confirmar.'), duration: Duration(seconds: 2), width: 200, backgroundColor: Colors.red,),
-                                  );
-                                  return;
-                                }
-                                setState(() => _isConfirming = true);
-                                try {
-                                  // Consultar invitado en Sheets
-                                  final guest = await SheetsService.getGuest(nombre);
-                                  if (guest == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('No encontramos tu nombre. Escríbelo exactamente como aparece en la invitación.'), duration: Duration(seconds: 2), width: 200, backgroundColor: Colors.red,),
-                                    );
-                                    return;
-                                  }
-
-                                  final passes = int.tryParse(guest['passesRemaining']?.toString() ?? '0') ?? 0;
-                                  if (passes <= 0) {
-                                    await _refreshSoldOutFromSheets();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Ya no quedan pases disponibles para este nombre.'), duration: Duration(seconds: 2), width: 260, backgroundColor: Colors.red,),
-                                    );
-                                    return;
-                                  }
-
-                                  // Consumir pases considerando hasta 3 acompañantes
-                                  final companionsInput = [acomp1, acomp2, acomp3]
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  int desired = 1 + companionsInput.length; // invitado + acompañantes
-                                  if (desired > passes) {
-                                    // recortar acompañantes a los cupos disponibles
-                                    final allowedCompanions = (passes - 1).clamp(0, 3);
-                                    companionsInput.removeRange(allowedCompanions, companionsInput.length);
-                                    desired = 1 + companionsInput.length;
-                                  }
-                                  final updated = await SheetsService.confirm(nombre, consume: desired);
-                                  if (updated == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('No se pudo confirmar. Intenta de nuevo.'), duration: Duration(seconds: 2), width: 240, backgroundColor: Colors.red,),
-                                    );
-                                    return;
-                                  }
-
-                                  String acompFinal = '';
-                                  if (companionsInput.isNotEmpty) {
-                                    acompFinal = _humanJoin(companionsInput);
-                                  }
-                                  _enviarWhatsApp(nombre, acompFinal);
-                                  // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
-                                  if (mounted) {
-                                    setState(() {
-                                      _soldOut = false;
-                                    });
-                                  }
-                                  await _refreshSoldOutFromSheets();
-                                } finally {
-                                  if (mounted) setState(() => _isConfirming = false);
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: const Text("Confirmar asistencia 💌"),
-                            ),
                             const SizedBox(height: 20),
                           ],
                         ),

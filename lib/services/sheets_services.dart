@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SheetsService {
-  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbwOjAVnehV9x35TKBqZYXNhyjafVRIdM4drilX5-2PwiJowNyrUufvuzktg87n6bHrYaA/exec'; // tu URL
-  static const _token = 'mibodasecreta2025'; // el mismo TOKEN del script
+  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbz2P1xT3WVws5Pp6qSuXMvK_bgbg9282OfiotS1kG_crCf9-fAO6mOoB6tg1nKioFTBRg/exec'; // tu URL
+  static const _token = 'babyshower'; // el mismo TOKEN del script
 
   static Future<List<dynamic>> search(String query) async {
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {
@@ -39,16 +39,34 @@ class SheetsService {
   }
 
   static Future<Map<String, dynamic>?> confirm(String name, {int consume = 1}) async {
-    // Usar GET para evitar preflight CORS en Flutter Web
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-      'action': 'confirm',
-      'name': name,
-      'consume': consume.toString(),
-      'token': _token,
+      "action": "confirm",
+      "name": name,
+      "consume": consume.toString(),
+      "token": _token
     });
     final res = await http.get(uri, headers: {
       'Accept': 'application/json',
     });
+    if (res.statusCode == 200) {
+      return json.decode(res.body);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> noConfirm(String name, {int consume = 1}) async {
+    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
+      'action': 'decline',
+      'name': name,
+      'consume': consume.toString(),
+      'token': _token,
+    });
+
+    final res = await http.get(uri, headers: {
+      'Accept': 'application/json',
+    });
+
     if (res.statusCode == 200) {
       return json.decode(res.body);
     } else {
