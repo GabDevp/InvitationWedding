@@ -20,6 +20,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
   late Animation<double> _arrowAnimation;
 
   bool opened = false;
+  bool _dataLoaded = false;
   String _nombreInvitado = '';
   String? _guestDisplayName;
   String? _guestName;
@@ -58,11 +59,23 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
             _guestDisplayName = guestData['display'] ?? _nombreInvitado;
             _guestPasses = int.tryParse(guestData['passesRemaining'].toString()) ?? 0;
             _guestPassesConfirmed = int.tryParse(guestData['confirmedCount'].toString()) ?? 0;
+            _dataLoaded = true;
+          });
+        } else {
+          setState(() {
+            _dataLoaded = true;
           });
         }
       } catch (e) {
         print('Error obteniendo datos del invitado: $e');
+        setState(() {
+          _dataLoaded = true;
+        });
       }
+    } else {
+      setState(() {
+        _dataLoaded = true;
+      });
     }
   }
 
@@ -244,7 +257,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen> with TickerProviderStat
           //   ),
           // ),
           /// 🟡 SELLO DORADO
-          if (!opened)
+          if (!opened && _dataLoaded)
           Positioned(
             top: size.height * 0.50, // Mover más arriba
             right: size.width * 0.35, // Mover más hacia la derecha
