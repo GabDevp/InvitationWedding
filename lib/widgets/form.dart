@@ -15,6 +15,7 @@ class InvitadosForm extends StatelessWidget {
 
   final VoidCallback onConfirm;
   final Function(String) onNameChanged;
+  final VoidCallback onAskToAttend;
 
   const InvitadosForm({
     super.key,
@@ -28,6 +29,7 @@ class InvitadosForm extends StatelessWidget {
     required this.soldOut,
     required this.onConfirm,
     required this.onNameChanged,
+    required this.onAskToAttend,
   });
 
   @override
@@ -57,14 +59,16 @@ class InvitadosForm extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        // 🔹 MENSAJE DE PASES
+        // MENSAJE DE PASES
         if (passes != null)
           SizedBox(
             width: size.width > 600 ? 400 : size.width * 0.75,
             child: Text(
-              passes! > 1
-                  ? 'Tienes $passes pases disponibles, el tuyo y el de ${((passes ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.'
-                  : 'El pase es solo para ti.',
+              passes! > 0
+                  ? passes! > 1
+                      ? 'Tienes $passes pases disponibles, el tuyo y el de ${((passes ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.'
+                      : 'El pase es solo para ti.'
+                  : 'No tienes pases asignados, pero nos encantaría que vengas.',
               style: GoogleFonts.roboto(
                 color: Colors.white,
                 fontSize: fontSizeBody * 0.80,
@@ -75,8 +79,8 @@ class InvitadosForm extends StatelessWidget {
 
         const SizedBox(height: 10),
 
-        // 🔹 ACOMPAÑANTES
-        if (!soldOut) ...[
+        // ACOMPAÑANTES - Solo mostrar si hay pases disponibles
+        if (!soldOut && (passes ?? 0) > 0) ...[
           if (maxCompanions >= 1)
             _input(size, acomp1Ctrl, "Acompañante 1"),
           if (maxCompanions >= 2)
@@ -87,8 +91,8 @@ class InvitadosForm extends StatelessWidget {
 
         const SizedBox(height: 20),
 
-        // 🔹 BOTÓN
-        if (!soldOut)
+        // BOTONES
+        if (!soldOut && (passes ?? 0) > 0)
           ElevatedButton(
             onPressed: onConfirm,
             style: ElevatedButton.styleFrom(
@@ -98,7 +102,32 @@ class InvitadosForm extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
               ),
             ),
-            child: const Text("Confirmar asistencia 💌"),
+            child: const Text("Confirmar asistencia \ud83d\udc8c"),
+          )
+        else if (!soldOut && (passes ?? 0) == 0)
+          Column(
+            children: [
+              ElevatedButton(
+                onPressed: onAskToAttend,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: const Text("¿Deseas asistir? \ud83c\udf89"),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Si deseas asistir, te haremos una pregunta sobre quiénes vendrán.',
+                style: GoogleFonts.roboto(
+                  color: Colors.white70,
+                  fontSize: fontSizeBody * 0.70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
       ],
     );

@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart'; // kIsWeb
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:video_player/video_player.dart';
 
 import 'package:invitacion_boda/widgets/carrusel.dart';
 import 'package:invitacion_boda/services/sheets_services.dart';
@@ -30,9 +29,6 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   bool _isPlaying = false;
   StreamSubscription<PlayerState>? _playerStateSub;
   StreamSubscription<html.Event>? _firstGestureSub;
-
-  // Video
-  late final VideoPlayerController _videoController;
 
   // Form controllers
   final TextEditingController _nombreCtrl = TextEditingController();
@@ -130,6 +126,202 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     } catch (_) {}
   }
 
+  Future<void> _askToAttendDialog() async {
+    final nombre = _nombreCtrl.text.trim();
+    if (nombre.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor ingresa tu nombre primero.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final bool? deseaAsistir = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text('¿Deseas asistir a la fiesta?', 
+          style: GoogleFonts.playfairDisplay(fontSize: 22)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Hola $nombre,', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            const Text('Aunque no tienes pases asignados, nos encantaría que vengas a celebrar con nosotros. Si deseas asistir, por favor indícanos quiénes vendrán.', 
+              style: TextStyle(fontSize: 14)),
+            const SizedBox(height: 16),
+            const Text('¿Te gustaría asistir?', 
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('No, gracias'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text('Sí, deseo asistir'),
+          ),
+        ],
+      ),
+    );
+
+    if (deseaAsistir == true) {
+      await _showAttendanceForm();
+    } else if (deseaAsistir == false) {
+      await _declineInvitation();
+    }
+  }
+
+  Future<void> _showAttendanceForm() async {
+    final nombre = _nombreCtrl.text.trim();
+    
+    // Limpiar campos de acompañantes
+    _acompananteCtrl.clear();
+    _acompanante2Ctrl.clear();
+    _acompanante3Ctrl.clear();
+    
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          final TextEditingController localAcomp1 = TextEditingController();
+          final TextEditingController localAcomp2 = TextEditingController();
+          final TextEditingController localAcomp3 = TextEditingController();
+          
+          return AlertDialog(
+            title: Text('¿Quiénes asistirán?', 
+              style: GoogleFonts.playfairDisplay(fontSize: 22)),
+            content: SizedBox(
+              width: 300,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Hola $nombre, por favor indícanos quiénes vendrán:', 
+                    style: const TextStyle(fontSize: 14)),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: localAcomp1,
+                    decoration: const InputDecoration(
+                      labelText: 'Acompañante 1 (opcional)',
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: localAcomp2,
+                    decoration: const InputDecoration(
+                      labelText: 'Acompañante 2 (opcional)',
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: localAcomp3,
+                    decoration: const InputDecoration(
+                      labelText: 'Acompañante 3 (opcional)',
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(null),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final companions = [
+                    localAcomp1.text.trim(),
+                    localAcomp2.text.trim(),
+                    localAcomp3.text.trim()
+                  ].where((e) => e.isNotEmpty).toList();
+                  
+                  Navigator.of(ctx).pop({
+                    'nombre': nombre,
+                    'acompanantes': companions,
+                    'total': 1 + companions.length,
+                  });
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text('Enviar solicitud'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (result != null) {
+      await _processAttendanceRequest(result);
+    }
+  }
+
+  Future<void> _processAttendanceRequest(Map<String, dynamic> data) async {
+    setState(() => _isConfirming = true);
+    
+    try {
+      final nombre = data['nombre'] as String;
+      final total = data['total'] as int;
+      
+      // Aquí podrías agregar lógica para enviar un email o notificación
+      // Por ahora, mostramos un mensaje de confirmación
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('¡Gracias $nombre! Hemos recibido tu solicitud para $total personas.'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      
+      // Limpiar formulario
+      _nombreCtrl.clear();
+      _acompananteCtrl.clear();
+      _acompanante2Ctrl.clear();
+      _acompanante3Ctrl.clear();
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al procesar solicitud: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isConfirming = false);
+    }
+  }
+
+  Future<void> _declineInvitation() async {
+    final nombre = _nombreCtrl.text.trim();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Entendido $nombre. Te extrañaremos, ¡esperamos verte pronto!'),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+    
+    // Limpiar formulario
+    _nombreCtrl.clear();
+    _acompananteCtrl.clear();
+    _acompanante2Ctrl.clear();
+    _acompanante3Ctrl.clear();
+  }
+
   void _startCountdown() {
     void calc() {
       final now = DateTime.now();
@@ -217,19 +409,7 @@ void initState() {
   _startCountdown();
   _player = AudioPlayer();
   _player.setReleaseMode(ReleaseMode.loop);
-  if (kIsWeb) {
-    _tryAutoplayWeb();
-  } else {
-    _startAudio();
-  }
-
-  _videoController = VideoPlayerController.asset('lib/assets/video/invitacion.mp4',videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),)..initialize().then((_) {
-    setState(() {});
-    _videoController.setLooping(true);
-    _videoController.setVolume(0); // sin sonido
-    _videoController.play();
-  });
-
+  
   // Escuchar cambios de estado del reproductor para reflejar _isPlaying
   _playerStateSub = _player.onPlayerStateChanged.listen((state) {
     final playing = state == PlayerState.playing;
@@ -241,6 +421,14 @@ void initState() {
   }, onError: (e, st) {
     debugPrint('Audio state error: $e');
   });
+  
+  if (kIsWeb) {
+    // Para web, solo armar el listener del primer gesto
+    _armFirstGestureToStart();
+  } else {
+    _startAudio();
+  }
+
   // Escuchar cambios en el nombre para mostrar/ocultar acompañante
   _nombreCtrl.addListener(_onNameChanged);
   // Estado inicial de cupos
@@ -259,21 +447,7 @@ void dispose() {
   _acompanante2Ctrl.dispose();
   _acompanante3Ctrl.dispose();
   _searchDebounce?.cancel();
-  _videoController.dispose();
   super.dispose();
-}
-
-Future<void> _tryAutoplayWeb() async {
-  // Intenta reproducir en silencio y luego hacer fade-in
-  try {
-    await _player.setVolume(0.0);
-    await _player.play(UrlSource('assets/lib/assets/audio/Fonseca.mp3'));
-    // Fade-in suave a 1.0
-    await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
-  } catch (e) {
-    // Si el navegador lo bloquea, armar listener del primer gesto global
-    _armFirstGestureToStart();
-  }
 }
 
 void _armFirstGestureToStart() {
@@ -281,9 +455,18 @@ void _armFirstGestureToStart() {
   _firstGestureSub?.cancel();
   _firstGestureSub = html.document.onClick.listen((_) async {
     try {
+      // Si ya está reproduciendo, no hacer nada
+      if (_isPlaying) {
+        _firstGestureSub?.cancel();
+        _firstGestureSub = null;
+        return;
+      }
+      
       await _player.setVolume(0.0);
-      await _player.play(UrlSource('assets/lib/assets/audio/Fonseca.mp3'));
+      await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazónEstarás.mp3'));
       await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1000);
+      
+      debugPrint('Audio iniciado exitosamente después del primer gesto');
     } catch (e) {
       debugPrint('Autoplay after first gesture error: $e');
     } finally {
@@ -312,10 +495,10 @@ Future<void> _togglePlayPause() async {
       if (kIsWeb) {
         // En Web, iniciar reproducción explícita tras interacción del usuario
         await _player.setVolume(1.0);
-        await _player.play(UrlSource('lib/assets/audio/Fonseca.mp3'));
+        await _player.play(UrlSource('lib/assets/audio/EnMiCorazónEstarás.mp3'));
       } else {
         if (_player.source == null) {
-          await _player.play(AssetSource('lib/assets/audio/Fonseca.mp3'));
+          await _player.play(UrlSource('lib/assets/audio/EnMiCorazónEstarás.mp3'));
         } else {
           await _player.resume();
         }
@@ -335,7 +518,7 @@ Future<void> _togglePlayPause() async {
 
 Future<void> _startAudio() async {
   try {
-    await _player.play(AssetSource('lib/assets/audio/Fonseca.mp3'));
+    await _player.play(UrlSource('lib/assets/audio/EnMiCorazónEstarás.mp3'));
     // _isPlaying se actualizará por el listener onPlayerStateChanged
   } catch (e) {
     debugPrint('Start audio error: $e');
@@ -357,9 +540,6 @@ Widget build(BuildContext context) {
   final double fontSizeTitle = size.width * 0.07; // título grande
   final double fontSizeBody = size.width * 0.045; // texto secundario
 
-  final TextEditingController nombreCtrl = _nombreCtrl;
-  final TextEditingController acompananteCtrl = _acompananteCtrl;
-
   return Scaffold(
     floatingActionButton: FloatingActionButton(
       onPressed: _togglePlayPause,
@@ -369,13 +549,20 @@ Widget build(BuildContext context) {
       focusElevation: 10,
       highlightElevation: 10,
       hoverColor: Colors.white,
-      tooltip: "Fonseca - Que Suerte Tenerte",
+      tooltip: "En Mi Corazón Estarás",
       child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
     ),
     body: Stack(
       fit: StackFit.expand,
       children: [
-        Container(color: Colors.black.withOpacity(0.30)), // filtro oscuro
+        Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("lib/assets/fondo.jpg"),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ), // filtro oscuro
         // _buildSideBars(size),
         // 🔹 Contenido desplazable encima
         SingleChildScrollView(
@@ -388,7 +575,6 @@ Widget build(BuildContext context) {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Barras laterales
                     // Contenido
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -405,7 +591,7 @@ Widget build(BuildContext context) {
                         const SizedBox(height: 15),
                         FittedBox(
                           child: Text(
-                            "Esta invitación es única,\nya que eres una de las personas\nmás importantes para nosotros.",
+                            "Este momento es especial,\ny queremos compartirlo contigo\nporque eres muy importante para nosotros.",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.parisienne(
                               fontSize: fontSizeTitle,
@@ -421,7 +607,7 @@ Widget build(BuildContext context) {
                         ),
                         FittedBox(
                           child: Text(
-                            "Por eso queremos compartir\n este momento tan especial 💍",
+                            "Por eso te invitamos a celebrar\n la llegada de nuestro bebé \ud83d\udc76",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.parisienne(
                               fontSize: fontSizeTitle,
@@ -845,6 +1031,7 @@ Widget build(BuildContext context) {
                               passes: _passesForTypedName,
                               soldOut: _soldOut,
                               onNameChanged: (_) => _onNameChanged(),
+                              onAskToAttend: () async => _askToAttendDialog(),
                               onConfirm: () async {
                                 final nombre = _nombreCtrl.text.trim();
                                 final acomp1 = _acompananteCtrl.text.trim();

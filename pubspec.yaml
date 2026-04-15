@@ -31,6 +31,7 @@ flutter:
   uses-material-design: true
   assets:
     - lib/assets/fondo1.jpg
+    - lib/assets/fondo.jpg
     - lib/assets/sobre1.jpg
     - lib/assets/sobre2.jpg
     - lib/assets/sobre3.jpg
@@ -39,5 +40,7 @@ flutter:
     - lib/assets/hombres.png
     - lib/assets/mujeres.png
     - lib/assets/noniños.gif
+    - lib/assets/gif.gif
     - lib/assets/audio/Fonseca.mp3
+    - lib/assets/audio/EnMiCorazónEstarás.mp3
     - lib/assets/video/invitacion.mp4
