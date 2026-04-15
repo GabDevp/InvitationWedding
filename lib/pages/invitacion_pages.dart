@@ -192,7 +192,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     if (confirmar != true) return;
 
     final url =
-        "https://wa.me/573188618159?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
+        "https://wa.me/573152611883?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
