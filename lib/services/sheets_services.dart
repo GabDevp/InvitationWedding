@@ -2,91 +2,95 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SheetsService {
-  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbz2P1xT3WVws5Pp6qSuXMvK_bgbg9282OfiotS1kG_crCf9-fAO6mOoB6tg1nKioFTBRg/exec'; // tu URL
-  static const _token = 'babyshower'; // el mismo TOKEN del script
+  static const _scriptUrl =
+      'https://script.google.com/macros/s/AKfycbwkJuTj7djJEZpt91L1cIzepFve4h9hVQ979VZIZm6QyiGumFxmeIpvBRCY7Hta8Zdxqw/exec';
 
-  static Future<List<dynamic>> search(String query) async {
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
+  static const _token = 'babyshower';
+
+  // 🔥 BASE REQUEST (BIEN HECHO)
+  static Future<dynamic> _get(Map<String, String> params) async {
+    // 1. URL real
+    final original = Uri.parse(_scriptUrl).replace(queryParameters: {
+      ...params,
+      'token': _token,
+    });
+
+    // 2. pasar al proxy
+    final proxyUrl = Uri.parse(
+      'https://corsproxy.io/?${Uri.encodeComponent(original.toString())}',
+    );
+
+    final res = await http.get(proxyUrl);
+
+    if (res.statusCode != 200) {
+      throw Exception('Error HTTP: ${res.statusCode}');
+    }
+
+    return jsonDecode(res.body);
+  }
+
+  // 🔹 SEARCH
+  static Future<List<Map<String, dynamic>>> search(String query) async {
+    final data = await _get({
       'action': 'search',
       'q': query,
-      'token': _token,
     });
-    final res = await http.get(uri, headers: {
-      'Accept': 'application/json',
-    });
-    if (res.statusCode == 200) {
-      return json.decode(res.body);
-    } else {
-      throw Exception("Error buscando invitados");
+
+    if (data is List) {
+      return List<Map<String, dynamic>>.from(data);
     }
+
+    return [];
   }
 
+  // 🔹 GET GUEST
   static Future<Map<String, dynamic>?> getGuest(String name) async {
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
+    final data = await _get({
       'action': 'guest',
       'name': name,
-      'token': _token,
     });
-    final res = await http.get(uri, headers: {
-      'Accept': 'application/json',
-    });
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      return data is Map<String, dynamic> ? data : null;
-    } else {
-      return null;
-    }
+
+    if (data == null) return null;
+
+    return Map<String, dynamic>.from(data);
   }
 
-  static Future<Map<String, dynamic>?> confirm(String name, {int consume = 1}) async {
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-      "action": "confirm",
-      "name": name,
-      "consume": consume.toString(),
-      "token": _token
+  // 🔹 CONFIRM
+  static Future<Map<String, dynamic>?> confirm(String name,
+      {int consume = 1}) async {
+    final data = await _get({
+      'action': 'confirm',
+      'name': name,
+      'consume': consume.toString(),
     });
-    final res = await http.get(uri, headers: {
-      'Accept': 'application/json',
-    });
-    if (res.statusCode == 200) {
-      return json.decode(res.body);
-    } else {
-      return null;
-    }
+
+    if (data == null) return null;
+
+    return Map<String, dynamic>.from(data);
   }
 
-  static Future<Map<String, dynamic>?> noConfirm(String name, {int consume = 1}) async {
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
+  // 🔹 DECLINE
+  static Future<Map<String, dynamic>?> noConfirm(String name,
+      {int consume = 1}) async {
+    final data = await _get({
       'action': 'decline',
       'name': name,
       'consume': consume.toString(),
-      'token': _token,
     });
 
-    final res = await http.get(uri, headers: {
-      'Accept': 'application/json',
-    });
+    if (data == null) return null;
 
-    if (res.statusCode == 200) {
-      return json.decode(res.body);
-    } else {
-      return null;
-    }
+    return Map<String, dynamic>.from(data);
   }
 
+  // 🔹 STATUS
   static Future<bool> status() async {
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
+    final data = await _get({
       'action': 'status',
-      'token': _token,
     });
-    final res = await http.get(uri, headers: {
-      'Accept': 'application/json',
-    });
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      return data["hasAnyGuestsLeft"] ?? false;
-    } else {
-      return false;
-    }
+
+    if (data == null) return false;
+
+    return data['hasAny'] == true;
   }
 }

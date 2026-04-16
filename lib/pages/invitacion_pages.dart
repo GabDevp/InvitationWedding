@@ -13,7 +13,10 @@ import 'package:invitacion_boda/services/sheets_services.dart';
 import 'package:invitacion_boda/widgets/form.dart';
 
 class InvitacionPage extends StatefulWidget {
-  const InvitacionPage({super.key});
+  final String? guestName;
+  final String? guestDisplayName;
+  final int? guestPasses;
+  const InvitacionPage({super.key, this.guestName, this.guestDisplayName, this.guestPasses});
 
   @override
   State<InvitacionPage> createState() => _InvitacionPageState();
@@ -580,26 +583,18 @@ Widget build(BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 20), 
-                        // Monograma fijo antes del texto
-                        SizedBox(
-                          // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
-                          child: Image.asset(
-                            "lib/assets/fondo1.jpg",
-                            height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
-                          ),
-                        ),
-                        const SizedBox(height: 15),
                         FittedBox(
                           child: Text(
-                            "Este momento es especial,\ny queremos compartirlo contigo\nporque eres muy importante para nosotros.",
+                            "El amor se multiplica\ny en la famililia habrá\nuna tierna sonrisa\niluminando\nnuestras vidas...",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.parisienne(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: fontSizeTitle + 20,
+                              color: Colors.brown[700],
                               shadows: const [
                                 Shadow(
                                     color: Colors.black45,
-                                    blurRadius: 4,
+                                    blurRadius: 12,
                                     offset: Offset(2, 2)),
                               ],
                             ),
@@ -607,15 +602,16 @@ Widget build(BuildContext context) {
                         ),
                         FittedBox(
                           child: Text(
-                            "Por eso te invitamos a celebrar\n la llegada de nuestro bebé \ud83d\udc76",
+                            "Con amor e ilusión\nesperamos tu llegada",
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.parisienne(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
+                            style: GoogleFonts.baloo2(
+                              fontWeight: FontWeight.bold,
+                              fontSize: fontSizeTitle + 20,
+                              color: Colors.green[900],
                               shadows: const [
                                 Shadow(
                                     color: Colors.black45,
-                                    blurRadius: 4,
+                                    blurRadius: 12,
                                     offset: Offset(2, 2)),
                               ],
                             ),
