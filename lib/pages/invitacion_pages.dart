@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field, unused_local_variable
+// ignore_for_file: unused_field, unused_local_variable, dead_code
 
 import 'dart:async';
 import 'dart:ui_web' as ui; // For platformViewRegistry (web)
@@ -192,7 +192,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     if (confirmar != true) return;
 
     final url =
-        "https://wa.me/573152611883?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
+        "https://wa.me/573152611873?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -202,57 +202,91 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   void _confirmarAsistenciaDesdeRuta() async {
     if (_guestDisplayNameFromRoute == null) return;
     
+    bool _isConfirming = false;
+    
     // Mostrar diálogo de confirmación
     final bool? confirmar = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Confirmar Asistencia'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Invitado: $_guestDisplayNameFromRoute'),
-            _guestPassesFromRoute != null && _guestPassesFromRoute! > 1 
-                ? Text('Pases disponibles: $_guestPassesFromRoute') 
-                : Text('Pase disponible: $_guestPassesFromRoute'),
-            SizedBox(height: 10),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cerrar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              // Descontar pases automáticamente
-              try {
-                await SheetsService.confirm(_guestNameFromRoute!, consume: int.parse(_guestPassesFromRoute.toString()));
-                Navigator.of(ctx).pop(true);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('¡Asistencia confirmada! ${_guestPassesFromRoute != null && _guestPassesFromRoute! > 1 ? 'pases descontados' : 'pase descontado'}'),
-                    backgroundColor: Colors.green,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: Text('Confirmar Asistencia'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Invitado: $_guestDisplayNameFromRoute'),
+                _guestPassesFromRoute != null && _guestPassesFromRoute! > 1 
+                    ? Text('Pases disponibles: $_guestPassesFromRoute') 
+                    : Text('Pase disponible: $_guestPassesFromRoute'),
+                SizedBox(height: 10),
+                if (_isConfirming) ...[
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text('Procesando confirmación...'),
+                    ],
                   ),
-                );
-                setState(() {
-                  _alreadyConfirmed = true;
-                });
-                // Enviar WhatsApp después de confirmar
-                _enviarWhatsApp(_guestDisplayNameFromRoute!, "");
-              } catch (e) {
-                Navigator.of(ctx).pop(false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Error al confirmar: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Confirmar'),
-          )
-        ],
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: _isConfirming ? null : () => Navigator.of(ctx).pop(false),
+                child: const Text('Cerrar'),
+              ),
+              ElevatedButton(
+                onPressed: _isConfirming ? null : () async {
+                  setDialogState(() => _isConfirming = true);
+                  
+                  // Descontar pases automáticamente
+                  try {
+                    await SheetsService.confirm(_guestNameFromRoute!, consume: int.parse(_guestPassesFromRoute.toString()));
+                    Navigator.of(ctx).pop(true);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('¡Asistencia confirmada! ${_guestPassesFromRoute != null && _guestPassesFromRoute! > 1 ? 'pases descontados' : 'pase descontado'}'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    setState(() {
+                      _alreadyConfirmed = true;
+                    });
+                    // Enviar WhatsApp después de confirmar
+                    _enviarWhatsApp(_guestDisplayNameFromRoute!, "");
+                  } catch (e) {
+                    setDialogState(() => _isConfirming = false);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al confirmar: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: _isConfirming 
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text('Confirmar'),
+              )
+            ],
+          );
+        },
       ),
     );
   }
