@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' as ui; // For platformViewRegistry (web)
+import 'dart:ui_web' as ui; // For platformViewRegistry (web)
 import 'dart:html' as html; // For IFrameElement (web)
 
 import 'package:flutter/material.dart';
@@ -8,7 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-import 'package:invitacion_boda/widgets/carrusel.dart';
+import 'package:invitacion_boda/widgets/countdownwidget.dart';
+import 'package:invitacion_boda/widgets/titleanimated.dart';
 import 'package:invitacion_boda/services/sheets_services.dart';
 import 'package:invitacion_boda/widgets/form.dart';
 
@@ -16,7 +17,8 @@ class InvitacionPage extends StatefulWidget {
   final String? guestName;
   final String? guestDisplayName;
   final int? guestPasses;
-  const InvitacionPage({super.key, this.guestName, this.guestDisplayName, this.guestPasses});
+  final int? guestConfirmedCount;
+  const InvitacionPage({super.key, this.guestName, this.guestDisplayName, this.guestPasses, this.guestConfirmedCount});
 
   @override
   State<InvitacionPage> createState() => _InvitacionPageState();
@@ -26,6 +28,11 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   Timer? _countdownTimer;
   int _d = 0, _h = 0, _m = 0, _s = 0;
   bool _mapRegistered = false;
+
+  bool _alreadyConfirmed = false;
+  
+  // Datos desde EnvelopePage
+  int? _guestConfirmedCountFromRoute;
   
   // Audio
   late final AudioPlayer _player;
@@ -46,6 +53,11 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   // Control de búsqueda al seleccionar una sugerencia
   String? _selectedNameDisplay;
   bool _ignoreNextNameChange = false;
+  
+  // Datos del invitado desde la ruta del envelope
+  String? _guestNameFromRoute;
+  String? _guestDisplayNameFromRoute;
+  int? _guestPassesFromRoute;
 
   void _onNameChanged() {
     // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
@@ -124,6 +136,13 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
 
   Future<void> _refreshSoldOutFromSheets() async {
     try {
+      // Si viene desde EnvelopePage con confirmedCount, usar ese valor
+      if (_guestConfirmedCountFromRoute != null) {
+        if (mounted) setState(() => _soldOut = _guestConfirmedCountFromRoute != 0);
+        return;
+      }
+      
+      // Si no, consultar el status global
       final hasAny = await SheetsService.status();
       if (mounted) setState(() => _soldOut = !hasAny);
     } catch (_) {}
@@ -328,7 +347,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   void _startCountdown() {
     void calc() {
       final now = DateTime.now();
-      final target = DateTime(2026, 7, 18);
+      final target = DateTime(2026, 5, 17);
       Duration diff = target.difference(now);
       if (diff.isNegative) diff = Duration.zero;
       final days = diff.inDays;
@@ -352,7 +371,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   
   void _abrirGoogleMaps() async {
     const url =
-        "https://www.google.com/maps?vet=12ahUKEwipyfnhh7uSAxXkmbAFHYyRBMcQ8UF6BAgoEAI..i&lei=ZrqAaan-HeSzwt0PjKOSuAw&cs=1&um=1&ie=UTF-8&fb=1&gl=co&sa=X&geocode=KY_shlMAxTmOMbBiVo-qEDCw&daddr=Narino,+Palomestizo,+Tulu%C3%A1,+Valle+del+Cauca"; // cámbialo por tu ubicación real
+        "https://www.google.com/maps/place/Sede+Comunal+Los+Guayacanes/@3.4743975,-76.4909615,18.57z/data=!4m6!3m5!1s0x8e30a71c9d0668d9:0xf26d47619bf4a3b7!8m2!3d3.4743543!4d-76.490771!16s%2Fg%2F11rg2qlld1?entry=ttu&g_ep=EgoyMDI2MDQwOC4wIKXMDSoASAFQAw%3D%3D"; // cámbialo por tu ubicación real
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -364,7 +383,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     }
     final String mensaje = acompanante.isEmpty
         ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 18/07/26"
-        : "Hola! Soy $nombre y confirmo mi asistencia con $acompanante para asistir a este evento tan importante el día 18/07/26";
+        : "Hola! Soy $nombre y confirmo mi asistencia con mis $acompanante pases para asistir a este evento tan importante el día 18/07/26";
 
     // Previsualización del mensaje antes de enviar
     final bool? confirmar = await showDialog<bool>(
@@ -398,12 +417,29 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
 @override
 void initState() {
   super.initState();
+
+  // Inicializar datos del invitado desde la ruta
+  _guestNameFromRoute = widget.guestName;
+  _guestPassesFromRoute = widget.guestPasses;
+  _guestDisplayNameFromRoute = widget.guestDisplayName;
+  _guestConfirmedCountFromRoute = widget.guestConfirmedCount;
+  
+  // Si hay nombre desde la ruta, establecerlo en el campo
+  if (_guestNameFromRoute != null) {
+    _nombreCtrl.text = _guestDisplayNameFromRoute ?? _guestNameFromRoute!;
+    _selectedNameDisplay = _guestDisplayNameFromRoute ?? _guestNameFromRoute!;
+    _passesForTypedName = _guestPassesFromRoute;
+  }
+  
   if (kIsWeb && !_mapRegistered) {
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory('gmap-iframe', (int viewId) {
       final iframe = html.IFrameElement()
-        ..src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.800881111111!2d-76.2290202!3d4.0894487!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e39c5005386ec8f%3A0xb03010aa8f5662b0!2sFinca%20Villa%20In%C3%A9s!5e0!3m2!1ses!2sco!4v1234567890123'
+        ..src = 'https://www.openstreetmap.org/export/embed.html?bbox=-76.492%2C3.472%2C-76.489%2C3.476&layer=mapnik&marker=3.4743975%2C-76.4909615'
+        ..style.width = '100%'
+        ..style.height = '100%'
         ..style.border = '0'
+        ..style.borderRadius = '12px'
         ..allowFullscreen = true;
       return iframe;
     });
@@ -436,6 +472,8 @@ void initState() {
   _nombreCtrl.addListener(_onNameChanged);
   // Estado inicial de cupos
   _refreshSoldOutFromSheets();
+  // Consulta pases disponibles
+  _checkIfConfirmed();
 }
 
 @override
@@ -507,7 +545,7 @@ Future<void> _togglePlayPause() async {
         }
       }
     }
-    // _isPlaying se actualiza por el listener onPlayerStateChanged
+    _isPlaying = true;
   } catch (e) {
     debugPrint('Play/Pause error: $e');
     // Opcional: mostrar un SnackBar con el error
@@ -522,7 +560,7 @@ Future<void> _togglePlayPause() async {
 Future<void> _startAudio() async {
   try {
     await _player.play(UrlSource('lib/assets/audio/EnMiCorazónEstarás.mp3'));
-    // _isPlaying se actualizará por el listener onPlayerStateChanged
+    _isPlaying = true;
   } catch (e) {
     debugPrint('Start audio error: $e');
   }
@@ -535,6 +573,159 @@ String _humanJoin(List<String> items) {
   final head = items.sublist(0, items.length - 1).join(', ');
   return '$head y ${items.last}';
 }
+
+  // Nueva función de confirmación con datos de la ruta
+  void _confirmarAsistenciaDesdeRuta() async {
+    if (_guestDisplayNameFromRoute == null) return;
+
+    bool _loading = false;
+    
+    // Verificar si está dentro del plazo de 14 días
+    final now = DateTime.now();
+    final deadline = DateTime(2026, 5, 3); // 14 días antes del evento (17 de mayo)
+    final daysRemaining = deadline.difference(now).inDays;
+    
+    // Mostrar diálogo de confirmación con mensaje de 3 días
+    await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: Text('Confirmar Asistencia'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Invitado: $_guestDisplayNameFromRoute'),
+                _guestPassesFromRoute != null && _guestPassesFromRoute! > 1 
+                    ? Text('Pases disponibles: $_guestPassesFromRoute') 
+                    : Text('Pase disponible: $_guestPassesFromRoute'),
+                SizedBox(height: 10),
+                if (daysRemaining < 0)
+                  Text(
+                    'El plazo para confirmar ha finalizado',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                else
+                  Text(
+                    daysRemaining > 0 
+                      ? 'Tienes $daysRemaining días para confirmar tu asistencia'
+                      : 'Último día para confirmar',
+                    style: TextStyle(
+                      color: daysRemaining > 2 ? Colors.green : Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                SizedBox(height: 10),
+                if (daysRemaining < 0)
+                  Text('Ya no es posible confirmar la asistencia.')
+                else
+                  Text('¿Deseas confirmar tu asistencia?'),
+                if (_loading) ...[
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text('Procesando confirmación...'),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: _loading ? null : () => Navigator.of(ctx).pop(false),
+                child: const Text('Cerrar'),
+              ),
+              (daysRemaining >= 0 && !_alreadyConfirmed) ?
+                ElevatedButton(
+                  onPressed: _loading ? null : () async {
+                    setDialogState(() => _loading = true);
+                    // Descontar pases automáticamente
+                    try {
+                      final respuesta = await SheetsService.confirm(_guestNameFromRoute!, consume: int.parse(_guestPassesFromRoute.toString()));
+                      Navigator.of(ctx).pop(true);
+                      await ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('¡Asistencia confirmada! $_guestPassesFromRoute pases descontados'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      setState(() {
+                        _alreadyConfirmed = true;
+                        _guestConfirmedCountFromRoute = respuesta!['confirmedCount'];
+                        // Refrescar estado de soldOut para actualizar UI
+                        _refreshSoldOutFromSheets();
+                      });
+                      // Enviar WhatsApp después de confirmar
+                      _enviarWhatsApp(_guestDisplayNameFromRoute!, _guestConfirmedCountFromRoute.toString());
+                    } catch (e) {
+                      setDialogState(() => _loading = false);
+                      Navigator.of(ctx).pop(false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error al confirmar: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                  child: _loading 
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text('Confirmar'),
+                ) : Text(
+                  "Muchas gracias por confirmar.\nNos vemos pronto",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 22,
+                    color: Colors.greenAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
+          );
+        }
+      ),
+    );
+  }
+
+  Future<void> _checkIfConfirmed() async {
+    if (_guestNameFromRoute == null) return;
+
+    try {
+      final guest = await SheetsService.getGuest(_guestNameFromRoute!);
+
+      if (guest != null) {
+        final passes = int.tryParse(guest['passesRemaining'].toString()) ?? 0;
+
+        if (mounted) {
+          setState(() {
+            _alreadyConfirmed = passes == 0;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Error verificando confirmación: $e");
+    }
+  }
 
 // 🔹 Dentro del build (ajustado)
 @override
@@ -573,7 +764,7 @@ Widget build(BuildContext context) {
             children: [
               // 🔹 Sección 1
               Container(
-                height:  size.width > 600 ? size.height * 2.1 : size.height * 1.1,
+                height:  size.width > 600 ? size.height * 2.1 : size.height * 1.0,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -589,12 +780,12 @@ Widget build(BuildContext context) {
                             textAlign: TextAlign.center,
                             style: GoogleFonts.parisienne(
                               fontWeight: FontWeight.bold,
-                              fontSize: fontSizeTitle + 20,
+                              fontSize: fontSizeTitle + 18,
                               color: Colors.brown[700],
                               shadows: const [
                                 Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 12,
+                                    color: Colors.black,
+                                    blurRadius: 8,
                                     offset: Offset(2, 2)),
                               ],
                             ),
@@ -602,7 +793,7 @@ Widget build(BuildContext context) {
                         ),
                         FittedBox(
                           child: Text(
-                            "Con amor e ilusión\nesperamos tu llegada",
+                            "Con amor e ilusión\nesperamos su llegada",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.baloo2(
                               fontWeight: FontWeight.bold,
@@ -610,8 +801,8 @@ Widget build(BuildContext context) {
                               color: Colors.green[900],
                               shadows: const [
                                 Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 12,
+                                    color: Colors.black,
+                                    blurRadius: 8,
                                     offset: Offset(2, 2)),
                               ],
                             ),
@@ -622,163 +813,11 @@ Widget build(BuildContext context) {
                   ],
                 ),
               ),
+              // 🔹 Sección 2 
               // 🔔 Cuenta regresiva (reloj HH:MM:SS)
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Etiqueta superior
-                    FittedBox(
-                      child: Text(
-                        "Faltan:",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.ropaSans(
-                          fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.06,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          shadows: const [
-                            Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Reloj en bloques: Días | Horas | Minutos | Segundos
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Días
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                '$_d:',
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Días',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: size.width > 600 ? 24 : 12),
-                        // Horas
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                '${_h.toString().padLeft(2, '0')}:',
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Horas',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: size.width > 600 ? 24 : 12),
-                        // Minutos
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                '${_m.toString().padLeft(2, '0')}:',
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Minutos',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: size.width > 600 ? 24 : 12),
-                        // Segundos
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                _s.toString().padLeft(2, '0'),
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Segundos',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    // Etiqueta inferior
-                    FittedBox(
-                      child: Text(
-                        "Para este evento tan importante",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.ropaSans(
-                          fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.055,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          shadows: const [
-                            Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 50),
-              // 🔹 Sección 2
+              // 📅 Calendario
               Container(
-                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.2,
+                height:  size.width > 600 ? size.height * 4.2 : size.height * 0.8,
                 width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
@@ -786,118 +825,74 @@ Widget build(BuildContext context) {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Carrusel más centrado y uniforme
-                            CarruselConDots(),
-                            const SizedBox(height: 50),
-                            FittedBox(
-                              child: Text(
-                                "Cantares 2:2",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FittedBox(
-                              child: Text(
-                                "Como el lirio entre \nlos espinos, así es mi amada \nentre las doncellas",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.dancingScript(
-                                  fontSize: fontSizeBody + 8,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.amberAccent,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FittedBox(
-                              child: Text(
-                                "¡Aparta la fecha!",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle + 1.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            // Calendario Julio 2026 con corazón en el 18
-                            _buildCalendar(),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.location_pin,
-                                  color: Colors.amberAccent,
-                                  size: fontSizeTitle + 5
-                                ),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    "VILLA INES",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: fontSizeTitle,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
+                        FittedBox(
+                          child: Text(
+                            "Acompañanos a mi",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.parisienne(
+                              fontWeight: FontWeight.bold,
+                              fontSize: fontSizeTitle + 20,
+                              color: Colors.brown[900],
+                              shadows: const [
+                                Shadow(
+                                    color: Colors.black,
+                                    blurRadius: 8,
+                                    offset: Offset(2, 2)),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            // Mapa embebido (solo Web)
-                            if (kIsWeb)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
-                                  height: 320,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.white24),
-                                  ),
-                                  child: const HtmlElementView(viewType: 'gmap-iframe'),
-                                ),
-                              )
-                            else
-                            Container(
-                              width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
-                              height: 200,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white24),
-                              ),
-                              child: Text(
-                                'El mapa embebido está disponible en la versión Web.',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.roboto(
-                                  color: Colors.white,
-                                  fontSize: fontSizeBody,
-                                ),
-                              ),
+                          ),
+                        ),
+                        TitleAnimated(),
+                        FittedBox(
+                          child: Text(
+                            "Shower",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.parisienne(
+                              fontWeight: FontWeight.bold,
+                              fontSize: fontSizeTitle + 40,
+                              color: Colors.brown[900],
+                              shadows: const [
+                                Shadow(
+                                    color: Colors.black,
+                                    blurRadius: 8,
+                                    offset: Offset(2, 2)),
+                              ],
                             ),
-                            const SizedBox(height: 15),
-                            ElevatedButton(
-                              onPressed: _abrirGoogleMaps,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.amber.shade400,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: const Text("Ver en Google Maps"),
+                          ),
+                        ),
+                        FittedBox(
+                          child: Text(
+                            "La dulce espera está\npor terminar",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontWeight: FontWeight.bold,
+                              fontSize: fontSizeTitle,
+                              color: Colors.green[900],
+                              shadows: const [
+                                Shadow(
+                                    color: Colors.black,
+                                    blurRadius: 8,
+                                    offset: Offset(2, 2)),
+                              ],
                             ),
-                          ],
+                          ),
+                        ),
+                        FittedBox(
+                          child: Text(
+                            "GAEL",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontWeight: FontWeight.bold,
+                              fontSize: fontSizeTitle + 40,
+                              color: Colors.brown[900],
+                              shadows: const [
+                                Shadow(
+                                    color: Colors.black,
+                                    blurRadius: 8,
+                                    offset: Offset(2, 2)),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -906,87 +901,128 @@ Widget build(BuildContext context) {
               ),
               // 🔹 Sección 3
               Container(
+                // height:  size.width > 600 ? size.height * 4.2 : size.height * 2.2,
                 width: double.infinity,
                 child: Column(
                   children: [
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "¿Tienes dudas o necesitas ayuda?\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "¡Contáctanos! Estamos aquí para acompañarte y \nresolver cualquier detalle con todo el cariño. 💌",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () => _showRecomendacionesDialog(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB08D57),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          elevation: 5,
-                        ),
-                        child: const Text(
-                          "Ver Recomendaciones",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
+                    // Reloj en bloques: Días | Horas | Minutos | Segundos
+                    CountdownWidget(d: _d, h: _h, m: _m, s: _s, size: size),
+                    // Calendario Mayo 2026 con corazón en el 17
+                    _buildCalendar(),
                     const SizedBox(height: 20),
-                    // Aviso: Lluvia de sobres
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_pin,
+                          color: Colors.green[900],
+                          size: fontSizeTitle + 20
                         ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Regalo:\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Si deseas honrarnos con un detalle, agradecemos una lluvia de sobres. 💌\n",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
+                        Flexible(
+                          child: Text(
+                            "SEDE COMUNAL LOS GUAYACANES",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 20,
+                              color: Colors.brown[900],
+                            ),
                           ),
                         ),
+                        Flexible(
+                          child: Text(
+                            "CALLE 64 A #1E-15",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 20,
+                              color: Colors.brown[900],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Mapa embebido (solo Web)
+                    if (kIsWeb)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
+                          height: 320,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: const HtmlElementView(viewType: 'gmap-iframe'),
+                        ),
+                      )
+                    else
+                    Container(
+                      width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
+                      height: 200,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white24),
                       ),
+                      child: Text(
+                        'El mapa embebido está disponible en la versión Web.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.roboto(
+                          color: Colors.white,
+                          fontSize: fontSizeBody,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    ElevatedButton(
+                      onPressed: _abrirGoogleMaps,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.brown[900],
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: const Text("Ver en Google Maps", style: TextStyle(color: Colors.white)),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FittedBox(
+                          child: Text(
+                            "REGALO:",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontWeight: FontWeight.bold,
+                              fontSize: fontSizeTitle,
+                              color: Colors.green[900],
+                              shadows: const [
+                                Shadow(
+                                    color: Colors.black,
+                                    blurRadius: 8,
+                                    offset: Offset(2, 2)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Column(
+                          children: [
+                            Icon(
+                              Icons.card_giftcard_rounded,
+                              color: Colors.brown[900],
+                              size: fontSizeTitle + 20
+                            ),
+                            Icon(
+                              Icons.mail,
+                              color: Colors.brown[900],
+                              size: fontSizeTitle + 20
+                            ),
+                          ],
+                        )
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Center(
@@ -996,6 +1032,7 @@ Widget build(BuildContext context) {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const SizedBox(height: 20),
+                            // Mostrar "cupos a tope" solo si no hay cupos globales Y no es invitado desde la ruta
                             if (_soldOut)
                               Container(
                                 width: size.width > 600 ? 480 : size.width * 0.85,
@@ -1006,10 +1043,10 @@ Widget build(BuildContext context) {
                                   border: Border.all(color: Colors.white24),
                                 ),
                                 child: Text(
-                                  '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto para vivir este día inolvidable! 🥳💍',
+                                  '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto! 🥳',
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.roboto(
-                                    color: Colors.white,
+                                    color: Colors.brown[900],
                                     fontSize: fontSizeBody,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -1026,9 +1063,17 @@ Widget build(BuildContext context) {
                               acomp3Ctrl: _acompanante3Ctrl,
                               passes: _passesForTypedName,
                               soldOut: _soldOut,
+                              alreadyConfirmed: _alreadyConfirmed,
                               onNameChanged: (_) => _onNameChanged(),
                               onAskToAttend: () async => _askToAttendDialog(),
                               onConfirm: () async {
+                                // Si viene desde EnvelopePage, usar la función especial
+                                if (_guestNameFromRoute != null) {
+                                  _confirmarAsistenciaDesdeRuta();
+                                  return;
+                                }
+                                
+                                // Lógica normal para usuarios generales
                                 final nombre = _nombreCtrl.text.trim();
                                 final acomp1 = _acompananteCtrl.text.trim();
                                 final acomp2 = _acompanante2Ctrl.text.trim();
@@ -1100,7 +1145,7 @@ Widget build(BuildContext context) {
                                 constraints: const BoxConstraints(maxHeight: 180),
                                 margin: const EdgeInsets.only(top: 6),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Colors.brown[900],
                                   borderRadius: BorderRadius.circular(8),
                                   boxShadow: const [
                                     BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
@@ -1145,214 +1190,11 @@ Widget build(BuildContext context) {
     ),
   );
 }
-
-  //🔹 Metodo para mostrar recomendaciones
-  void _showRecomendacionesDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFB08D57),
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Recomendaciones",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: MediaQuery.of(context).size.width * 0.07,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Your existing RichText widgets go here, each wrapped in a Padding
-                  _buildRecommendationItem(
-                    context,
-                    number: "1",
-                    title: "Llega a tiempo ⏰",
-                    description: "Cada momento es creado con amor y queremos que vivas\nla experiencia completa desde el inicio,\npor eso llega puntual a la hora.",
-                  ),
-                  _buildRecommendationItem(
-                    context,
-                    number: "2",
-                    title: "Disfruta, baila y comparte 💃",
-                    description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre\npor eso comparte tus recuerdos en este QR:",
-                    showQR: true,
-                  ),
-                  _buildRecommendationItem(
-                    context,
-                    number: "3",
-                    title: "Código de vestimenta 👗🤵",
-                    description: "Hombres: Camisa - Pantalon 👔\nMujeres: Vestido 👗",
-                    isDressCode: true,
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF8C6B1F),
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text("Cerrar"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildRecommendationItem(BuildContext context, {
-    required String number,
-    required String title,
-    required String description,
-    bool isDressCode = false,
-    bool showQR = false,  // New parameter for QR code
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: "$number. ",
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: MediaQuery.of(context).size.width * 0.045,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                TextSpan(
-                  text: "$title\n",
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: MediaQuery.of(context).size.width * 0.045,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                if (!isDressCode) ...[
-                  TextSpan(
-                    text: description,
-                    style: GoogleFonts.nunito(
-                      fontSize: MediaQuery.of(context).size.width * 0.035,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (isDressCode) ...[
-            Text(
-              "Los colores son de muestra pero el\nCOLOR BLANCO RESERVADO PARA LA NOVIA",
-              style: GoogleFonts.nunito(
-                fontSize: MediaQuery.of(context).size.width * 0.035,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "Hombres",
-                      style: GoogleFonts.nunito(
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      height: 160,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('lib/assets/hombres.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      "Mujeres",
-                      style: GoogleFonts.nunito(
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      height: 160,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('lib/assets/mujeres.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ] else if (showQR) ...[
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white24),
-                image: DecorationImage(
-                  image: AssetImage('lib/assets/qrphotos.jpeg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Text(
-              "Escanéame para compartir tus fotos",
-              style: GoogleFonts.nunito(
-                fontSize: MediaQuery.of(context).size.width * 0.030,
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-  // 🔹 Calendario simple: Julio 2026 con corazón en el día 18
+  // 🔹 Calendario simple: Mayo 2026 con corazón en el día 17
   Widget _buildCalendar() {
     final size = MediaQuery.of(context).size;
-    final monthStart = DateTime(2026, 7, 1);
-    final daysInMonth = DateTime(2026, 8, 0).day; // 31
+    final monthStart = DateTime(2026, 5, 1);
+    final daysInMonth = DateTime(2026, 6, 0).day; // 31
     final startWeekday = monthStart.weekday; // 1=Lun ... 7=Dom
 
     final leadingEmpty = startWeekday - 1; // celdas vacías antes del 1
@@ -1360,25 +1202,25 @@ Widget build(BuildContext context) {
     final totalCells = ((cells + 6) ~/ 7) * 7; // múltiplo de 7
 
     TextStyle headerStyle = GoogleFonts.roboto(
-      color: Colors.white,
+      color: Colors.brown[700],
       fontWeight: FontWeight.w600,
       fontSize: size.width > 600 ? 14 : 10,
       shadows: const [Shadow(color: Colors.black45, blurRadius: 2, offset: Offset(1, 1))],
     );
 
     TextStyle dayStyle = GoogleFonts.roboto(
-      color: Colors.white,
+      color: Colors.brown[700],
       fontWeight: FontWeight.w500,
       fontSize: size.width > 600 ? 16 : 12,
       shadows: const [Shadow(color: Colors.black38, blurRadius: 2, offset: Offset(1, 1))],
     );
 
     Widget dayCell(int? day) {
-      final isMarked = day == 18;
+      final isMarked = day == 17;
       return Container(
         margin: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: isMarked ? Colors.amber.withOpacity(0.2) : Colors.white.withOpacity(0.04),
+          color: isMarked ? Colors.amber.withOpacity(0.2) : Colors.green.withOpacity(0.5),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.white24),
         ),
@@ -1390,9 +1232,9 @@ Widget build(BuildContext context) {
                 // if (isMarked) const SizedBox(height: 1.5),
                 if (isMarked)
                   Center(
-                    child: const Icon(
+                    child: Icon(
                       Icons.favorite_border,
-                      color: Colors.redAccent,
+                      color: Colors.green[900],
                       size: 40,
                     ),
                   ),
@@ -1408,9 +1250,9 @@ Widget build(BuildContext context) {
         // Título del mes
         FittedBox(
           child: Text(
-            'Julio 2026 - 4:00 PM',
+            'Mayo 2026 - 3:00 PM',
             style: GoogleFonts.playfairDisplay(
-              color: Colors.white,
+              color: Colors.brown[700],
               fontSize: size.width > 600 ? 28 : 22,
               fontWeight: FontWeight.w700,
               shadows: const [Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(2, 2))],
@@ -1448,44 +1290,4 @@ Widget build(BuildContext context) {
       ],
     );
   }
-
-  // 🔹 Método para no repetir barras doradas
-  Widget _buildSideBars(Size size) {
-    return Positioned.fill(
-      child: Row(
-        children: [
-          Container(
-            width: size.width * 0.1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                Color(0xFFFFE08A), // Dorado brillante
-                Color(0xFFD4AF37), // Gold clásico
-                Color(0xFF8C6B1F), // Dorado oscuro profundo
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          const Spacer(),
-          Container(
-            width: size.width * 0.1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                Color(0xFFFFE08A), // Dorado brillante
-                Color(0xFFD4AF37), // Gold clásico
-                Color(0xFF8C6B1F), // Dorado oscuro profundo
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 }

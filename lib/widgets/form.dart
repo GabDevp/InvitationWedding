@@ -12,6 +12,7 @@ class InvitadosForm extends StatelessWidget {
 
   final int? passes;
   final bool soldOut;
+  final bool alreadyConfirmed;
 
   final VoidCallback onConfirm;
   final Function(String) onNameChanged;
@@ -27,6 +28,7 @@ class InvitadosForm extends StatelessWidget {
     required this.acomp3Ctrl,
     required this.passes,
     required this.soldOut,
+    required this.alreadyConfirmed,
     required this.onConfirm,
     required this.onNameChanged,
     required this.onAskToAttend,
@@ -35,11 +37,14 @@ class InvitadosForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final maxCompanions = ((passes ?? 0) - 1).clamp(0, 3);
+    
+    // Verificar si es el invitado especial que no debe ver botones
+    final isSpecialGuest = nombreCtrl.text.trim().toLowerCase().contains('angela y jhon');
 
     return Column(
       children: [
-        // 🔹 INPUT NOMBRE
-        if (!soldOut)
+        // INPUT NOMBRE
+        if (!soldOut && !isSpecialGuest)
           SizedBox(
             width: size.width > 600 ? 400 : size.width * 0.75,
             child: TextField(
@@ -59,26 +64,6 @@ class InvitadosForm extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        // MENSAJE DE PASES
-        if (passes != null)
-          SizedBox(
-            width: size.width > 600 ? 400 : size.width * 0.75,
-            child: Text(
-              passes! > 0
-                  ? passes! > 1
-                      ? 'Tienes $passes pases disponibles, el tuyo y el de ${((passes ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.'
-                      : 'El pase es solo para ti.'
-                  : 'No tienes pases asignados, pero nos encantaría que vengas.',
-              style: GoogleFonts.roboto(
-                color: Colors.white,
-                fontSize: fontSizeBody * 0.80,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-
-        const SizedBox(height: 10),
-
         // ACOMPAÑANTES - Solo mostrar si hay pases disponibles
         if (!soldOut && (passes ?? 0) > 0) ...[
           if (maxCompanions >= 1)
@@ -89,10 +74,68 @@ class InvitadosForm extends StatelessWidget {
             _input(size, acomp3Ctrl, "Acompañante 3"),
         ],
 
+        const SizedBox(height: 10),
+
+        // MENSAJE DE PASES
+        if (passes != null && !isSpecialGuest)
+          SizedBox(
+            width: size.width > 600 ? 400 : size.width * 0.75,
+            child: Text(
+              passes! > 0
+                  ? passes! > 1
+                      ? 'Tienes $passes pases disponibles, el tuyo y el de ${((passes ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.'
+                      : 'El pase es solo para ti.'
+                  : 'No tienes pases asignados, pero nos encantaría que vengas.',
+              style: GoogleFonts.roboto(
+                color: Colors.brown[900],
+                fontSize: fontSizeBody * 0.80,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
         const SizedBox(height: 20),
 
         // BOTONES
-        if (!soldOut && (passes ?? 0) > 0)
+        if (isSpecialGuest)
+          Container(
+            width: size.width > 600 ? 400 : size.width * 0.75,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.info,
+                  color: Colors.blue,
+                  size: 48,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Información especial",
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 22,
+                    color: Colors.brown[900],
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Tu asistencia ha sido confirmada\npor medios especiales.\n¡Nos vemos pronto!",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.roboto(
+                    color: Colors.brown[900],
+                    fontSize: fontSizeBody * 0.80,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (!soldOut && (passes ?? 0) > 0)
           ElevatedButton(
             onPressed: onConfirm,
             style: ElevatedButton.styleFrom(
@@ -102,7 +145,7 @@ class InvitadosForm extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
               ),
             ),
-            child: const Text("Confirmar asistencia \ud83d\udc8c"),
+            child: const Text("Confirmar asistencia \ud83d\udc8c", style: TextStyle(color: Colors.white),),
           )
         else if (!soldOut && (passes ?? 0) == 0)
           Column(

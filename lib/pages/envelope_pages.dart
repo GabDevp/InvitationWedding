@@ -58,22 +58,14 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
 
     try {
       final raw = await SheetsService.getGuest(_nombreInvitado);
-      print("RAW DATA: $raw");
-      print("TYPE: ${raw.runtimeType}");
-
       if (raw != null) {
         // 🔥 Conversión segura
         final guestData = Map<String, dynamic>.from(raw);
-        print("GUEST DATA: $guestData");
-        print("TYPE: ${guestData.runtimeType}");
-
         setState(() {
           _guestName = guestData['key_normalized'] ?? _nombreInvitado;
           _guestDisplayName = guestData['display'] ?? _nombreInvitado;
-          _guestPasses =
-              int.tryParse(guestData['passesRemaining'].toString()) ?? 0;
-          _guestPassesConfirmed =
-              int.tryParse(guestData['confirmedCount'].toString()) ?? 0;
+          _guestPasses = int.tryParse(guestData['passesRemaining'].toString()) ?? 0;
+          _guestPassesConfirmed = int.tryParse(guestData['confirmedCount'].toString()) ?? 0;
           _dataLoaded = true;
         });
       } else {
@@ -95,8 +87,6 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
   void _toggleEnvelope() async {
     if (opened) return;
 
-    setState(() => opened = true);
-
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
 
@@ -107,6 +97,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
           guestName: _guestName,
           guestDisplayName: _guestDisplayName,
           guestPasses: _guestPasses,
+          guestConfirmedCount: _guestPassesConfirmed,
         ),
         transitionsBuilder: (_, animation, __, child) {
           final blur = Tween<double>(begin: 25, end: 0).animate(animation);

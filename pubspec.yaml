@@ -32,13 +32,6 @@ flutter:
   assets:
     - lib/assets/fondo1.jpg
     - lib/assets/fondo.jpg
-    - lib/assets/sobre1.jpg
-    - lib/assets/sobre2.jpg
-    - lib/assets/sobre3.jpg
-    - lib/assets/sobre4.jpg
-    - lib/assets/qrphotos.jpeg
-    - lib/assets/hombres.png
-    - lib/assets/mujeres.png
     - lib/assets/noniños.gif
     - lib/assets/gif.gif
     - lib/assets/audio/Fonseca.mp3
