@@ -45,6 +45,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   final TextEditingController _acompananteCtrl = TextEditingController();
   final TextEditingController _acompanante2Ctrl = TextEditingController();
   final TextEditingController _acompanante3Ctrl = TextEditingController();
+  final TextEditingController _acompanante4Ctrl = TextEditingController();
+  final TextEditingController _acompanante5Ctrl = TextEditingController();
   int? _passesForTypedName;
   List<Map<String, dynamic>> _nameSuggestions = [];
   bool _soldOut = false;
@@ -110,11 +112,22 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
               _acompananteCtrl.clear();
               _acompanante2Ctrl.clear();
               _acompanante3Ctrl.clear();
+              _acompanante4Ctrl.clear();
+              _acompanante5Ctrl.clear();
             } else if (pp == 2) {
               _acompanante2Ctrl.clear();
               _acompanante3Ctrl.clear();
+              _acompanante4Ctrl.clear();
+              _acompanante5Ctrl.clear();
             } else if (pp == 3) {
               _acompanante3Ctrl.clear();
+              _acompanante4Ctrl.clear();
+              _acompanante5Ctrl.clear();
+            } else if (pp == 4){
+              _acompanante4Ctrl.clear();
+              _acompanante5Ctrl.clear();
+            } else if (pp == 5){
+              _acompanante5Ctrl.clear();
             }
           });
         }
@@ -126,6 +139,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
             _acompananteCtrl.clear();
             _acompanante2Ctrl.clear();
             _acompanante3Ctrl.clear();
+            _acompanante4Ctrl.clear();
+            _acompanante5Ctrl.clear();
           });
         }
       }
@@ -141,10 +156,6 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
         if (mounted) setState(() => _soldOut = _guestConfirmedCountFromRoute != 0);
         return;
       }
-      
-      // Si no, consultar el status global
-      final hasAny = await SheetsService.status();
-      if (mounted) setState(() => _soldOut = !hasAny);
     } catch (_) {}
   }
 
@@ -207,6 +218,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     _acompananteCtrl.clear();
     _acompanante2Ctrl.clear();
     _acompanante3Ctrl.clear();
+    _acompanante4Ctrl.clear();
+    _acompanante5Ctrl.clear();
     
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -216,6 +229,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
           final TextEditingController localAcomp1 = TextEditingController();
           final TextEditingController localAcomp2 = TextEditingController();
           final TextEditingController localAcomp3 = TextEditingController();
+          final TextEditingController localAcomp4 = TextEditingController();
+          final TextEditingController localAcomp5 = TextEditingController();
           
           return AlertDialog(
             title: Text('¿Quiénes asistirán?', 
@@ -254,6 +269,24 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                       fillColor: Colors.white70,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: localAcomp4,
+                    decoration: const InputDecoration(
+                      labelText: 'Acompañante 4 (opcional)',
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: localAcomp5,
+                    decoration: const InputDecoration(
+                      labelText: 'Acompañante 5 (opcional)',
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -267,7 +300,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                   final companions = [
                     localAcomp1.text.trim(),
                     localAcomp2.text.trim(),
-                    localAcomp3.text.trim()
+                    localAcomp3.text.trim(),
+                    localAcomp4.text.trim(),
+                    localAcomp5.text.trim(),
                   ].where((e) => e.isNotEmpty).toList();
                   
                   Navigator.of(ctx).pop({
@@ -308,11 +343,16 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
         ),
       );
       
+      // Enviar WhatsApp automáticamente
+      _enviarWhatsApp(nombre, total.toString());
+      
       // Limpiar formulario
       _nombreCtrl.clear();
       _acompananteCtrl.clear();
       _acompanante2Ctrl.clear();
       _acompanante3Ctrl.clear();
+      _acompanante4Ctrl.clear();
+      _acompanante5Ctrl.clear();
       
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -342,6 +382,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     _acompananteCtrl.clear();
     _acompanante2Ctrl.clear();
     _acompanante3Ctrl.clear();
+    _acompanante4Ctrl.clear();
+    _acompanante5Ctrl.clear();
   }
 
   void _startCountdown() {
@@ -382,8 +424,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
       return;
     }
     final String mensaje = acompanante.isEmpty
-        ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 18/07/26"
-        : "Hola! Soy $nombre y confirmo mi asistencia con mis $acompanante pases para asistir a este evento tan importante el día 18/07/26";
+        ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 17/05/26"
+        : "Hola! Soy $nombre y confirmo mi asistencia con mis $acompanante pases para asistir a este evento tan importante el día 17/05/26";
 
     // Previsualización del mensaje antes de enviar
     final bool? confirmar = await showDialog<bool>(
@@ -407,7 +449,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     if (confirmar != true) return;
 
     final url =
-        "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
+        "https://wa.me/573183795157?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
@@ -483,6 +525,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     _acompananteCtrl.dispose();
     _acompanante2Ctrl.dispose();
     _acompanante3Ctrl.dispose();
+    _acompanante4Ctrl.dispose();
+    _acompanante5Ctrl.dispose();
     _searchDebounce?.cancel();
     super.dispose();
   }
@@ -1067,24 +1111,24 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                               const SizedBox(height: 20),
                               // Mostrar "cupos a tope" solo si no hay cupos globales Y no es invitado desde la ruta
                               if (_soldOut)
-                                Container(
-                                  width: size.width > 600 ? 480 : size.width * 0.85,
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.white24),
+                              Container(
+                                width: size.width > 600 ? 480 : size.width * 0.85,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white24),
+                                ),
+                                child: Text(
+                                  '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto! 🥳',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.roboto(
+                                    color: Colors.brown[900],
+                                    fontSize: fontSizeBody,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  child: Text(
-                                    '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto! 🥳',
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.roboto(
-                                      color: Colors.brown[900],
-                                      fontSize: fontSizeBody,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                )
+                                ),
+                              )
                               else
                               // 🔹 Widget nuevo
                               InvitadosForm(
@@ -1094,6 +1138,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 acomp1Ctrl: _acompananteCtrl,
                                 acomp2Ctrl: _acompanante2Ctrl,
                                 acomp3Ctrl: _acompanante3Ctrl,
+                                acomp4Ctrl: _acompanante4Ctrl,
+                                acomp5Ctrl: _acompanante5Ctrl,
                                 passes: _passesForTypedName,
                                 soldOut: _soldOut,
                                 alreadyConfirmed: _alreadyConfirmed,
@@ -1111,6 +1157,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                   final acomp1 = _acompananteCtrl.text.trim();
                                   final acomp2 = _acompanante2Ctrl.text.trim();
                                   final acomp3 = _acompanante3Ctrl.text.trim();
+                                  final acomp4 = _acompanante4Ctrl.text.trim();
+                                  final acomp5 = _acompanante5Ctrl.text.trim();
+                                  
                                   if (nombre.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -1143,7 +1192,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                       );
                                       return;
                                     }
-                                    final companions = [acomp1, acomp2, acomp3]
+                                    final companions = [acomp1, acomp2, acomp3, acomp4, acomp5]
                                         .where((e) => e.isNotEmpty)
                                         .toList();
                                     int desired = 1 + companions.length;

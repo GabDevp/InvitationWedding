@@ -143,7 +143,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
               ),
             ),
           ),
-          if (!opened && _dataLoaded && _guestDisplayName != null)
+          if (!opened && _dataLoaded)
           Positioned(
             bottom: size.height * 0.52,
             left: 0,
@@ -151,7 +151,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("¡Hola ${_guestDisplayName ?? _nombreInvitado}!",
+                Text("¡Hola ${_guestDisplayName ?? 'Invitado especial'}!",
                   style: GoogleFonts.baloo2(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
@@ -210,7 +210,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
               ],
             ),
           ),
-          if (!opened && _dataLoaded && _guestDisplayName != null)
+          if (!opened && _dataLoaded)
           Positioned(
             top: size.height * 0.50,
             left: 0,

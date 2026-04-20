@@ -9,6 +9,8 @@ class InvitadosForm extends StatelessWidget {
   final TextEditingController acomp1Ctrl;
   final TextEditingController acomp2Ctrl;
   final TextEditingController acomp3Ctrl;
+  final TextEditingController acomp4Ctrl;
+  final TextEditingController acomp5Ctrl;
 
   final int? passes;
   final bool soldOut;
@@ -26,6 +28,8 @@ class InvitadosForm extends StatelessWidget {
     required this.acomp1Ctrl,
     required this.acomp2Ctrl,
     required this.acomp3Ctrl,
+    required this.acomp4Ctrl,
+    required this.acomp5Ctrl,
     required this.passes,
     required this.soldOut,
     required this.alreadyConfirmed,
@@ -44,7 +48,7 @@ class InvitadosForm extends StatelessWidget {
     return Column(
       children: [
         // INPUT NOMBRE
-        if (!soldOut && !isSpecialGuest)
+        if ((!soldOut && !isSpecialGuest))
           SizedBox(
             width: size.width > 600 ? 400 : size.width * 0.75,
             child: TextField(
@@ -72,6 +76,10 @@ class InvitadosForm extends StatelessWidget {
             _input(size, acomp2Ctrl, "Acompañante 2"),
           if (maxCompanions >= 3)
             _input(size, acomp3Ctrl, "Acompañante 3"),
+          if (maxCompanions >= 4)
+            _input(size, acomp4Ctrl, "Acompañante 4"),
+          if (maxCompanions >= 5)
+            _input(size, acomp5Ctrl, "Acompañante 5"),
         ],
 
         const SizedBox(height: 10),
@@ -82,10 +90,8 @@ class InvitadosForm extends StatelessWidget {
             width: size.width > 600 ? 400 : size.width * 0.75,
             child: Text(
               passes! > 0
-                  ? passes! > 1
-                      ? 'Tienes $passes pases disponibles, el tuyo y el de ${((passes ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.'
-                      : 'El pase es solo para ti.'
-                  : 'No tienes pases asignados, pero nos encantaría que vengas.',
+              ? 'Tienes ${passes == 5 ? (passes!) - 1 : passes} pases disponibles, el tuyo y el de ${((passes ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.'
+              : 'El pase es solo para ti.',
               style: GoogleFonts.roboto(
                 color: Colors.brown[900],
                 fontSize: fontSizeBody * 0.80,
@@ -147,7 +153,7 @@ class InvitadosForm extends StatelessWidget {
             ),
             child: const Text("Confirmar asistencia \ud83d\udc8c", style: TextStyle(color: Colors.white),),
           )
-        else if (!soldOut && (passes ?? 0) == 0)
+        else if (!soldOut && (passes == null || (passes ?? 0) == 0))
           Column(
             children: [
               ElevatedButton(
@@ -159,16 +165,7 @@ class InvitadosForm extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-                child: const Text("¿Deseas asistir? \ud83c\udf89"),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Si deseas asistir, te haremos una pregunta sobre quiénes vendrán.',
-                style: GoogleFonts.roboto(
-                  color: Colors.white70,
-                  fontSize: fontSizeBody * 0.70,
-                ),
-                textAlign: TextAlign.center,
+                child: const Text("¿Deseas asistir? \ud83c\udf89", style: TextStyle(color: Colors.white),),
               ),
             ],
           ),
