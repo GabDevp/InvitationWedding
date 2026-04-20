@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "babyshowerangeyjhon"
-  }
+    "default": "invitaciones-boda-13bdf",
+    "prod": "jeronimo-cf55e"
+  },
+  "targets": {},
+  "etags": {}
 }

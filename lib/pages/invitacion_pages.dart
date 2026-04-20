@@ -24,7 +24,7 @@ class InvitacionPage extends StatefulWidget {
   State<InvitacionPage> createState() => _InvitacionPageState();
 }
 class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStateMixin {
-    // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 13 de diciembre de 2025
+  // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 13 de diciembre de 2025
   Timer? _countdownTimer;
   int _d = 0, _h = 0, _m = 0, _s = 0;
   bool _mapRegistered = false;
@@ -449,6 +449,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     _player = AudioPlayer();
     _player.setReleaseMode(ReleaseMode.loop);
     
+      // Reiniciar música cada vez que se entra a la página
+    _restartMusic();
+
     // Escuchar cambios de estado del reproductor para reflejar _isPlaying
     _playerStateSub = _player.onPlayerStateChanged.listen((state) {
       final playing = state == PlayerState.playing;
@@ -460,13 +463,6 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     }, onError: (e, st) {
       debugPrint('Audio state error: $e');
     });
-    
-    if (kIsWeb) {
-      // Para web, solo armar el listener del primer gesto
-      _armFirstGestureToStart();
-    } else {
-      _startAudio();
-    }
 
     // Escuchar cambios en el nombre para mostrar/ocultar acompañante
     _nombreCtrl.addListener(_onNameChanged);
@@ -491,6 +487,19 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     super.dispose();
   }
 
+  Future<void> _tryAutoplayWeb() async {
+    // Intenta reproducir en silencio y luego hacer fade-in
+    try {
+      await _player.setVolume(0.0);
+      await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazonEstaras.mp3'));
+      // Fade-in suave a 1.0
+      await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
+    } catch (e) {
+      // Si el navegador lo bloquea, armar listener del primer gesto global
+      _armFirstGestureToStart();
+    }
+  }
+
   void _armFirstGestureToStart() {
     // Escuchamos el primer click en el documento para iniciar el audio sin overlay
     _firstGestureSub?.cancel();
@@ -504,7 +513,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
         }
         
         await _player.setVolume(0.0);
-        await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazónEstarás.mp3'));
+        await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazonEstaras.mp3'));
         await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1000);
         
         debugPrint('Audio iniciado exitosamente después del primer gesto');
@@ -536,16 +545,15 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
         if (kIsWeb) {
           // En Web, iniciar reproducción explícita tras interacción del usuario
           await _player.setVolume(1.0);
-          await _player.play(UrlSource('lib/assets/audio/EnMiCorazónEstarás.mp3'));
+          await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazonEstaras.mp3'));
         } else {
           if (_player.source == null) {
-            await _player.play(UrlSource('lib/assets/audio/EnMiCorazónEstarás.mp3'));
+            await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazonEstaras.mp3'));
           } else {
             await _player.resume();
           }
         }
       }
-      _isPlaying = true;
     } catch (e) {
       debugPrint('Play/Pause error: $e');
       // Opcional: mostrar un SnackBar con el error
@@ -559,10 +567,35 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
 
   Future<void> _startAudio() async {
     try {
-      await _player.play(UrlSource('lib/assets/audio/EnMiCorazónEstarás.mp3'));
+      await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazonEstaras.mp3'));
       _isPlaying = true;
     } catch (e) {
       debugPrint('Start audio error: $e');
+    }
+  }
+
+  Future<void> _restartMusic() async {
+    try {
+      // Detener cualquier reproducción anterior
+      await _player.stop();
+      
+      // Reiniciar desde el principio según la plataforma
+      if (kIsWeb) {
+        await _player.setVolume(0.0);
+        await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazonEstaras.mp3'));
+        // Fade-in suave
+        await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
+      } else {
+        await _player.play(UrlSource('assets/lib/assets/audio/EnMiCorazonEstaras.mp3'));
+      }
+    } catch (e) {
+      debugPrint('Restart music error: $e');
+      // Si falla el reinicio, intentar el método normal
+      if (kIsWeb) {
+        _tryAutoplayWeb();
+      } else {
+        _startAudio();
+      }
     }
   }
 
@@ -785,8 +818,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 shadows: const [
                                   Shadow(
                                       color: Colors.black,
-                                      blurRadius: 8,
-                                      offset: Offset(2, 2)),
+                                      blurRadius: 1,
+                                      offset: Offset(1, 1)),
                                 ],
                               ),
                             ),
@@ -802,8 +835,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 shadows: const [
                                   Shadow(
                                       color: Colors.black,
-                                      blurRadius: 8,
-                                      offset: Offset(2, 2)),
+                                      blurRadius: 1,
+                                      offset: Offset(1, 1)),
                                 ],
                               ),
                             ),
@@ -836,8 +869,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 shadows: const [
                                   Shadow(
                                       color: Colors.black,
-                                      blurRadius: 8,
-                                      offset: Offset(2, 2)),
+                                      blurRadius: 1,
+                                      offset: Offset(1, 1)),
                                 ],
                               ),
                             ),
@@ -854,8 +887,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 shadows: const [
                                   Shadow(
                                       color: Colors.black,
-                                      blurRadius: 8,
-                                      offset: Offset(2, 2)),
+                                      blurRadius: 1,
+                                      offset: Offset(1, 1)),
                                 ],
                               ),
                             ),
@@ -871,8 +904,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 shadows: const [
                                   Shadow(
                                       color: Colors.black,
-                                      blurRadius: 8,
-                                      offset: Offset(2, 2)),
+                                      blurRadius: 1,
+                                      offset: Offset(1, 1)),
                                 ],
                               ),
                             ),
@@ -888,8 +921,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 shadows: const [
                                   Shadow(
                                       color: Colors.black,
-                                      blurRadius: 8,
-                                      offset: Offset(2, 2)),
+                                      blurRadius: 1,
+                                      offset: Offset(1, 1)),
                                 ],
                               ),
                             ),
@@ -1001,7 +1034,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                 shadows: const [
                                   Shadow(
                                       color: Colors.black,
-                                      blurRadius: 8,
+                                      blurRadius: 3,
                                       offset: Offset(2, 2)),
                                 ],
                               ),
@@ -1148,7 +1181,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                     color: Colors.brown[900],
                                     borderRadius: BorderRadius.circular(8),
                                     boxShadow: const [
-                                      BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+                                      BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 2)),
                                     ],
                                   ),
                                   child: ListView.builder(

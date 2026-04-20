@@ -37,7 +37,7 @@ class CountdownWidget extends StatelessWidget {
                   color: Colors.brown[700],
                   fontWeight: FontWeight.bold,
                   shadows: const [
-                    Shadow(color: Colors.black, blurRadius: 8, offset: Offset(2, 2)),
+                    Shadow(color: Colors.black, blurRadius: 1, offset: Offset(1, 1)),
                   ],
                 ),
               ),
@@ -65,7 +65,7 @@ class CountdownWidget extends StatelessWidget {
                   color: Colors.green[900],
                   // fontWeight: FontWeight.w600,
                   shadows: const [
-                    Shadow(color: Colors.black, blurRadius: 8, offset: Offset(2, 2)),
+                    Shadow(color: Colors.black, blurRadius: 1, offset: Offset(1, 1)),
                   ],
                 ),
               ),
