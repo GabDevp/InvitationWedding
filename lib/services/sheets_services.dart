@@ -15,45 +15,11 @@ class SheetsService {
     });
 
     // 2. pasar al proxy
-    final proxyUrl = Uri.parse(
-      'https://corsproxy.io/?${Uri.encodeComponent(original.toString())}',
-    );
+    // final proxyUrl = Uri.parse(
+    //   'https://corsproxy.io/?${Uri.encodeComponent(original.toString())}',
+    // );
 
-    final res = await http.get(proxyUrl);
-
-    if (res.statusCode != 200) {
-      throw Exception('Error HTTP: ${res.statusCode}');
-    }
-
-    return jsonDecode(res.body);
-  }
-
-  // POST REQUEST para escrituras (funciona mejor con proxy)
-  static Future<dynamic> _post(Map<String, String> params) async {
-    // 1. URL base del App Script (sin parámetros)
-    final original = _scriptUrl;
-
-    // 2. pasar al proxy
-    final proxyUrl = Uri.parse(
-      'https://corsproxy.io/?${Uri.encodeComponent(original)}',
-    );
-
-    // 3. Construir el body JSON con los parámetros
-    final bodyParams = {
-      ...params,
-      'token': _token,
-    };
-
-    final res = await http.post(
-      proxyUrl,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(bodyParams),
-    );
-
-    print('POST Response status: ${res.statusCode}');
-    print('POST Response body: ${res.body}');
+    final res = await http.get(original);
 
     if (res.statusCode != 200) {
       throw Exception('Error HTTP: ${res.statusCode}');
