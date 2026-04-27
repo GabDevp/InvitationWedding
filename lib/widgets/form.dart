@@ -89,7 +89,7 @@ class InvitadosForm extends StatelessWidget {
           SizedBox(
             width: size.width > 600 ? 400 : size.width * 0.75,
             child: Text(
-              passes! > 0
+              passes! > 1
               ? 'Tienes ${passes == 5 ? (passes!) - 1 : passes} pases disponibles, el tuyo y el de ${((passes ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.'
               : 'El pase es solo para ti.',
               style: GoogleFonts.roboto(

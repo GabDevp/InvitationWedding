@@ -183,7 +183,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
           children: [
             Text('Hola $nombre,', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            const Text('Aunque no tienes pases asignados, nos encantaría que vengas a celebrar con nosotros. Si deseas asistir, por favor indícanos quiénes vendrán.', 
+            const Text('Nos encantaría que vengas a celebrar con nosotros. Si deseas asistir, por favor indícanos quiénes vendrán.', 
               style: TextStyle(fontSize: 14)),
             const SizedBox(height: 16),
             const Text('¿Te gustaría asistir?', 
