@@ -2,8 +2,12 @@ import 'dart:async';
 import 'dart:ui' as ui; // For platformViewRegistry (web)
 import 'dart:html' as html; // For IFrameElement (web)
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // kIsWeb
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -371,323 +375,506 @@ Widget build(BuildContext context) {
       tooltip: "Fonseca - Que Suerte Tenerte",
       child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white),
     ),
-    body: Stack(
-      fit: StackFit.expand,
-      children: [
-        // 🔹 Fondo único en toda la pantalla
-        if (_videoController.value.isInitialized)
-        SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: VideoPlayer(_videoController),
-            ),
-          ),
+    body: Container(
+      // 🔹 Fondo único en toda la pantalla
+      // if (_videoController.value.isInitialized)
+      // SizedBox.expand(
+      //   child: FittedBox(
+      //     fit: BoxFit.cover,
+      //     child: SizedBox(
+      //       width: size.width,
+      //       height: size.height,
+      //       child: VideoPlayer(_videoController),
+      //     ),
+      //   ),
+      // ),
+      // else
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("lib/assets/fondo1.jpg"),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.30), BlendMode.darken),
         ),
-        // else
-        //   Image.asset(
-        //     "lib/assets/fondo1.jpg",
-        //     fit: BoxFit.cover,
-        //   ),
-        Container(color: Colors.black.withOpacity(0.30)), // filtro oscuro
-        _buildSideBars(size),
-        // 🔹 Contenido desplazable encima
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              // 🔹 Sección 1
-              Container(
-                height:  size.width > 600 ? size.height * 2.1 : size.height * 1.1,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Barras laterales
-                    // Contenido
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 20), 
-                        // Monograma fijo antes del texto
-                        SizedBox(
-                          // height: size.width > 600 ? size.height * 0.18 : size.height * 0.14,
-                          child: Image.asset(
-                            "lib/assets/fondo1.jpg",
-                            height: size.width > 600 ? size.height * 0.9 : size.height * 0.7,
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        FittedBox(
-                          child: Text(
-                            "Esta invitación es única,\nya que eres una de las personas\nmás importantes para nosotros.",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.parisienne(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 4,
-                                    offset: Offset(2, 2)),
-                              ],
-                            ),
-                          ),
-                        ),
-                        FittedBox(
-                          child: Text(
-                            "Por eso queremos compartir\n este momento tan especial 💍",
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.parisienne(
-                              fontSize: fontSizeTitle,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    color: Colors.black45,
-                                    blurRadius: 4,
-                                    offset: Offset(2, 2)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // 🔔 Cuenta regresiva (reloj HH:MM:SS)
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Etiqueta superior
-                    FittedBox(
-                      child: Text(
-                        "Faltan:",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.ropaSans(
-                          fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.06,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          shadows: const [
-                            Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
-                          ],
-                        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 80,),
+            // 🔹 Sección 1 con su propio borde floral
+            Stack(
+              children: [
+                Container(
+                  height: size.height * 0.8,
+                  child: Center(
+                    child: Container(
+                      height:  size.width > 600 ? size.height * 2.1 : size.height * 0.3,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                    // Reloj en bloques: Días | Horas | Minutos | Segundos
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Días
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                '$_d:',
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Días',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: size.width > 600 ? 24 : 12),
-                        // Horas
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                '${_h.toString().padLeft(2, '0')}:',
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Horas',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: size.width > 600 ? 24 : 12),
-                        // Minutos
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                '${_m.toString().padLeft(2, '0')}:',
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Minutos',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: size.width > 600 ? 24 : 12),
-                        // Segundos
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FittedBox(
-                              child: Text(
-                                _s.toString().padLeft(2, '0'),
-                                style: GoogleFonts.robotoMono(
-                                  fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Segundos',
-                              style: GoogleFonts.roboto(
-                                fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.045,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    // Etiqueta inferior
-                    FittedBox(
-                      child: Text(
-                        "Para este evento tan importante",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.ropaSans(
-                          fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.055,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          shadows: const [
-                            Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 50),
-              // 🔹 Sección 2
-              Container(
-                height:  size.width > 600 ? size.height * 4.2 : size.height * 2.2,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Carrusel más centrado y uniforme
-                            CarruselConDots(),
-                            const SizedBox(height: 50),
-                            FittedBox(
-                              child: Text(
-                                "Cantares 2:2",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FittedBox(
-                              child: Text(
-                                "Como el lirio entre \nlos espinos, así es mi amada \nentre las doncellas",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.dancingScript(
-                                  fontSize: fontSizeBody + 8,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.amberAccent,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            FittedBox(
-                              child: Text(
-                                "¡Aparta la fecha!",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle + 1.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            // Calendario Julio 2026 con corazón en el 18
-                            _buildCalendar(),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 50),
+                          // 🔔 Cuenta regresiva (reloj HH:MM:SS)
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  Icons.location_pin,
-                                  color: Colors.amberAccent,
-                                  size: fontSizeTitle + 5
-                                ),
-                                const SizedBox(width: 8),
-                                Flexible(
+                                // Etiqueta superior
+                                FittedBox(
                                   child: Text(
-                                    "VILLA INES",
+                                    "Faltan:",
                                     textAlign: TextAlign.center,
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: fontSizeTitle,
-                                      color: Colors.white,
+                                    style: GoogleFonts.ropaSans(
+                                      fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.06,
+                                      color: const Color(0xFFB08D57),
+                                      fontWeight: FontWeight.w600,
+                                      shadows: const [
+                                        Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // Reloj en bloques: Días | Horas | Minutos | Segundos
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Días
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        FittedBox(
+                                          child: Text(
+                                            '$_d|',
+                                            style: GoogleFonts.robotoMono(
+                                              fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.10,
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              shadows: const [
+                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Días',
+                                          style: GoogleFonts.roboto(
+                                            fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.04,
+                                            color: const Color(0xFFB08D57),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(width: size.width > 600 ? 24 : 10),
+                                    // Horas
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        FittedBox(
+                                          child: Text(
+                                            '${_h.toString().padLeft(2, '0')}|',
+                                            style: GoogleFonts.robotoMono(
+                                              fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.10,
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              shadows: const [
+                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Horas',
+                                          style: GoogleFonts.roboto(
+                                            fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.04,
+                                            color: const Color(0xFFB08D57),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(width: size.width > 600 ? 24 : 10),
+                                    // Minutos
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        FittedBox(
+                                          child: Text(
+                                            '${_m.toString().padLeft(2, '0')}|',
+                                            style: GoogleFonts.robotoMono(
+                                              fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.10,
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              shadows: const [
+                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Minutos',
+                                          style: GoogleFonts.roboto(
+                                            fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.04,
+                                            color: const Color(0xFFB08D57),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(width: size.width > 600 ? 24 : 10),
+                                    // Segundos
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        FittedBox(
+                                          child: Text(
+                                            _s.toString().padLeft(2, '0'),
+                                            style: GoogleFonts.robotoMono(
+                                              fontSize: size.width > 600 ? size.width * 0.05 : size.width * 0.10,
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              shadows: const [
+                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Segundos',
+                                          style: GoogleFonts.roboto(
+                                            fontSize: size.width > 600 ? size.width * 0.02 : size.width * 0.04,
+                                            color: const Color(0xFFB08D57),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                // Etiqueta inferior
+                                FittedBox(
+                                  child: Text(
+                                    "Para este evento tan importante",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.ropaSans(
+                                      fontSize: size.width > 600 ? size.width * 0.03 : size.width * 0.055,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      shadows: const [
+                                        Shadow(color: Colors.black54, blurRadius: 3, offset: Offset(1, 1)),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            // Mapa embebido (solo Web)
-                            if (kIsWeb)
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Borde floral para sección 1
+                Positioned(
+                  top: 130,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                // Borde floral inferior
+                Positioned(
+                  bottom: 140,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 50),
+            // 🔹 Sección 2 con su propio borde floral
+            Container(
+              height:  size.width > 600 ? size.height * 4.2 : size.height * 1.8,
+              width: double.infinity,
+              child: Center(
+                child: Column(
+                  children: [
+                    Container(
+                      height: size.height * 0.5,
+                      width: size.width * 0.8,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // PNG de anillos
+                          Container(
+                            width: size.width * 0.3,
+                            height: size.height * 0.12,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset(
+                                'lib/assets/anillos.png', // Asumiendo que tienes esta imagen
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          // Título CEREMONIA
+                          Text(
+                            "CEREMONIA",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFFB08D57),
+                              letterSpacing: 3,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // Divider dorado
+                          Container(
+                            width: size.width * 0.6,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFB08D57),
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          // Subtitulo del mes
+                          Text(
+                            "Julio",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 20,
+                              color: const Color(0xFFB08D57),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Día, hora y día de semana
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              // Hora a la izquierda
+                              Text(
+                                "4:00 PM",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 18,
+                                  color: const Color(0xFFB08D57),
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              const SizedBox(width: 30),
+                              // Día del mes centrado
+                              Text(
+                                "18",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 40,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 30),
+                              // Día de semana a la derecha
+                              Text(
+                                "Sábado",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 22,
+                                  color: const Color(0xFFB08D57),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          // Año centrado
+                          Text(
+                            "2026",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 24,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Lugar
+                          Text(
+                            "Villa Inés",
+                            style: GoogleFonts.dancingScript(
+                              fontSize: 28,
+                              color: const Color(0xFFB08D57),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 50,),
+                    Container(
+                      height: size.height * 1.0,
+                      width: size.width * 0.8,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // PNG de copas
+                              Container(
+                                width: size.width * 0.3,
+                                height: size.height * 0.12,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Image.asset(
+                                    'lib/assets/copas.png', // Asumiendo que tienes esta imagen
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                              // Título RECEPCIÓN
+                              Text(
+                                "RECEPCIÓN",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFFB08D57),
+                                  letterSpacing: 3,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              // Divider dorado
+                              Container(
+                                width: size.width,
+                                height: 2,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFB08D57),
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              // Subtitulo del mes
+                              Text(
+                                "Julio",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 20,
+                                  color: const Color(0xFFB08D57),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              // Día, hora y día de semana
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  // Día de semana a la izquierda
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Sábado",
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: 22,
+                                          color: const Color(0xFFB08D57),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      // Divider dorado debajo del texto
+                                      Container(
+                                        width: 95,
+                                        height: 2,
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(255, 132, 106, 66),
+                                          borderRadius: BorderRadius.circular(1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 20),
+                                  // Día del mes centrado
+                                  Text(
+                                    "18",
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: 40,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  // Hora a la derecha
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "5:30 PM",
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: 18,
+                                          color: const Color(0xFFB08D57),
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      // Divider dorado debajo del texto
+                                      Container(
+                                        width: 95,
+                                        height: 2,
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(255, 132, 106, 66),
+                                          borderRadius: BorderRadius.circular(1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              // Año centrado
+                              Text(
+                                "2026",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 24,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              // Lugar
+                              Text(
+                                "Villa Inés",
+                                style: GoogleFonts.dancingScript(
+                                  fontSize: 28,
+                                  color: const Color(0xFFB08D57),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
@@ -698,51 +885,102 @@ Widget build(BuildContext context) {
                                   ),
                                   child: const HtmlElementView(viewType: 'gmap-iframe'),
                                 ),
-                              )
-                            else
-                            Container(
-                              width: size.width > 600 ? size.width * 0.6 : size.width * 0.85,
-                              height: 200,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white24),
                               ),
-                              child: Text(
-                                'El mapa embebido está disponible en la versión Web.',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.roboto(
-                                  color: Colors.white,
-                                  fontSize: fontSizeBody,
+                              const SizedBox(height: 15),
+                              ElevatedButton(
+                                onPressed: _abrirGoogleMaps,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFB08D57),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(7),
+                                  ),
                                 ),
+                                child: const Text("Ver en Google Maps", style: TextStyle(color: Colors.white)),
                               ),
-                            ),
-                            const SizedBox(height: 15),
-                            ElevatedButton(
-                              onPressed: _abrirGoogleMaps,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.amber.shade400,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              child: const Text("Ver en Google Maps"),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-              // 🔹 Sección 3
-              Container(
-                width: double.infinity,
+            ),
+            // 🔹 Sección 3 con su propio borde floral
+            Stack(
+              children: [
+                Container(
+                  height:  size.height * 1.2,
+                  width: double.infinity,
+                  child: Center(
+                    child: Container(
+                      height:  size.height * 0.9,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "RETRATOS DE NUESTRO AMOR",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFFB08D57),
+                            ),
+                          ),
+                          Text(
+                            "La clave esta en disfrutar cada momento",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // Carrusel más centrado y uniforme
+                          CarruselConDots(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Borde floral superior para sección 3
+                Positioned(
+                  top: 55,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Seccion 4 
+            Container(
+              height:  size.width > 600 ? size.height * 4.2 : size.height * 1.8,
+              width: double.infinity,
+              child: Center(
                 child: Column(
                   children: [
+                    const SizedBox(height: 20),
+                    // Calendario Julio 2026 con corazón en el 18
+                    _buildCalendar(),
                     Center(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
@@ -980,7 +1218,7 @@ Widget build(BuildContext context) {
                                     );
                                     return;
                                   }
-
+                  
                                   final passes = int.tryParse(guest['passesRemaining']?.toString() ?? '0') ?? 0;
                                   if (passes <= 0) {
                                     await _refreshSoldOutFromSheets();
@@ -989,7 +1227,7 @@ Widget build(BuildContext context) {
                                     );
                                     return;
                                   }
-
+                  
                                   // Consumir pases considerando hasta 3 acompañantes
                                   final companionsInput = [acomp1, acomp2, acomp3]
                                       .where((s) => s.isNotEmpty)
@@ -1008,7 +1246,7 @@ Widget build(BuildContext context) {
                                     );
                                     return;
                                   }
-
+                  
                                   String acompFinal = '';
                                   if (companionsInput.isNotEmpty) {
                                     acompFinal = _humanJoin(companionsInput);
@@ -1044,10 +1282,10 @@ Widget build(BuildContext context) {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ]
+      ),
     ),
   );
 }
