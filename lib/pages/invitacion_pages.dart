@@ -37,6 +37,27 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
   // Video
   late final VideoPlayerController _videoController;
 
+  // Animación de aparición con scroll
+  late final ScrollController _scrollController;
+  late final AnimationController _fadeController;
+  late final Animation<double> _fadeAnimation;
+  
+  // Animación para recepción (independiente)
+  late final AnimationController _receptionFadeController;
+  late final Animation<double> _receptionFadeAnimation;
+  
+  // Animación para carrusel (deslizamiento derecha a izquierda)
+  late final AnimationController _carouselController;
+  late final Animation<Offset> _carouselSlideAnimation;
+
+  // Animación Dress Code (deslizamiento abajo a arriba)
+  late final AnimationController _dressCodeController;
+  late final Animation<Offset> _dressCodeSlideAnimation;
+
+  // Animación Regalos (deslizamiento derecha a izquierda)
+  late final AnimationController _regalosController;
+  late final Animation<Offset> _regalosSlideAnimation;
+
   // Form controllers
   final TextEditingController _nombreCtrl = TextEditingController();
   final TextEditingController _acompananteCtrl = TextEditingController();
@@ -217,6 +238,109 @@ void initState() {
     });
     _mapRegistered = true;
   }
+  // Inicializar ScrollController y animación
+  _scrollController = ScrollController();
+  _fadeController = AnimationController(
+    duration: const Duration(milliseconds: 800),
+    vsync: this,
+  );
+  _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+  );
+
+  // Inicializar animación para recepción
+  _receptionFadeController = AnimationController(
+    duration: const Duration(milliseconds: 800),
+    vsync: this,
+  );
+  _receptionFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    CurvedAnimation(parent: _receptionFadeController, curve: Curves.easeOut),
+  );
+
+  // Inicializar animación para carrusel
+  _carouselController = AnimationController(
+    duration: const Duration(milliseconds: 1200),
+    vsync: this,
+  );
+  _carouselSlideAnimation = Tween<Offset>(
+    begin: const Offset(1.0, 0.0), // Empieza desde la derecha
+    end: const Offset(0.0, 0.0),    // Termina en el centro
+  ).animate(CurvedAnimation(
+    parent: _carouselController,
+    curve: Curves.easeOutCubic,
+  ));
+
+  // Inicializar animación para DressCode
+  _dressCodeController = AnimationController(
+    duration: const Duration(milliseconds: 1200),
+    vsync: this,
+  );
+  _dressCodeSlideAnimation = Tween<Offset>(
+    begin: const Offset(0.0, 1.0), // Empieza desde abajo
+    end: const Offset(0.0, 0.0),    // Termina en el centro
+  ).animate(CurvedAnimation(
+    parent: _dressCodeController,
+    curve: Curves.easeOutCubic,
+  ));
+
+  // Inicializar animación para Regalos
+  _regalosController = AnimationController(
+    duration: const Duration(milliseconds: 1200),
+    vsync: this,
+  );
+  _regalosSlideAnimation = Tween<Offset>(
+    begin: const Offset(1.0, 0.0), // Empieza desde la derecha
+    end: const Offset(0.0, 0.0),    // Termina en el centro
+  ).animate(CurvedAnimation(
+    parent: _regalosController,
+    curve: Curves.easeOutCubic,
+  ));
+
+  // Escuchar cambios en el scroll
+  _scrollController.addListener(() {
+    final scrollPosition = _scrollController.offset;
+    final ceremonyTrigger = 300.0; // Posición para ceremonia
+    final receptionTrigger = 700.0; // Posición para recepción
+    final carouselTrigger = 1700.0; // Posición para carrusel
+    final dressCodeTrigger = 2700.0; // Posición para dress code
+    final regalosTrigger = 3700.0; // Posición para regalos
+    
+    // Controlar animación de ceremonia
+    if (scrollPosition > ceremonyTrigger && !_fadeController.isCompleted) {
+      _fadeController.forward();
+    } else if (scrollPosition <= ceremonyTrigger && _fadeController.isCompleted) {
+      _fadeController.reverse();
+    }
+    
+    // Controlar animación de recepción
+    if (scrollPosition > receptionTrigger && !_receptionFadeController.isCompleted) {
+      _receptionFadeController.forward();
+    } else if (scrollPosition <= receptionTrigger && _receptionFadeController.isCompleted) {
+      _receptionFadeController.reverse();
+    }
+    
+    // Controlar animación de carrusel
+    if (scrollPosition > carouselTrigger && !_carouselController.isCompleted) {
+      _carouselController.forward();
+    } else if (scrollPosition <= carouselTrigger && _carouselController.isCompleted) {
+      _carouselController.reverse();
+    }
+    
+    // Controlar animación de dress code
+    if (scrollPosition > dressCodeTrigger && !_dressCodeController.isCompleted) {
+      _dressCodeController.forward();
+    } else if (scrollPosition <= dressCodeTrigger && _dressCodeController.isCompleted) {
+      _dressCodeController.reverse();
+    }
+    
+    // Controlar animación de regalos
+    if (scrollPosition > regalosTrigger && !_regalosController.isCompleted) {
+      _regalosController.forward();
+    } else if (scrollPosition <= regalosTrigger && _regalosController.isCompleted) {
+      _regalosController.reverse();
+    }
+  });
+
   _startCountdown();
   _player = AudioPlayer();
   _player.setReleaseMode(ReleaseMode.loop);
@@ -263,6 +387,12 @@ void dispose() {
   _acompanante3Ctrl.dispose();
   _searchDebounce?.cancel();
   _videoController.dispose();
+  _scrollController.dispose();
+  _fadeController.dispose();
+  _receptionFadeController.dispose();
+  _carouselController.dispose();
+  _dressCodeController.dispose();
+  _regalosController.dispose();
   super.dispose();
 }
 
@@ -357,11 +487,6 @@ String _humanJoin(List<String> items) {
 @override
 Widget build(BuildContext context) {
   final size = MediaQuery.of(context).size;
-  final double fontSizeTitle = size.width * 0.07; // título grande
-  final double fontSizeBody = size.width * 0.045; // texto secundario
-
-  final TextEditingController nombreCtrl = _nombreCtrl;
-  final TextEditingController acompananteCtrl = _acompananteCtrl;
 
   return Scaffold(
     floatingActionButton: FloatingActionButton(
@@ -391,12 +516,13 @@ Widget build(BuildContext context) {
       // else
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage("lib/assets/fondo1.jpg"),
+          image: AssetImage("lib/assets/4.jpeg"),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.30), BlendMode.darken),
         ),
       ),
       child: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           children: [
             SizedBox(height: 80,),
@@ -407,7 +533,7 @@ Widget build(BuildContext context) {
                   height: size.height * 0.8,
                   child: Center(
                     child: Container(
-                      height:  size.width > 600 ? size.height * 2.1 : size.height * 0.3,
+                      height:  size.width > 600 ? size.height * 2.1 : size.height * 0.4,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
@@ -452,7 +578,7 @@ Widget build(BuildContext context) {
                                               color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                               shadows: const [
-                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                                Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(2, 2)),
                                               ],
                                             ),
                                           ),
@@ -479,7 +605,7 @@ Widget build(BuildContext context) {
                                               color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                               shadows: const [
-                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                                Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(2, 2)),
                                               ],
                                             ),
                                           ),
@@ -506,7 +632,7 @@ Widget build(BuildContext context) {
                                               color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                               shadows: const [
-                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                                Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(2, 2)),
                                               ],
                                             ),
                                           ),
@@ -533,7 +659,7 @@ Widget build(BuildContext context) {
                                               color: Colors.black,
                                               fontWeight: FontWeight.bold,
                                               shadows: const [
-                                                Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2)),
+                                                Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(2, 2)),
                                               ],
                                             ),
                                           ),
@@ -575,7 +701,7 @@ Widget build(BuildContext context) {
                 ),
                 // Borde floral para sección 1
                 Positioned(
-                  top: 130,
+                  top: 75,
                   left: 0,
                   right: 0,
                   child: Container(
@@ -593,7 +719,7 @@ Widget build(BuildContext context) {
                 ),
                 // Borde floral inferior
                 Positioned(
-                  bottom: 140,
+                  bottom: 95,
                   left: 0,
                   right: 0,
                   child: Container(
@@ -619,127 +745,134 @@ Widget build(BuildContext context) {
               child: Center(
                 child: Column(
                   children: [
-                    Container(
-                      height: size.height * 0.5,
-                      width: size.width * 0.8,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // PNG de anillos
-                          Container(
-                            width: size.width * 0.3,
-                            height: size.height * 0.12,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.asset(
-                                'lib/assets/anillos.png', // Asumiendo que tienes esta imagen
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                          // Título CEREMONIA
-                          Text(
-                            "CEREMONIA",
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFFB08D57),
-                              letterSpacing: 3,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // Divider dorado
-                          Container(
-                            width: size.width * 0.6,
-                            height: 2,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFB08D57),
-                              borderRadius: BorderRadius.circular(1),
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          // Subtitulo del mes
-                          Text(
-                            "Julio",
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: 20,
-                              color: const Color(0xFFB08D57),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          // Día, hora y día de semana
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              // Hora a la izquierda
-                              Text(
-                                "4:00 PM",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: 18,
-                                  color: const Color(0xFFB08D57),
-                                  fontWeight: FontWeight.w400,
+                    FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 1200),
+                        curve: Curves.easeInOut,
+                        height: size.height * 0.5,
+                        width: size.width * 0.8,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // PNG de anillos
+                            Container(
+                              width: size.width * 0.3,
+                              height: size.height * 0.12,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.asset(
+                                  'lib/assets/anillos.png', // Asumiendo que tienes esta imagen
+                                  fit: BoxFit.contain,
                                 ),
                               ),
-                              const SizedBox(width: 30),
-                              // Día del mes centrado
-                              Text(
-                                "18",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: 40,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 30),
-                              // Día de semana a la derecha
-                              Text(
-                                "Sábado",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: 22,
-                                  color: const Color(0xFFB08D57),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          // Año centrado
-                          Text(
-                            "2026",
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: 24,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w600,
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          // Lugar
-                          Text(
-                            "Villa Inés",
-                            style: GoogleFonts.dancingScript(
-                              fontSize: 28,
-                              color: const Color(0xFFB08D57),
-                              fontWeight: FontWeight.w600,
+                            // Título CEREMONIA
+                            Text(
+                              "CEREMONIA",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFB08D57),
+                                letterSpacing: 3,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 12),
+                            // Divider dorado
+                            Container(
+                              width: size.width * 0.6,
+                              height: 2,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFB08D57),
+                                borderRadius: BorderRadius.circular(1),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            // Subtitulo del mes
+                            Text(
+                              "Julio",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 20,
+                                color: const Color(0xFFB08D57),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            // Día, hora y día de semana
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                // Hora a la izquierda
+                                Text(
+                                  "4:00 PM",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 18,
+                                    color: const Color(0xFFB08D57),
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                const SizedBox(width: 30),
+                                // Día del mes centrado
+                                Text(
+                                  "18",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 40,
+                                    color: const Color(0xFFB08D57),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 30),
+                                // Día de semana a la derecha
+                                Text(
+                                  "Sábado",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 22,
+                                    color: const Color(0xFFB08D57),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            // Año centrado
+                            Text(
+                              "2026",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 24,
+                                color: const Color(0xFFB08D57),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            // Lugar
+                            Text(
+                              "Villa Inés",
+                              style: GoogleFonts.dancingScript(
+                                fontSize: 28,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     SizedBox(height: 50,),
-                    Container(
-                      height: size.height * 1.0,
-                      width: size.width * 0.8,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
+                    FadeTransition(
+                      opacity: _receptionFadeAnimation,
+                      child: Container(
+                        height: size.height * 1.0,
+                        width: size.width * 0.8,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Column(
@@ -823,7 +956,7 @@ Widget build(BuildContext context) {
                                     "18",
                                     style: GoogleFonts.playfairDisplay(
                                       fontSize: 40,
-                                      color: Colors.black,
+                                      color: const Color(0xFFB08D57),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -860,7 +993,7 @@ Widget build(BuildContext context) {
                                 "2026",
                                 style: GoogleFonts.playfairDisplay(
                                   fontSize: 24,
-                                  color: Colors.black87,
+                                  color: const Color(0xFFB08D57),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -870,7 +1003,7 @@ Widget build(BuildContext context) {
                                 "Villa Inés",
                                 style: GoogleFonts.dancingScript(
                                   fontSize: 28,
-                                  color: const Color(0xFFB08D57),
+                                  color: Colors.black87,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -904,24 +1037,27 @@ Widget build(BuildContext context) {
                         ],
                       ),
                     ),
+                        ),
                   ],
                 ),
               ),
             ),
-            // 🔹 Sección 3 con su propio borde floral
+            // 🔹 Sección 3 con su propio borde floral para la galeria de fotos
             Stack(
               children: [
                 Container(
                   height:  size.height * 1.2,
                   width: double.infinity,
                   child: Center(
-                    child: Container(
-                      height:  size.height * 0.9,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                      ),
-                      child: Column(
+                    child: SlideTransition(
+                      position: _carouselSlideAnimation,
+                      child: Container(
+                        height:  size.height * 0.9,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -929,7 +1065,7 @@ Widget build(BuildContext context) {
                             "RETRATOS DE NUESTRO AMOR",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.playfairDisplay(
-                              fontSize: 24,
+                              fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFFB08D57),
                             ),
@@ -938,7 +1074,7 @@ Widget build(BuildContext context) {
                             "La clave esta en disfrutar cada momento",
                             textAlign: TextAlign.center,
                             style: GoogleFonts.playfairDisplay(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.grey[600],
                             ),
@@ -949,6 +1085,7 @@ Widget build(BuildContext context) {
                         ],
                       ),
                     ),
+                        ),
                   ),
                 ),
                 // Borde floral superior para sección 3
@@ -969,319 +1106,535 @@ Widget build(BuildContext context) {
                     ),
                   ),
                 ),
+                // Borde floral inferior para sección 3
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 55,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            // Seccion 4 
+            // Seccion 4 calendario mas tarjetas de vestimenta y información adicional 
             Container(
-              height:  size.width > 600 ? size.height * 4.2 : size.height * 1.8,
+              height:  size.width > 600 ? size.height * 4.2 : size.height * 1.6,
               width: double.infinity,
               child: Center(
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
                     // Calendario Julio 2026 con corazón en el 18
                     _buildCalendar(),
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
+                    const SizedBox(height: 50),
+                    // Tarjeta 1: Dress Code con Flip Card
+                    SlideTransition(
+                      position: _dressCodeSlideAnimation,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 1200),
+                        curve: Curves.easeInOut,
+                        height: size.height * 0.5 + 0.008,
+                        width: size.width * 0.8,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white
                         ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "¿Tienes dudas o necesitas ayuda?\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle - 0.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "¡Contáctanos! Estamos aquí para acompañarte y \nresolver cualquier detalle con todo el cariño. 💌",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () => _showRecomendacionesDialog(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB08D57),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          elevation: 5,
-                        ),
-                        child: const Text(
-                          "Ver Recomendaciones",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Aviso: Lluvia de sobres
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width * 0.8,
-                        ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Regalo:\n",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: fontSizeTitle,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: "Si deseas honrarnos con un detalle, agradecemos una lluvia de sobres. 💌\n",
-                                style: GoogleFonts.nunito(
-                                  fontSize: fontSizeBody - 0.5,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: size.width * 0.12),
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const SizedBox(height: 20),
-                            if (_soldOut)
-                              Container(
-                                width: size.width > 600 ? 480 : size.width * 0.85,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white24),
-                                ),
-                                child: Text(
-                                  '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto para vivir este día inolvidable! 🥳💍',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.roboto(
-                                    color: Colors.white,
-                                    fontSize: fontSizeBody,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              )
-                            else
-                            SizedBox(
-                              width:  size.width > 600 ? 400 : size.width * 0.75,
-                              child: TextField(
-                                controller: nombreCtrl,
-                                decoration: const InputDecoration(
-                                  labelText: "Tu nombre",
-                                  filled: true,
-                                  fillColor: Colors.white70,
+                            const SizedBox(height: 12),
+                            // Título DRESS CODE
+                            Text(
+                              "DRESS CODE",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFB08D57),
+                                letterSpacing: 3,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // PNG del moño/corbatín
+                            Container(
+                              width: size.width * 0.3,
+                              height: size.height * 0.12,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.asset(
+                                  'lib/assets/corbatin.png', // Asumiendo que tienes esta imagen
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                             ),
-                            // Sugerencias de nombre (typeahead desde Sheets)
-                            if (_nameSuggestions.isNotEmpty)
-                              Container(
-                                width: size.width > 600 ? 400 : size.width * 0.75,
-                                constraints: const BoxConstraints(maxHeight: 180),
-                                margin: const EdgeInsets.only(top: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: const [
-                                    BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
-                                  ],
-                                ),
-                                child: ListView.builder(
-                                  itemCount: _nameSuggestions.length,
-                                  itemBuilder: (context, index) {
-                                    final item = _nameSuggestions[index];
-                                    final display = (item['display'] ?? '').toString();
-                                    final passesRem = int.tryParse(item['passesRemaining']?.toString() ?? '');
-                                    return ListTile(
-                                      dense: true,
-                                      title: Text(display),
-                                      onTap: () {
-                                        setState(() {
-                                          _ignoreNextNameChange = true;
-                                          _selectedNameDisplay = display;
-                                          _nombreCtrl.text = display;
-                                          _nombreCtrl.selection = TextSelection.collapsed(offset: display.length);
-                                          _passesForTypedName = passesRem;
-                                          _nameSuggestions = [];
-                                          if ((passesRem ?? 0) < 2) _acompananteCtrl.clear();
-                                        });
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            const SizedBox(height: 8),
-                            if (_passesForTypedName != null)
-                            SizedBox(
-                              width: size.width > 600 ? 400 : size.width * 0.75,
-                              child: Text(
-                                _passesForTypedName! > 1 ? 'Tienes ${_passesForTypedName} pases disponibles, el tuyo y el de ${((_passesForTypedName ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.' : 'El pase es solo para ti.',
-                                style: GoogleFonts.roboto(color: Colors.white, fontSize: fontSizeBody * 0.80, fontWeight: FontWeight.w500),
+                            const SizedBox(height: 15),
+                            // Subtítulo
+                            Text(
+                              "Elegante Formal",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 20,
+                                color: const Color(0xFFB08D57),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 10),
-                            if (!_soldOut)
-                              ...((){
-                                final p = _passesForTypedName ?? 0;
-                                final maxCompanions = (p - 1).clamp(0, 3);
-                                final widgets = <Widget>[];
-                                if (maxCompanions >= 1) {
-                                  widgets.add(SizedBox(
-                                    width: size.width > 600 ? 400 : size.width * 0.75,
-                                    child: TextField(
-                                      controller: acompananteCtrl,
-                                      decoration: const InputDecoration(
-                                        labelText: "Acompañante 1",
-                                        filled: true,
-                                        fillColor: Colors.white70,
-                                      ),
-                                    ),
-                                  ));
-                                  widgets.add(const SizedBox(height: 8));
-                                }
-                                if (maxCompanions >= 2) {
-                                  widgets.add(SizedBox(
-                                    width: size.width > 600 ? 400 : size.width * 0.75,
-                                    child: TextField(
-                                      controller: _acompanante2Ctrl,
-                                      decoration: const InputDecoration(
-                                        labelText: "Acompañante 2",
-                                        filled: true,
-                                        fillColor: Colors.white70,
-                                      ),
-                                    ),
-                                  ));
-                                  widgets.add(const SizedBox(height: 8));
-                                }
-                                if (maxCompanions >= 3) {
-                                  widgets.add(SizedBox(
-                                    width: size.width > 600 ? 400 : size.width * 0.75,
-                                    child: TextField(
-                                      controller: _acompanante3Ctrl,
-                                      decoration: const InputDecoration(
-                                        labelText: "Acompañante 3",
-                                        filled: true,
-                                        fillColor: Colors.white70,
-                                      ),
-                                    ),
-                                  ));
-                                }
-                                return widgets;
-                              }()),
-                            const SizedBox(height: 20),
-                            if (!_soldOut)
+                            // Contenido
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
+                              child: Text(
+                                "Una orientacion para ver tu vestimenta para verte elegante y formal para celebrar nuestro amor. 💕",
+                                style: GoogleFonts.nunito(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            // Botón Dress Code
                             ElevatedButton(
-                              onPressed: _isConfirming ? null : () async {
-                                final nombre = nombreCtrl.text.trim();
-                                final acomp1 = acompananteCtrl.text.trim();
-                                final acomp2 = _acompanante2Ctrl.text.trim();
-                                final acomp3 = _acompanante3Ctrl.text.trim();
-                                if (nombre.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Ingresa tu nombre para confirmar.'), duration: Duration(seconds: 2), width: 200, backgroundColor: Colors.red,),
-                                  );
-                                  return;
-                                }
-                                setState(() => _isConfirming = true);
-                                try {
-                                  // Consultar invitado en Sheets
-                                  final guest = await SheetsService.getGuest(nombre);
-                                  if (guest == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('No encontramos tu nombre. Escríbelo exactamente como aparece en la invitación.'), duration: Duration(seconds: 2), width: 200, backgroundColor: Colors.red,),
-                                    );
-                                    return;
-                                  }
-                  
-                                  final passes = int.tryParse(guest['passesRemaining']?.toString() ?? '0') ?? 0;
-                                  if (passes <= 0) {
-                                    await _refreshSoldOutFromSheets();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Ya no quedan pases disponibles para este nombre.'), duration: Duration(seconds: 2), width: 260, backgroundColor: Colors.red,),
-                                    );
-                                    return;
-                                  }
-                  
-                                  // Consumir pases considerando hasta 3 acompañantes
-                                  final companionsInput = [acomp1, acomp2, acomp3]
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  int desired = 1 + companionsInput.length; // invitado + acompañantes
-                                  if (desired > passes) {
-                                    // recortar acompañantes a los cupos disponibles
-                                    final allowedCompanions = (passes - 1).clamp(0, 3);
-                                    companionsInput.removeRange(allowedCompanions, companionsInput.length);
-                                    desired = 1 + companionsInput.length;
-                                  }
-                                  final updated = await SheetsService.confirm(nombre, consume: desired);
-                                  if (updated == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('No se pudo confirmar. Intenta de nuevo.'), duration: Duration(seconds: 2), width: 240, backgroundColor: Colors.red,),
-                                    );
-                                    return;
-                                  }
-                  
-                                  String acompFinal = '';
-                                  if (companionsInput.isNotEmpty) {
-                                    acompFinal = _humanJoin(companionsInput);
-                                  }
-                                  _enviarWhatsApp(nombre, acompFinal);
-                                  // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
-                                  if (mounted) {
-                                    setState(() {
-                                      _soldOut = false;
-                                    });
-                                  }
-                                  await _refreshSoldOutFromSheets();
-                                } finally {
-                                  if (mounted) setState(() => _isConfirming = false);
-                                }
-                              },
+                              onPressed: () => _showDressCodeDialog(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
+                                backgroundColor: const Color(0xFFB08D57),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                              child: const Text("Confirmar asistencia 💌"),
+                              child: const Text(
+                                "Ver Dress Code",
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
                             ),
-                            const SizedBox(height: 20),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 30),
+                    // Tarjeta 2: Regalo con Flip Card inverso
+                    SlideTransition(
+                      position: _dressCodeSlideAnimation,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 1200),
+                        curve: Curves.easeInOut,
+                        height: size.height * 0.5,
+                        width: size.width * 0.8,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 12),
+                            // Título DRESS CODE
+                            Text(
+                              "TIPS Y NOTAS",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFB08D57),
+                                letterSpacing: 3,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // PNG del moño/corbatín
+                            Container(
+                              width: size.width * 0.3,
+                              height: size.height * 0.12,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.asset(
+                                  'lib/assets/tips.png', // Asumiendo que tienes esta imagen
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            // Subtítulo
+                            Text(
+                              "Informaciones",
+                              style: GoogleFonts.playfairDisplay(
+                                fontSize: 20,
+                                color: const Color(0xFFB08D57),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            // Contenido
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
+                              child: Text(
+                                "Conoce unas recomendaciones personales que esperamos de tu parte 🤗",
+                                style: GoogleFonts.nunito(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            // Botón Dress Code
+                            ElevatedButton(
+                              onPressed: () => _showRecomendacionesDialog(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFB08D57),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              child: const Text(
+                                "Ver Info.",
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
+            ),
+            // Seccion 5 regalos
+            Stack(
+              children: [
+                Container(
+                  height:  size.width > 600 ? size.height * 4.2 : size.height * 0.7,
+                  width: double.infinity,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 70),
+                        // Tarjeta 3: Regalos
+                        SlideTransition(
+                          position: _regalosSlideAnimation,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 1200),
+                            curve: Curves.easeInOut,
+                            height: size.height * 0.5 + 0.008,
+                            color: Colors.white,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 12),
+                                // Título REGALOS
+                                Text(
+                                  "REGALOS",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFB08D57),
+                                    letterSpacing: 3,
+                                  ),
+                                ),
+                                // PNG del regalo
+                                Container(
+                                  width: size.width * 0.3,
+                                  height: size.height * 0.12,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: Image.asset(
+                                      'lib/assets/regalo.gif', // Asumiendo que tienes esta imagen
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                // Subtítulo
+                                Text(
+                                  "Lluvia de Sobres",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 20,
+                                    color: const Color(0xFFB08D57),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                // Contenido
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
+                                  child: Text(
+                                    "Tu presencia es el mejor regalo. Si deseas honrarnos con un detalle, agradecemos un veas estas opciones",
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                // Botón Regalos
+                                ElevatedButton(
+                                  onPressed: () => _showRegalosDialog(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFB08D57),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Ver Información",
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Borde floral superior para sección 5
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                // Borde floral inferior para sección 5
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 25,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Seccion 6 QR de albumn
+            Stack(
+              children: [
+                Container(
+                  height:  size.width > 600 ? size.height * 4.2 : size.height * 0.8 + 0.005,
+                  width: double.infinity,
+                  child: Center(
+                    child: Container(
+                      width: size.width * 0.7 + 0.005,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Título ALBUMN
+                          Text(
+                            "COMPARTIMOS ESTE DÍA JUNTO A TI",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 3,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          // Subtítulo
+                          Text(
+                            "Comparte tus fotos y videos de este hermoso momento",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 15),
+                          // PNG del QR
+                          Container(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset(
+                                'lib/assets/qrphotos.jpeg', // Asumiendo que tienes esta imagen
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Contenido
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
+                            child: Text(
+                              "Escanea el QR y sube tus fotos.",
+                              style: GoogleFonts.nunito(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),// Borde floral inferior para sección 5
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: -40,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Seccion 7 Tarjeta de Confirmación
+            Stack(
+              children: [
+                Container(
+                  height:  size.width > 600 ? size.height * 4.2 : size.height * 0.7,
+                  width: double.infinity,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        // Tarjeta de Confirmación
+                        SlideTransition(
+                          position: _regalosSlideAnimation,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 1200),
+                            curve: Curves.easeInOut,
+                            height: size.height * 0.6,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 20),
+                                // Título CONFIRMAR ASISTENCIA
+                                Text(
+                                  "CONFIRMAR ASISTENCIA",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFB08D57),
+                                    letterSpacing: 3,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 20),
+                                // Icono de confirmación
+                                Container(
+                                  width: size.width * 0.2,
+                                  height: size.height * 0.1,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFB08D57).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_circle_outline,
+                                    size: 50,
+                                    color: Color(0xFFB08D57),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                // Subtítulo
+                                Text(
+                                  "Confirma tu asistencia",
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 20,
+                                    color: const Color(0xFFB08D57),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 15),
+                                // Contenido
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
+                                  child: Text(
+                                    "Por favor confirma tu asistencia para que podamos prepararlo todo para ti. ¡Te esperamos! 💕",
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                const SizedBox(height: 25),
+                                // Botón Confirmar Asistencia
+                                ElevatedButton(
+                                  onPressed: () => _showConfirmacionDialog(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFB08D57),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Confirmar Asistencia",
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Borde floral inferior para sección 7
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 25,
+                  child: Container(
+                    height: size.height * 0.15,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('lib/assets/flores.png'),
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        repeat: ImageRepeat.repeatX,
+                        scale: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1289,6 +1642,629 @@ Widget build(BuildContext context) {
     ),
   );
 }
+
+  //🔹 Metodo para mostrar diálogo de confirmación
+  void _showConfirmacionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final size = MediaQuery.of(context).size;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                width: size.width * 0.9,
+                height: size.height * 0.8,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFB08D57),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Título
+                      Text(
+                        "CONFIRMAR ASISTENCIA",
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: size.width * 0.05,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      // Icono
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Icon(
+                          Icons.check_circle_outline,
+                          size: 35,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Formulario
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              if (_soldOut)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white24),
+                                  ),
+                                  child: Text(
+                                    '¡Los cupos están a tope! 💥🎉\n\nYa casi comienza la celebración... ¡nos vemos pronto para vivir este día inolvidable! 🥳💍',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.roboto(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                )
+                              else
+                              Column(
+                                children: [
+                                  // Campo nombre
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: TextField(
+                                      controller: _nombreCtrl,
+                                      onChanged: (value) {
+                                        // Forzar actualización del estado para mostrar sugerencias
+                                        setDialogState(() {});
+                                      },
+                                      decoration: const InputDecoration(
+                                        labelText: "Tu nombre",
+                                        filled: true,
+                                        fillColor: Colors.white70,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // Sugerencias de nombre
+                                  if (_nameSuggestions.isNotEmpty)
+                                  Container(
+                                    width: double.infinity,
+                                    constraints: const BoxConstraints(maxHeight: 120),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: const [
+                                        BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+                                      ],
+                                    ),
+                                    child: ListView.builder(
+                                      itemCount: _nameSuggestions.length,
+                                      itemBuilder: (context, index) {
+                                        final item = _nameSuggestions[index];
+                                        final display = (item['display'] ?? '').toString();
+                                        final passesRem = int.tryParse(item['passesRemaining']?.toString() ?? '');
+                                        return ListTile(
+                                          dense: true,
+                                          title: Text(display),
+                                          onTap: () {
+                                            setState(() {
+                                              _ignoreNextNameChange = true;
+                                              _selectedNameDisplay = display;
+                                              _nombreCtrl.text = display;
+                                              _nombreCtrl.selection = TextSelection.collapsed(offset: display.length);
+                                              _passesForTypedName = passesRem;
+                                              _nameSuggestions = [];
+                                              if ((passesRem ?? 0) < 2) _acompananteCtrl.clear();
+                                            });
+                                            // Actualizar el diálogo para mostrar los campos de acompañantes
+                                            setDialogState(() {});
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Info de pases
+                                  if (_passesForTypedName != null)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Text(
+                                      _passesForTypedName! > 1 
+                                        ? 'Tienes ${_passesForTypedName} pases disponibles, el tuyo y el de ${((_passesForTypedName ?? 1) - 1).clamp(0, 3)} acompañante.\nSi llevas niños es un pase para ellos tambien.' 
+                                        : 'El pase es solo para ti.',
+                                      style: GoogleFonts.roboto(
+                                        color: Colors.white, 
+                                        fontSize: 14, 
+                                        fontWeight: FontWeight.w500
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // Campos de acompañantes
+                                  if (!_soldOut)
+                                  ...(() {
+                                    final p = _passesForTypedName ?? 0;
+                                    final maxCompanions = (p - 1).clamp(0, 3);
+                                    final widgets = <Widget>[];
+                                    if (maxCompanions >= 1) {
+                                      widgets.add(SizedBox(
+                                        width: double.infinity,
+                                        child: TextField(
+                                          controller: _acompananteCtrl,
+                                          style: const TextStyle(color: Colors.black87),
+                                          decoration: const InputDecoration(
+                                            labelText: "Acompañante 1",
+                                            filled: true,
+                                            fillColor: Colors.white70,
+                                            labelStyle: TextStyle(color: Color(0xFFB08D57)),
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(Radius.circular(8)),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                          ),
+                                        ),
+                                      ));
+                                      widgets.add(const SizedBox(height: 8));
+                                    }
+                                    if (maxCompanions >= 2) {
+                                      widgets.add(SizedBox(
+                                        width: double.infinity,
+                                        child: TextField(
+                                          controller: _acompanante2Ctrl,
+                                          style: const TextStyle(color: Colors.black87),
+                                          decoration: const InputDecoration(
+                                            labelText: "Acompañante 2",
+                                            filled: true,
+                                            fillColor: Colors.white70,
+                                          ),
+                                        ),
+                                      ));
+                                      widgets.add(const SizedBox(height: 8));
+                                    }
+                                    if (maxCompanions >= 3) {
+                                      widgets.add(SizedBox(
+                                        width: double.infinity,
+                                        child: TextField(
+                                          controller: _acompanante3Ctrl,
+                                          decoration: const InputDecoration(
+                                            labelText: "Acompañante 3",
+                                            filled: true,
+                                            fillColor: Colors.white70,
+                                          ),
+                                        ),
+                                      ));
+                                    }
+                                    return widgets;
+                                  }()),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Botones
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // Botón cancelar
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withOpacity(0.9),
+                              foregroundColor: const Color(0xFFB08D57),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: const Text(
+                              "Cancelar",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          // Botón confirmar
+                          if (!_soldOut) ElevatedButton(
+                            onPressed: _isConfirming ? null : () async {
+                              final nombre = _nombreCtrl.text.trim();
+                              final acomp1 = _acompananteCtrl.text.trim();
+                              final acomp2 = _acompanante2Ctrl.text.trim();
+                              final acomp3 = _acompanante3Ctrl.text.trim();
+                              if (nombre.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Ingresa tu nombre para confirmar.'), 
+                                    duration: Duration(seconds: 2), 
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+                              setState(() => _isConfirming = true);
+                              try {
+                                // Consultar invitado en Sheets
+                                final guest = await SheetsService.getGuest(nombre);
+                                if (guest == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('No encontramos tu nombre. Escríbelo exactamente como aparece en la invitación.'), 
+                                      duration: Duration(seconds: 2), 
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                        
+                                final passes = int.tryParse(guest['passesRemaining']?.toString() ?? '0') ?? 0;
+                                if (passes <= 0) {
+                                  await _refreshSoldOutFromSheets();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Ya no quedan pases disponibles para este nombre.'), 
+                                      duration: Duration(seconds: 2), 
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                        
+                                // Consumir pases considerando hasta 3 acompañantes
+                                final companionsInput = [acomp1, acomp2, acomp3]
+                                    .where((s) => s.isNotEmpty)
+                                    .toList();
+                                int desired = 1 + companionsInput.length; // invitado + acompañantes
+                                if (desired > passes) {
+                                  // recortar acompañantes a los cupos disponibles
+                                  final allowedCompanions = (passes - 1).clamp(0, 3);
+                                  companionsInput.removeRange(allowedCompanions, companionsInput.length);
+                                  desired = 1 + companionsInput.length;
+                                }
+                                final updated = await SheetsService.confirm(nombre, consume: desired);
+                                if (updated == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('No se pudo confirmar. Intenta de nuevo.'), 
+                                      duration: Duration(seconds: 2), 
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                        
+                                String acompFinal = '';
+                                if (companionsInput.isNotEmpty) {
+                                  acompFinal = _humanJoin(companionsInput);
+                                }
+                                _enviarWhatsApp(nombre, acompFinal);
+                                // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
+                                if (mounted) {
+                                  setState(() {
+                                    _soldOut = false;
+                                  });
+                                }
+                                await _refreshSoldOutFromSheets();
+                                
+                                // Cerrar diálogo después de confirmar
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('¡Asistencia confirmada! Te esperamos 💕'), 
+                                    duration: Duration(seconds: 3), 
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } finally {
+                                if (mounted) setState(() => _isConfirming = false);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: _isConfirming 
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text(
+                              "Confirmar",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+  //🔹 Metodo para mostrar solo Dress Code
+  void _showDressCodeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final size = MediaQuery.of(context).size;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: size.width * 0.9,
+            decoration: BoxDecoration(
+              color: const Color(0xFFB08D57),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Título
+                  Text(
+                    "Código de Vestimenta 👗🤵",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: size.width * 0.05,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // Descripción
+                  Text(
+                    "Hombres: Camisa - Pantalon 👔\nMujeres: Vestido 👗",
+                    style: GoogleFonts.nunito(
+                      fontSize: size.width * 0.04,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 15),
+                  // Advertencia
+                  Text(
+                    "Los colores son de muestra pero el\nCOLOR BLANCO RESERVADO PARA LA NOVIA",
+                    style: GoogleFonts.nunito(
+                      fontSize: size.width * 0.035,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // Imágenes de hombres y mujeres
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            "Hombres",
+                            style: GoogleFonts.nunito(
+                              fontSize: size.width * 0.04,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Container(
+                            width: 80,
+                            height: 160,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage('lib/assets/hombres.png'),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            "Mujeres",
+                            style: GoogleFonts.nunito(
+                              fontSize: size.width * 0.04,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Container(
+                            width: 80,
+                            height: 160,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage('lib/assets/mujeres.png'),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // Botón cerrar
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF8C6B1F),
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text("Cerrar"),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  //🔹 Metodo para mostrar información de Regalos
+  void _showRegalosDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final size = MediaQuery.of(context).size;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: size.width * 0.9,
+            decoration: BoxDecoration(
+              color: const Color(0xFFB08D57),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Icono de regalo
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: const Icon(
+                      Icons.card_giftcard,
+                      size: 35,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Título
+                  Text(
+                    "Lluvia de Sobres 💌",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: size.width * 0.05,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 15),
+                  // Mensaje principal
+                  Text(
+                    "Tu presencia es nuestro mayor regalo 💕",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: size.width * 0.04,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 15),
+                  // Descripción mejorada
+                  Text(
+                    "Si además deseas honrarnos con un detalle, agradecemos tu contribución\na través de una lluvia de sobres o una transferencia.\n\n💛 Aunque Cualquier detalle es bienvenido y apreciado 💛",
+                    style: GoogleFonts.nunito(
+                      fontSize: size.width * 0.040,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // Información bancaria
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          "🏦 Para Transferencias",
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: size.width * 0.038,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Banco: NU\nLlave Bre-B: 1116281304",
+                          style: GoogleFonts.nunito(
+                            fontSize: size.width * 0.034,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  // Nota de agradecimiento
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Text(
+                      "💕 Con todo nuestro cariño y gratitud\npor ser parte de este día tan especial",
+                      style: GoogleFonts.nunito(
+                        fontSize: size.width * 0.036,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Botón cerrar
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFB08D57),
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text("Gracias"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   //🔹 Metodo para mostrar recomendaciones
   void _showRecomendacionesDialog(BuildContext context) {
@@ -1326,22 +2302,20 @@ Widget build(BuildContext context) {
                   _buildRecommendationItem(
                     context,
                     number: "1",
-                    title: "Llega a tiempo ⏰",
+                    title: "¡Llega a tiempo! ⏰",
                     description: "Cada momento es creado con amor y queremos que vivas\nla experiencia completa desde el inicio,\npor eso llega puntual a la hora.",
                   ),
                   _buildRecommendationItem(
                     context,
                     number: "2",
-                    title: "Disfruta, baila y comparte 💃",
-                    description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre\npor eso comparte tus recuerdos en este QR:",
-                    showQR: true,
+                    title: "Disfruta y baila 💃",
+                    description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre por eso \nqueremos que disfrutes de esta fiesta al máximo"
                   ),
                   _buildRecommendationItem(
                     context,
                     number: "3",
-                    title: "Código de vestimenta 👗🤵",
-                    description: "Hombres: Camisa - Pantalon 👔\nMujeres: Vestido 👗",
-                    isDressCode: true,
+                    title: "Confirmar asistencia",
+                    description: "Por favor confirma tu asistencia antes del\n30 de Junio para que podamos coordinar todo a la perfección.",
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
@@ -1369,7 +2343,6 @@ Widget build(BuildContext context) {
     required String number,
     required String title,
     required String description,
-    bool isDressCode = false,
     bool showQR = false,  // New parameter for QR code
   }) {
     return Padding(
@@ -1396,77 +2369,16 @@ Widget build(BuildContext context) {
                     color: Colors.white,
                   ),
                 ),
-                if (!isDressCode) ...[
-                  TextSpan(
-                    text: description,
-                    style: GoogleFonts.nunito(
-                      fontSize: MediaQuery.of(context).size.width * 0.035,
-                      color: Colors.white,
-                    ),
+                TextSpan(
+                  text: description,
+                  style: GoogleFonts.nunito(
+                    fontSize: MediaQuery.of(context).size.width * 0.035,
+                    color: Colors.white,
                   ),
-                ],
-              ],
-            ),
-          ),
-          if (isDressCode) ...[
-            Text(
-              "Los colores son de muestra pero el\nCOLOR BLANCO RESERVADO PARA LA NOVIA",
-              style: GoogleFonts.nunito(
-                fontSize: MediaQuery.of(context).size.width * 0.035,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "Hombres",
-                      style: GoogleFonts.nunito(
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      height: 160,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('lib/assets/hombres.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      "Mujeres",
-                      style: GoogleFonts.nunito(
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      height: 160,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('lib/assets/mujeres.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
-          ] else if (showQR) ...[
+          ),if (showQR) ...[
             Container(
               width: 200,
               height: 200,
@@ -1590,45 +2502,6 @@ Widget build(BuildContext context) {
           },
         ),
       ],
-    );
-  }
-
-  // 🔹 Método para no repetir barras doradas
-  Widget _buildSideBars(Size size) {
-    return Positioned.fill(
-      child: Row(
-        children: [
-          Container(
-            width: size.width * 0.1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                Color(0xFFFFE08A), // Dorado brillante
-                Color(0xFFD4AF37), // Gold clásico
-                Color(0xFF8C6B1F), // Dorado oscuro profundo
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          const Spacer(),
-          Container(
-            width: size.width * 0.1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                Color(0xFFFFE08A), // Dorado brillante
-                Color(0xFFD4AF37), // Gold clásico
-                Color(0xFF8C6B1F), // Dorado oscuro profundo
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 

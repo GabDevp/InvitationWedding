@@ -17,14 +17,14 @@ class _CarruselConDotsState extends State<CarruselConDots> {
   int _activeIndex = 0;
 
   final List<Map<String, String>> items = [
-    {"path": "lib/assets/fondo1.jpg", "caption": "💍"},
-    {"path": "lib/assets/fondo1.jpg", "caption": "Un comienzo 🥰"},
-    {"path": "lib/assets/fondo1.jpg", "caption": "Una promesa 💌"},
-    {"path": "lib/assets/fondo1.jpg", "caption": "Un deseo ✨"},
-    {"path": "lib/assets/fondo1.jpg", "caption": "Un sentimiento 👨🏽‍❤️‍💋‍👩🏾"},
-    {"path": "lib/assets/fondo1.jpg", "caption": "Un amor 💌"},
-    {"path": "lib/assets/fondo1.jpg", "caption": "Un siempre juntos 💐"},
-    {"path": "lib/assets/fondo1.jpg", "caption": "Un toda la vida 🥰"},
+    {"path": "lib/assets/1.jpeg"},
+    {"path": "lib/assets/2.jpeg"},
+    {"path": "lib/assets/4.jpeg"},
+    {"path": "lib/assets/fondo1.jpg"},
+    {"path": "lib/assets/fondo1.jpg"},
+    {"path": "lib/assets/fondo1.jpg"},
+    {"path": "lib/assets/fondo1.jpg"},
+    {"path": "lib/assets/fondo1.jpg"},
     // {"path": "lib/assets/pareja6.jpg", "caption": "Un amor eterno ❤️"},
   ];
 
@@ -43,10 +43,10 @@ class _CarruselConDotsState extends State<CarruselConDots> {
             carouselController: _controller,
             items: items.map((item) {
               return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 6),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.25),
@@ -61,29 +61,10 @@ class _CarruselConDotsState extends State<CarruselConDots> {
                     Expanded(
                       flex: 8,
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(18),
-                          topRight: Radius.circular(18),
-                        ),
                         child: Image.asset(
                           item["path"]!,
                           fit: BoxFit.cover,
                           width: double.infinity,
-                        ),
-                      ),
-                    ),
-                    // 📝 Caption
-                    Expanded(
-                      flex: 2,
-                      child: Center(
-                        child: Text(
-                          item["caption"]!,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.dancingScript(
-                            fontSize: size.width * 0.05,
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                          ),
                         ),
                       ),
                     ),

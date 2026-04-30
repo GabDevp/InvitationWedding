@@ -37,6 +37,13 @@ flutter:
     - lib/assets/flores.png
     - lib/assets/anillos.png
     - lib/assets/copas.png
+    - lib/assets/corbatin.png
+    - lib/assets/tips.png
+    - lib/assets/regalo.gif
+    - lib/assets/1.jpeg
+    - lib/assets/2.jpeg
+    - lib/assets/3.jpeg
+    - lib/assets/4.jpeg
     - lib/assets/noniños.gif
     - lib/assets/audio/Fonseca.mp3
     - lib/assets/video/invitacion.mp4
