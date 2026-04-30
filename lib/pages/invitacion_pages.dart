@@ -1841,7 +1841,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -1913,7 +1913,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         // Formulario
                         Expanded(
                           child: SingleChildScrollView(
@@ -1958,150 +1958,150 @@ class _InvitacionPageState extends State<InvitacionPage>
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 5),
                                       // Sugerencias de nombre o estado de carga
-                                      if (_nombreCtrl.text.trim().length >= 2)
-                                        Container(
-                                          width: double.infinity,
-                                          constraints: const BoxConstraints(
-                                              maxHeight: 120),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                  color: Colors.black26,
-                                                  blurRadius: 6,
-                                                  offset: Offset(0, 2)),
+                                      if (_nombreCtrl.text.trim().length >= 2 && _selectedNameDisplay == null)
+                                      Container(
+                                        width: double.infinity,
+                                        constraints: const BoxConstraints(
+                                            maxHeight: 120),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                                color: Colors.black26,
+                                                blurRadius: 6,
+                                                offset: Offset(0, 2)),
+                                          ],
+                                        ),
+                                        child: _isSearchingNames
+                                        ? Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: 30,
+                                                height: 30,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                              Color>(
+                                                          const Color(
+                                                              0xFFB08D57)),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                "Buscando invitados...",
+                                                style: GoogleFonts.roboto(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                  fontWeight:
+                                                      FontWeight.w500,
+                                                ),
+                                                textAlign:
+                                                    TextAlign.center,
+                                              ),
                                             ],
-                                          ),
-                                          child: _isSearchingNames
-                                              ? Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 30,
-                                                      height: 30,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        strokeWidth: 3,
-                                                        valueColor:
-                                                            AlwaysStoppedAnimation<
-                                                                    Color>(
-                                                                const Color(
-                                                                    0xFFB08D57)),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 8),
-                                                    Text(
-                                                      "Buscando invitados...",
-                                                      style: GoogleFonts.roboto(
-                                                        color: Colors.grey[600],
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  ],
-                                                )
-                                              : _nameSuggestions.isEmpty
-                                                  ? Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(
-                                                          Icons
-                                                              .sentiment_very_dissatisfied,
-                                                          size: 40,
-                                                          color:
-                                                              Colors.grey[600],
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 8),
-                                                        Text(
-                                                          "No estás entre los invitados 😔",
-                                                          style: GoogleFonts
-                                                              .roboto(
-                                                            color: Colors
-                                                                .grey[600],
-                                                            fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 4),
-                                                        Text(
-                                                          "Verifica el nombre exacto en tu invitación",
-                                                          style: GoogleFonts
-                                                              .roboto(
-                                                            color: Colors
-                                                                .grey[500],
-                                                            fontSize: 12,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                        ),
-                                                      ],
-                                                    )
-                                                  : ListView.builder(
-                                                      itemCount:
-                                                          _nameSuggestions
-                                                              .length,
-                                                      itemBuilder:
-                                                          (context, index) {
-                                                        final item =
-                                                            _nameSuggestions[
-                                                                index];
-                                                        final display =
-                                                            (item['display'] ??
-                                                                    '')
-                                                                .toString();
-                                                        final passesRem = int.tryParse(
-                                                            item['passesRemaining']
-                                                                    ?.toString() ??
-                                                                '');
-                                                        return ListTile(
-                                                          dense: true,
-                                                          title: Text(display),
-                                                          onTap: () {
-                                                            setState(() {
-                                                              _ignoreNextNameChange =
-                                                                  true;
-                                                              _selectedNameDisplay =
-                                                                  display;
-                                                              _nombreCtrl.text =
-                                                                  display;
-                                                              _nombreCtrl
-                                                                      .selection =
-                                                                  TextSelection
-                                                                      .collapsed(
-                                                                          offset:
-                                                                              display.length);
-                                                              _passesForTypedName =
-                                                                  passesRem;
-                                                              _nameSuggestions =
-                                                                  [];
-                                                              if ((passesRem ??
-                                                                      0) <
-                                                                  2)
-                                                                _acompananteCtrl
-                                                                    .clear();
-                                                            });
-                                                            // Actualizar el diálogo para mostrar los campos de acompañantes
-                                                            setDialogState(
-                                                                () {});
-                                                          },
-                                                        );
-                                                      },
-                                                    ),
+                                          )
+                                        : _nameSuggestions.isEmpty && !_isSearchingNames && _nombreCtrl.text.trim().length >= 2
+                                          ? Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .center,
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .sentiment_very_dissatisfied,
+                                                  size: 40,
+                                                  color:
+                                                      Colors.grey[600],
+                                                ),
+                                                const SizedBox(
+                                                    height: 8),
+                                                Text(
+                                                  "No estás entre los invitados 😔",
+                                                  style: GoogleFonts
+                                                      .roboto(
+                                                    color: Colors
+                                                        .grey[600],
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.w500,
+                                                  ),
+                                                  textAlign:
+                                                      TextAlign.center,
+                                                ),
+                                                const SizedBox(
+                                                    height: 4),
+                                                Text(
+                                                  "Verifica el nombre exacto en tu invitación",
+                                                  style: GoogleFonts
+                                                      .roboto(
+                                                    color: Colors
+                                                        .grey[500],
+                                                    fontSize: 12,
+                                                  ),
+                                                  textAlign:
+                                                      TextAlign.center,
+                                                ),
+                                              ],
+                                            )
+                                          : ListView.builder(
+                                              itemCount:
+                                                  _nameSuggestions
+                                                      .length,
+                                              itemBuilder:
+                                                  (context, index) {
+                                                final item =
+                                                    _nameSuggestions[
+                                                        index];
+                                                final display =
+                                                    (item['display'] ??
+                                                            '')
+                                                        .toString();
+                                                final passesRem = int.tryParse(
+                                                    item['passesRemaining']
+                                                            ?.toString() ??
+                                                        '');
+                                                return ListTile(
+                                                  dense: true,
+                                                  title: Text(display),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      _ignoreNextNameChange =
+                                                          true;
+                                                      _selectedNameDisplay =
+                                                          display;
+                                                      _nombreCtrl.text =
+                                                          display;
+                                                      _nombreCtrl
+                                                              .selection =
+                                                          TextSelection
+                                                              .collapsed(
+                                                                  offset:
+                                                                      display.length);
+                                                      _passesForTypedName =
+                                                          passesRem;
+                                                      _nameSuggestions =
+                                                          [];
+                                                      if ((passesRem ??
+                                                              0) <
+                                                          2)
+                                                        _acompananteCtrl
+                                                            .clear();
+                                                    });
+                                                    // Actualizar el diálogo para mostrar los campos de acompañantes
+                                                    setDialogState(
+                                                        () {});
+                                                  },
+                                                );
+                                              },
+                                            ),
                                         ),
                                       const SizedBox(height: 8),
                                       // Info de pases
@@ -2229,7 +2229,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                             _acompanante2Ctrl.text.trim();
                                         final acomp3 =
                                             _acompanante3Ctrl.text.trim();
-                                        // No se necesita validar _isConfirt porque siempre tiene un valor (false por defecto)
+                                        
                                         setState(() => _isConfirming = true);
                                         try {
                                           // Consultar invitado en Sheets
@@ -2254,81 +2254,113 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                           ?.toString() ??
                                                       '0') ??
                                               0;
-                                          if (passes <= 0) {
+
+                                          if (_isConfirt == true) {
+                                            // CASO: CONFIRMAR ASISTENCIA
+                                            if (passes <= 0) {
+                                              await _refreshSoldOutFromSheets();
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      'Ya no quedan pases disponibles para este nombre.'),
+                                                  duration: Duration(seconds: 2),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                              return;
+                                            }
+
+                                            // Consumir pases considerando hasta 3 acompañantes
+                                            final companionsInput = [
+                                              acomp1,
+                                              acomp2,
+                                              acomp3
+                                            ].where((s) => s.isNotEmpty).toList();
+                                            int desired = 1 +
+                                                companionsInput
+                                                    .length; // invitado + acompañantes
+                                            if (desired > passes) {
+                                              // recortar acompañantes a los cupos disponibles
+                                              final allowedCompanions =
+                                                  (passes - 1).clamp(0, 3);
+                                              companionsInput.removeRange(
+                                                  allowedCompanions,
+                                                  companionsInput.length);
+                                              desired =
+                                                  1 + companionsInput.length;
+                                            }
+                                            final updated =
+                                                await SheetsService.confirm(
+                                                    nombre,
+                                                    consume: desired);
+                                            if (updated == null) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      'No se pudo confirmar. Intenta de nuevo.'),
+                                                  duration: Duration(seconds: 2),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                              return;
+                                            }
+
+                                            String acompFinal = '';
+                                            if (companionsInput.isNotEmpty) {
+                                              acompFinal = _humanJoin(companionsInput);
+                                            }
+                                            _enviarWhatsApp(nombre, acompFinal);
+                                            // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
+                                            if (mounted) {
+                                              setState(() {
+                                                _soldOut = false;
+                                              });
+                                            }
                                             await _refreshSoldOutFromSheets();
+
+                                            // Cerrar diálogo después de confirmar
+                                            Navigator.of(context).pop();
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text('¡Asistencia confirmada! Te esperamos 💕'),
+                                                duration: Duration(seconds: 3),
+                                                backgroundColor: Colors.green,
+                                              ),
+                                            );
+                                          } else {
+                                            // CASO: DECLINE ASISTENCIA
+                                            final updated = await SheetsService.decline(
+                                                nombre, 
+                                                consume: passes
+                                            );
+                                            if (updated == null) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      'No se pudo procesar tu respuesta. Intenta de nuevo.'),
+                                                  duration: Duration(seconds: 2),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                              return;
+                                            }
+
+                                            // Cerrar diálogo después de procesar decline
+                                            Navigator.of(context).pop();
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
                                               const SnackBar(
                                                 content: Text(
-                                                    'Ya no quedan pases disponibles para este nombre.'),
-                                                duration: Duration(seconds: 2),
-                                                backgroundColor: Colors.red,
+                                                    '¡Gracias por informarnos! Te extrañaremos en la fiesta 😔'),
+                                                duration: Duration(seconds: 3),
+                                                backgroundColor: Colors.orange,
                                               ),
                                             );
-                                            return;
                                           }
-
-                                          // Consumir pases considerando hasta 3 acompañantes
-                                          final companionsInput = [
-                                            acomp1,
-                                            acomp2,
-                                            acomp3
-                                          ].where((s) => s.isNotEmpty).toList();
-                                          int desired = 1 +
-                                              companionsInput
-                                                  .length; // invitado + acompañantes
-                                          if (desired > passes) {
-                                            // recortar acompañantes a los cupos disponibles
-                                            final allowedCompanions =
-                                                (passes - 1).clamp(0, 3);
-                                            companionsInput.removeRange(
-                                                allowedCompanions,
-                                                companionsInput.length);
-                                            desired =
-                                                1 + companionsInput.length;
-                                          }
-                                          final updated =
-                                              await SheetsService.confirm(
-                                                  nombre,
-                                                  consume: desired);
-                                          if (updated == null) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                    'No se pudo confirmar. Intenta de nuevo.'),
-                                                duration: Duration(seconds: 2),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                            return;
-                                          }
-
-                                          String acompFinal = '';
-                                          if (companionsInput.isNotEmpty) {
-                                            acompFinal =
-                                                _humanJoin(companionsInput);
-                                          }
-                                          _enviarWhatsApp(nombre, acompFinal);
-                                          // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
-                                          if (mounted) {
-                                            setState(() {
-                                              _soldOut = false;
-                                            });
-                                          }
-                                          await _refreshSoldOutFromSheets();
-
-                                          // Cerrar diálogo después de confirmar
-                                          Navigator.of(context).pop();
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                  '¡Asistencia confirmada! Te esperamos 💕'),
-                                              duration: Duration(seconds: 3),
-                                              backgroundColor: Colors.green,
-                                            ),
-                                          );
                                         } finally {
                                           if (mounted)
                                             setState(
