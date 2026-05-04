@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SheetsService {
-  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbwOjAVnehV9x35TKBqZYXNhyjafVRIdM4drilX5-2PwiJowNyrUufvuzktg87n6bHrYaA/exec'; // tu URL
-  static const _token = 'mibodasecreta2025'; // el mismo TOKEN del script
+  static const _baseUrl = 'https://script.google.com/macros/s/AKfycbwYHHczqRJDHoAFSacQ8Jv6LkLN-C8erLNIzAivlIxHikMLkj97rvXofsPsSflHcj-ECg/exec'; // tu URL
+  static const _token = 'miboda2026'; // el mismo TOKEN del script
 
   static Future<List<dynamic>> search(String query) async {
     final uri = Uri.parse(_baseUrl).replace(queryParameters: {

@@ -73,6 +73,7 @@ class _InvitacionPageState extends State<InvitacionPage>
   bool _isSearchingNames = false;
   // Control de búsqueda al seleccionar una sugerencia
   String? _selectedNameDisplay;
+  String? _selectedNameKey;
   bool _ignoreNextNameChange = false;
 
   void _onNameChanged() {
@@ -88,6 +89,7 @@ class _InvitacionPageState extends State<InvitacionPage>
     }
     // Si el usuario cambió el texto respecto a la selección, liberar selección y buscar
     _selectedNameDisplay = null;
+    _selectedNameKey = null;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 200), _runNameSearch);
   }
@@ -1647,9 +1649,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                 Stack(
                   children: [
                     Container(
-                      height: size.width > 600
-                          ? size.height * 4.2
-                          : size.height * 0.7,
+                      height: size.width > 600 ? size.height * 4.2 : size.height * 0.7,
                       width: double.infinity,
                       child: Center(
                         child: Column(
@@ -1743,10 +1743,44 @@ class _InvitacionPageState extends State<InvitacionPage>
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  const SizedBox(height: 20),
+                                  // Aviso de plazo de confirmación
+                                  Container(
+                                    width: double.infinity,
+                                    margin: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.schedule,
+                                          color: Colors.red[700],
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            "El plazo para confirmar es hasta el 30 de junio",
+                                            style: GoogleFonts.nunito(
+                                              fontSize: 14,
+                                              color: Colors.red[700],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                            )
                           ],
                         ),
                       ),
@@ -1792,6 +1826,7 @@ class _InvitacionPageState extends State<InvitacionPage>
     }
     // Si el usuario cambió el texto respecto a la selección, liberar selección y buscar
     _selectedNameDisplay = null;
+    _selectedNameKey = null;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 200), () {
       _runNameSearch(setDialogState: () => setDialogState(() {}));
@@ -2064,6 +2099,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                     (item['display'] ??
                                                             '')
                                                         .toString();
+                                                final nameKey = (item['key_normalized']).toString();
                                                 final passesRem = int.tryParse(
                                                     item['passesRemaining']
                                                             ?.toString() ??
@@ -2073,10 +2109,10 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                   title: Text(display),
                                                   onTap: () {
                                                     setState(() {
-                                                      _ignoreNextNameChange =
-                                                          true;
+                                                      _ignoreNextNameChange = true;
                                                       _selectedNameDisplay =
                                                           display;
+                                                      _selectedNameKey = nameKey;
                                                       _nombreCtrl.text =
                                                           display;
                                                       _nombreCtrl
@@ -2223,47 +2259,33 @@ class _InvitacionPageState extends State<InvitacionPage>
                                     ? null
                                     : () async {
                                         final nombre = _nombreCtrl.text.trim();
-                                        final acomp1 =
-                                            _acompananteCtrl.text.trim();
-                                        final acomp2 =
-                                            _acompanante2Ctrl.text.trim();
-                                        final acomp3 =
-                                            _acompanante3Ctrl.text.trim();
+                                        final key = _selectedNameKey;
+                                        final acomp1 = _acompananteCtrl.text.trim();
+                                        final acomp2 = _acompanante2Ctrl.text.trim();
+                                        final acomp3 = _acompanante3Ctrl.text.trim();
                                         
                                         setState(() => _isConfirming = true);
                                         try {
                                           // Consultar invitado en Sheets
-                                          final guest =
-                                              await SheetsService.getGuest(
-                                                  nombre);
+                                          final guest = await SheetsService.getGuest(key!);
                                           if (guest == null) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
-                                                content: Text(
-                                                    'No encontramos tu nombre. Escríbelo exactamente como aparece en la invitación.'),
+                                                content: Text('No encontramos tu nombre. Escríbelo exactamente como aparece en la invitación.'),
                                                 duration: Duration(seconds: 2),
                                                 backgroundColor: Colors.red,
                                               ),
                                             );
                                             return;
                                           }
-
-                                          final passes = int.tryParse(
-                                                  guest['passesRemaining']
-                                                          ?.toString() ??
-                                                      '0') ??
-                                              0;
-
+                                          final passes = int.tryParse(guest['passesRemaining'] ?.toString() ?? '0') ?? 0;
                                           if (_isConfirt == true) {
                                             // CASO: CONFIRMAR ASISTENCIA
                                             if (passes <= 0) {
                                               await _refreshSoldOutFromSheets();
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
+                                              ScaffoldMessenger.of(context).showSnackBar(
                                                 const SnackBar(
-                                                  content: Text(
-                                                      'Ya no quedan pases disponibles para este nombre.'),
+                                                  content: Text('Ya no quedan pases disponibles para este nombre.'),
                                                   duration: Duration(seconds: 2),
                                                   backgroundColor: Colors.red,
                                                 ),
@@ -2277,29 +2299,20 @@ class _InvitacionPageState extends State<InvitacionPage>
                                               acomp2,
                                               acomp3
                                             ].where((s) => s.isNotEmpty).toList();
-                                            int desired = 1 +
-                                                companionsInput
-                                                    .length; // invitado + acompañantes
+                                            int desired = 1 + companionsInput.length; // invitado + acompañantes
                                             if (desired > passes) {
                                               // recortar acompañantes a los cupos disponibles
-                                              final allowedCompanions =
-                                                  (passes - 1).clamp(0, 3);
+                                              final allowedCompanions = (passes - 1).clamp(0, 3);
                                               companionsInput.removeRange(
-                                                  allowedCompanions,
-                                                  companionsInput.length);
-                                              desired =
-                                                  1 + companionsInput.length;
+                                                allowedCompanions,
+                                                companionsInput.length);
+                                              desired = 1 + companionsInput.length;
                                             }
-                                            final updated =
-                                                await SheetsService.confirm(
-                                                    nombre,
-                                                    consume: desired);
+                                            final updated = await SheetsService.confirm(key, consume: desired);
                                             if (updated == null) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
+                                              ScaffoldMessenger.of(context).showSnackBar(
                                                 const SnackBar(
-                                                  content: Text(
-                                                      'No se pudo confirmar. Intenta de nuevo.'),
+                                                  content: Text('No se pudo confirmar. Intenta de nuevo.'),
                                                   duration: Duration(seconds: 2),
                                                   backgroundColor: Colors.red,
                                                 ),
@@ -2322,8 +2335,7 @@ class _InvitacionPageState extends State<InvitacionPage>
 
                                             // Cerrar diálogo después de confirmar
                                             Navigator.of(context).pop();
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
                                                 content: Text('¡Asistencia confirmada! Te esperamos 💕'),
                                                 duration: Duration(seconds: 3),
@@ -2333,15 +2345,13 @@ class _InvitacionPageState extends State<InvitacionPage>
                                           } else {
                                             // CASO: DECLINE ASISTENCIA
                                             final updated = await SheetsService.decline(
-                                                nombre, 
+                                                key, 
                                                 consume: passes
                                             );
                                             if (updated == null) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
+                                              ScaffoldMessenger.of(context).showSnackBar(
                                                 const SnackBar(
-                                                  content: Text(
-                                                      'No se pudo procesar tu respuesta. Intenta de nuevo.'),
+                                                  content: Text('No se pudo procesar tu respuesta. Intenta de nuevo.'),
                                                   duration: Duration(seconds: 2),
                                                   backgroundColor: Colors.red,
                                                 ),
@@ -2351,11 +2361,9 @@ class _InvitacionPageState extends State<InvitacionPage>
 
                                             // Cerrar diálogo después de procesar decline
                                             Navigator.of(context).pop();
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
-                                                content: Text(
-                                                    '¡Gracias por informarnos! Te extrañaremos en la fiesta 😔'),
+                                                content: Text('¡Gracias por informarnos! Te extrañaremos en la fiesta 😔'),
                                                 duration: Duration(seconds: 3),
                                                 backgroundColor: Colors.orange,
                                               ),
@@ -2363,8 +2371,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                           }
                                         } finally {
                                           if (mounted)
-                                            setState(
-                                                () => _isConfirming = false);
+                                            setState(() => _isConfirming = false);
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
@@ -2377,22 +2384,22 @@ class _InvitacionPageState extends State<InvitacionPage>
                                   ),
                                 ),
                                 child: _isConfirming
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : const Text(
-                                        "Confirmar",
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
-                                      ),
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                              Colors.white),
+                                    ),
+                                  )
+                                : const Text(
+                                    "Confirmar",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                               ),
                           ],
                         ),
@@ -2592,7 +2599,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                   const SizedBox(height: 15),
                   // Descripción mejorada
                   Text(
-                    "Si además deseas honrarnos con un detalle, agradecemos tu contribución\na través de una lluvia de sobres o una transferencia.\n\n💛 Aunque Cualquier detalle es bienvenido y apreciado 💛",
+                    "Si además deseas honrarnos con un detalle, agradecemos tu contribución\na través de una lluvia de sobres o una transferencia.",
                     style: GoogleFonts.nunito(
                       fontSize: size.width * 0.040,
                       color: Colors.white,
@@ -2711,20 +2718,23 @@ class _InvitacionPageState extends State<InvitacionPage>
                     context,
                     number: "1",
                     title: "¡Llega a tiempo! ⏰",
-                    description:
-                        "Cada momento es creado con amor y queremos que vivas\nla experiencia completa desde el inicio,\npor eso llega puntual a la hora.",
+                    description: "Cada momento es creado con amor y queremos que vivas\nla experiencia completa desde el inicio,\npor eso llega puntual a la hora.",
                   ),
                   _buildRecommendationItem(context,
                       number: "2",
                       title: "Disfruta y baila 💃",
-                      description:
-                          "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre por eso \nqueremos que disfrutes de esta fiesta al máximo"),
+                      description: "Este día está hecho para celebrar, compartir y crear recuerdos que\ndurarán para siempre por eso \nqueremos que disfrutes de esta fiesta al máximo"),
                   _buildRecommendationItem(
                     context,
                     number: "3",
-                    title: "Confirmar asistencia",
-                    description:
-                        "Por favor confirma tu asistencia antes del\n30 de Junio para que podamos coordinar todo a la perfección.",
+                    title: "Confirmar asistencia ✅",
+                    description: "Por favor confirma tu asistencia antes del\n30 de Junio para que podamos coordinar todo a la perfección.",
+                  ),
+                  _buildRecommendationItem(
+                    context,
+                    number: "4",
+                    title: "ATENCIÓN IMPORTANTE‼️",
+                    description: "NO SE ACEPTARÁ LA ENTRADA DE LICOR.",
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
@@ -2754,7 +2764,6 @@ class _InvitacionPageState extends State<InvitacionPage>
     required String number,
     required String title,
     required String description,
-    bool showQR = false, // New parameter for QR code
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -2790,28 +2799,6 @@ class _InvitacionPageState extends State<InvitacionPage>
               ],
             ),
           ),
-          if (showQR) ...[
-            Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white24),
-                image: DecorationImage(
-                  image: AssetImage('lib/assets/qrphotos.jpeg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Text(
-              "Escanéame para compartir tus fotos",
-              style: GoogleFonts.nunito(
-                fontSize: MediaQuery.of(context).size.width * 0.030,
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
         ],
       ),
     );
