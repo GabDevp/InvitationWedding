@@ -17,14 +17,17 @@ class _CarruselConDotsState extends State<CarruselConDots> {
   int _activeIndex = 0;
 
   final List<Map<String, String>> items = [
-    {"path": "lib/assets/1.jpeg"},
-    {"path": "lib/assets/2.jpeg"},
+    {"path": "lib/assets/14.jpeg"},
+    {"path": "lib/assets/13.jpeg"},
+    {"path": "lib/assets/9.jpeg"},
+    {"path": "lib/assets/5.jpeg"},
+    {"path": "lib/assets/10.jpeg"},
+    {"path": "lib/assets/11.jpeg"},
     {"path": "lib/assets/4.jpeg"},
-    {"path": "lib/assets/fondo1.jpg"},
-    {"path": "lib/assets/fondo1.jpg"},
-    {"path": "lib/assets/fondo1.jpg"},
-    {"path": "lib/assets/fondo1.jpg"},
-    {"path": "lib/assets/fondo1.jpg"},
+    {"path": "lib/assets/6.jpeg"},
+    {"path": "lib/assets/12.jpeg"},
+    {"path": "lib/assets/7.jpeg"},
+    {"path": "lib/assets/8.jpeg"},
     // {"path": "lib/assets/pareja6.jpg", "caption": "Un amor eterno ❤️"},
   ];
 

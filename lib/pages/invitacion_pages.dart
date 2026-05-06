@@ -826,8 +826,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                 const SizedBox(height: 50),
                 // 🔹 Sección 2 con su propio borde floral
                 Container(
-                  height:
-                      size.width > 600 ? size.height * 4.2 : size.height * 1.8,
+                  height: size.width > 600 ? size.height * 4.2 : size.height * 1.8,
                   width: double.infinity,
                   child: Center(
                     child: Column(
@@ -954,7 +953,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                         FadeTransition(
                           opacity: _receptionFadeAnimation,
                           child: Container(
-                            height: size.height * 1.0,
+                            height: size.height * 1.1,
                             width: size.width * 0.8,
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -1426,9 +1425,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                 Stack(
                   children: [
                     Container(
-                      height: size.width > 600
-                          ? size.height * 4.2
-                          : size.height * 0.7,
+                      height: size.width > 600 ? size.height * 4.2 : size.height * 0.7,
                       width: double.infinity,
                       child: Center(
                         child: Column(
@@ -1649,7 +1646,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                 Stack(
                   children: [
                     Container(
-                      height: size.width > 600 ? size.height * 4.2 : size.height * 0.7,
+                      height: size.width > 600 ? size.height * 4.2 : size.height * 0.8,
                       width: double.infinity,
                       child: Center(
                         child: Column(
@@ -1660,7 +1657,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 1200),
                                 curve: Curves.easeInOut,
-                                height: size.height * 0.6,
+                                height: size.height * 0.7,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                 ),
@@ -2448,7 +2445,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                   const SizedBox(height: 20),
                   // Descripción
                   Text(
-                    "Hombres: Camisa - Pantalon 👔\nMujeres: Vestido 👗",
+                    "Hombres: Camisa - Pantalon 👔\nMujeres: Vestido o Formal 👗",
                     style: GoogleFonts.nunito(
                       fontSize: size.width * 0.04,
                       color: Colors.white,
