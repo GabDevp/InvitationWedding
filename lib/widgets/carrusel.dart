@@ -17,17 +17,19 @@ class _CarruselConDotsState extends State<CarruselConDots> {
   int _activeIndex = 0;
 
   final List<Map<String, String>> items = [
-    {"path": "lib/assets/14.jpeg"},
-    {"path": "lib/assets/13.jpeg"},
-    {"path": "lib/assets/9.jpeg"},
-    {"path": "lib/assets/5.jpeg"},
     {"path": "lib/assets/10.jpeg"},
-    {"path": "lib/assets/11.jpeg"},
-    {"path": "lib/assets/4.jpeg"},
+    {"path": "lib/assets/5.jpeg"},
+    {"path": "lib/assets/1.jpeg"},
     {"path": "lib/assets/6.jpeg"},
-    {"path": "lib/assets/12.jpeg"},
+    {"path": "lib/assets/2.jpeg"},
+    {"path": "lib/assets/3.jpeg"},
+    {"path": "lib/assets/4.jpeg"},
+    {"path": "lib/assets/11.jpeg"},
     {"path": "lib/assets/7.jpeg"},
+    {"path": "lib/assets/9.jpeg"},
     {"path": "lib/assets/8.jpeg"},
+    {"path": "lib/assets/13.jpeg"},
+    {"path": "lib/assets/14.jpeg"},
     // {"path": "lib/assets/pareja6.jpg", "caption": "Un amor eterno ❤️"},
   ];
 
@@ -78,8 +80,8 @@ class _CarruselConDotsState extends State<CarruselConDots> {
             options: CarouselOptions(
               height: size.height * 0.80,
               autoPlay: true,
-              autoPlayInterval: const Duration(seconds: 2),
-              autoPlayAnimationDuration: const Duration(milliseconds: 600),
+              autoPlayInterval: const Duration(seconds: 1),
+              autoPlayAnimationDuration: const Duration(milliseconds: 450),
               viewportFraction: 0.65,
               enlargeCenterPage: true,
               enableInfiniteScroll: true,

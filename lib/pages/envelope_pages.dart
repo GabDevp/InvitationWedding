@@ -32,7 +32,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
 
     _arrowController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 750),
     )..repeat(reverse: true);
 
     _arrowAnimation = Tween<double>(begin: 0, end: -8).animate(
@@ -118,7 +118,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                 : Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage('lib/assets/fondo1.jpg'),
+                        image: AssetImage('lib/assets/4.jpeg'),
                         fit: BoxFit.cover,
                       ),
                       color: Colors.black.withOpacity(0.3),

@@ -66,15 +66,16 @@ class _InvitacionPageState extends State<InvitacionPage>
   final TextEditingController _acompanante2Ctrl = TextEditingController();
   final TextEditingController _acompanante3Ctrl = TextEditingController();
   int? _passesForTypedName;
-  List<Map<String, dynamic>> _nameSuggestions = [];
   bool _soldOut = false;
-  Timer? _searchDebounce;
   bool _isConfirming = false;
+  bool _isProcessingConfirmation = false;
   bool _isSearchingNames = false;
   // Control de búsqueda al seleccionar una sugerencia
   String? _selectedNameDisplay;
   String? _selectedNameKey;
   bool _ignoreNextNameChange = false;
+  Timer? _searchDebounce;
+  List<Map<String, dynamic>> _nameSuggestions = [];
 
   void _onNameChanged() {
     // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
@@ -211,9 +212,9 @@ class _InvitacionPageState extends State<InvitacionPage>
     }
   }
 
-  void _enviarWhatsApp(String nombre, String acompanante) async {
+  Future<bool> _enviarWhatsApp(String nombre, String acompanante) async {
     if (nombre.isEmpty) {
-      return;
+      return false;
     }
     final String mensaje = acompanante.isEmpty
         ? "Hola! Soy $nombre y confirmo mi asistencia para asistir a este evento tan importante el día 18/07/26"
@@ -238,13 +239,15 @@ class _InvitacionPageState extends State<InvitacionPage>
       ),
     );
 
-    if (confirmar != true) return;
+    if (confirmar != true) return false;
 
     final url =
         "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}"; // cámbialo por tu número de WhatsApp
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      return true;
     }
+    return false;
   }
 
 // 🔹 Ciclo de vida y build (ajustado)
@@ -556,7 +559,7 @@ class _InvitacionPageState extends State<InvitacionPage>
           // else
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("lib/assets/4.jpeg"),
+              image: AssetImage("lib/assets/1.jpeg"),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(0.30), BlendMode.darken),
@@ -606,7 +609,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                           shadows: const [
                                             Shadow(
                                                 color: Colors.black54,
-                                                blurRadius: 3,
+                                                blurRadius: 2,
                                                 offset: Offset(1, 1)),
                                           ],
                                         ),
@@ -633,7 +636,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                     Shadow(
                                                         color: Colors.black54,
                                                         blurRadius: 2,
-                                                        offset: Offset(2, 2)),
+                                                        offset: Offset(1, 1)),
                                                   ],
                                                 ),
                                               ),
@@ -668,7 +671,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                     Shadow(
                                                         color: Colors.black54,
                                                         blurRadius: 2,
-                                                        offset: Offset(2, 2)),
+                                                        offset: Offset(1, 1)),
                                                   ],
                                                 ),
                                               ),
@@ -703,7 +706,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                     Shadow(
                                                         color: Colors.black54,
                                                         blurRadius: 2,
-                                                        offset: Offset(2, 2)),
+                                                        offset: Offset(1, 1)),
                                                   ],
                                                 ),
                                               ),
@@ -738,7 +741,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                     Shadow(
                                                         color: Colors.black54,
                                                         blurRadius: 2,
-                                                        offset: Offset(2, 2)),
+                                                        offset: Offset(1, 1)),
                                                   ],
                                                 ),
                                               ),
@@ -894,9 +897,9 @@ class _InvitacionPageState extends State<InvitacionPage>
                                   children: [
                                     // Hora a la izquierda
                                     Text(
-                                      "4:00 PM",
+                                      "3:40 PM",
                                       style: GoogleFonts.playfairDisplay(
-                                        fontSize: 18,
+                                        fontSize: 22,
                                         color: const Color(0xFFB08D57),
                                         fontWeight: FontWeight.w400,
                                       ),
@@ -1024,21 +1027,9 @@ class _InvitacionPageState extends State<InvitacionPage>
                                               "Sábado",
                                               style:
                                                   GoogleFonts.playfairDisplay(
-                                                fontSize: 22,
+                                                fontSize: 26,
                                                 color: const Color(0xFFB08D57),
                                                 fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            // Divider dorado debajo del texto
-                                            Container(
-                                              width: 95,
-                                              height: 2,
-                                              decoration: BoxDecoration(
-                                                color: const Color.fromARGB(
-                                                    255, 132, 106, 66),
-                                                borderRadius:
-                                                    BorderRadius.circular(1),
                                               ),
                                             ),
                                           ],
@@ -1048,40 +1039,40 @@ class _InvitacionPageState extends State<InvitacionPage>
                                         Text(
                                           "18",
                                           style: GoogleFonts.playfairDisplay(
-                                            fontSize: 40,
+                                            fontSize: 45,
                                             color: const Color(0xFFB08D57),
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        const SizedBox(width: 20),
-                                        // Hora a la derecha
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              "5:30 PM",
-                                              style:
-                                                  GoogleFonts.playfairDisplay(
-                                                fontSize: 18,
-                                                color: const Color(0xFFB08D57),
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            // Divider dorado debajo del texto
-                                            Container(
-                                              width: 95,
-                                              height: 2,
-                                              decoration: BoxDecoration(
-                                                color: const Color.fromARGB(
-                                                    255, 132, 106, 66),
-                                                borderRadius:
-                                                    BorderRadius.circular(1),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                        // const SizedBox(width: 20),
+                                        // // Hora a la derecha
+                                        // Column(
+                                        //   crossAxisAlignment:
+                                        //       CrossAxisAlignment.center,
+                                        //   children: [
+                                        //     Text(
+                                        //       "5:30 PM",
+                                        //       style:
+                                        //           GoogleFonts.playfairDisplay(
+                                        //         fontSize: 18,
+                                        //         color: const Color(0xFFB08D57),
+                                        //         fontWeight: FontWeight.w400,
+                                        //       ),
+                                        //     ),
+                                        //     const SizedBox(height: 4),
+                                        //     // Divider dorado debajo del texto
+                                        //     Container(
+                                        //       width: 95,
+                                        //       height: 2,
+                                        //       decoration: BoxDecoration(
+                                        //         color: const Color.fromARGB(
+                                        //             255, 132, 106, 66),
+                                        //         borderRadius:
+                                        //             BorderRadius.circular(1),
+                                        //       ),
+                                        //     ),
+                                        //   ],
+                                        // ),
                                       ],
                                     ),
                                     const SizedBox(height: 10),
@@ -1646,7 +1637,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                 Stack(
                   children: [
                     Container(
-                      height: size.width > 600 ? size.height * 4.2 : size.height * 0.8,
+                      height: size.width > 600 ? size.height * 4.2 : size.height * 0.8 + 0.08,
                       width: double.infinity,
                       child: Center(
                         child: Column(
@@ -1664,7 +1655,6 @@ class _InvitacionPageState extends State<InvitacionPage>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    const SizedBox(height: 20),
                                     // Título CONFIRMAR ASISTENCIA
                                     Text(
                                       "CONFIRMAR ASISTENCIA",
@@ -1703,7 +1693,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                                    const SizedBox(height: 15),
+                                    const SizedBox(height: 5),
                                     // Contenido
                                     Padding(
                                       padding: EdgeInsets.symmetric(
@@ -1717,7 +1707,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    const SizedBox(height: 25),
+                                    const SizedBox(height: 10),
                                     // Botón Confirmar Asistencia
                                     ElevatedButton(
                                       onPressed: () =>
@@ -1740,7 +1730,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ),
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 10),
                                   // Aviso de plazo de confirmación
                                   Container(
                                     width: double.infinity,
@@ -2252,7 +2242,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                             // Botón confirmar
                             if (!_soldOut)
                               ElevatedButton(
-                                onPressed: _isConfirming
+                                onPressed: _isConfirming || _isProcessingConfirmation
                                     ? null
                                     : () async {
                                         final nombre = _nombreCtrl.text.trim();
@@ -2261,11 +2251,16 @@ class _InvitacionPageState extends State<InvitacionPage>
                                         final acomp2 = _acompanante2Ctrl.text.trim();
                                         final acomp3 = _acompanante3Ctrl.text.trim();
                                         
-                                        setState(() => _isConfirming = true);
+                                        // Mostrar progreso y previsualización
+                                        setState(() => _isProcessingConfirmation = true);
+                                        setDialogState(() {}); // Actualizar diálogo inmediatamente
+                                        
                                         try {
                                           // Consultar invitado en Sheets
                                           final guest = await SheetsService.getGuest(key!);
                                           if (guest == null) {
+                                            setState(() => _isProcessingConfirmation = false);
+                                            setDialogState(() {}); // Actualizar diálogo
                                             ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
                                                 content: Text('No encontramos tu nombre. Escríbelo exactamente como aparece en la invitación.'),
@@ -2279,6 +2274,8 @@ class _InvitacionPageState extends State<InvitacionPage>
                                           if (_isConfirt == true) {
                                             // CASO: CONFIRMAR ASISTENCIA
                                             if (passes <= 0) {
+                                              setState(() => _isProcessingConfirmation = false);
+                                              setDialogState(() {}); // Actualizar diálogo
                                               await _refreshSoldOutFromSheets();
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 const SnackBar(
@@ -2307,6 +2304,8 @@ class _InvitacionPageState extends State<InvitacionPage>
                                             }
                                             final updated = await SheetsService.confirm(key, consume: desired);
                                             if (updated == null) {
+                                              setState(() => _isProcessingConfirmation = false);
+                                              setDialogState(() {}); // Actualizar diálogo
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 const SnackBar(
                                                   content: Text('No se pudo confirmar. Intenta de nuevo.'),
@@ -2321,24 +2320,36 @@ class _InvitacionPageState extends State<InvitacionPage>
                                             if (companionsInput.isNotEmpty) {
                                               acompFinal = _humanJoin(companionsInput);
                                             }
-                                            _enviarWhatsApp(nombre, acompFinal);
-                                            // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
-                                            if (mounted) {
-                                              setState(() {
-                                                _soldOut = false;
-                                              });
-                                            }
-                                            await _refreshSoldOutFromSheets();
+                                            
+                                            // Enviar WhatsApp y esperar confirmación del usuario
+                                            final whatsappEnviado = await _enviarWhatsApp(nombre, acompFinal);
+                                            
+                                            if (whatsappEnviado) {
+                                              // Solo si el usuario confirmó el envío de WhatsApp
+                                              // Recalcular estado de cupos (optimista) y luego confirmar con Sheets
+                                              if (mounted) {
+                                                setState(() {
+                                                  _soldOut = false;
+                                                });
+                                              }
+                                              await _refreshSoldOutFromSheets();
 
-                                            // Cerrar diálogo después de confirmar
-                                            Navigator.of(context).pop();
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('¡Asistencia confirmada! Te esperamos 💕'),
-                                                duration: Duration(seconds: 3),
-                                                backgroundColor: Colors.green,
-                                              ),
-                                            );
+                                              // Cerrar diálogo después de confirmar
+                                              Navigator.of(context).pop();
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('¡Asistencia confirmada! Te esperamos 💕'),
+                                                  duration: Duration(seconds: 3),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            } else {
+                                              // Si el usuario canceló el WhatsApp, resetear el estado pero no cerrar el diálogo
+                                              setState(() => _isProcessingConfirmation = false);
+                                              setDialogState(() {}); // Actualizar diálogo para restaurar el botón
+                                              return;
+                                            }
+                                            setState(() => _isProcessingConfirmation = false);
                                           } else {
                                             // CASO: DECLINE ASISTENCIA
                                             final updated = await SheetsService.decline(
@@ -2346,6 +2357,8 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                 consume: passes
                                             );
                                             if (updated == null) {
+                                              setState(() => _isProcessingConfirmation = false);
+                                              setDialogState(() {}); // Actualizar diálogo
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 const SnackBar(
                                                   content: Text('No se pudo procesar tu respuesta. Intenta de nuevo.'),
@@ -2365,6 +2378,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                                                 backgroundColor: Colors.orange,
                                               ),
                                             );
+                                            setState(() => _isProcessingConfirmation = false);
                                           }
                                         } finally {
                                           if (mounted)
@@ -2380,23 +2394,27 @@ class _InvitacionPageState extends State<InvitacionPage>
                                     borderRadius: BorderRadius.circular(15),
                                   ),
                                 ),
-                                child: _isConfirming
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor:
-                                          AlwaysStoppedAnimation<Color>(
-                                              Colors.white),
-                                    ),
-                                  )
-                                : const Text(
-                                    "Confirmar",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                                child: _isProcessingConfirmation
+                                    ? Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text("Procesando..."),
+                                        ],
+                                      )
+                                    : const Text(
+                                        "Confirmar",
+                                        style: TextStyle(
+                                            fontSize: 14, fontWeight: FontWeight.bold),
+                                      ),
                               ),
                           ],
                         ),
@@ -2867,7 +2885,7 @@ class _InvitacionPageState extends State<InvitacionPage>
         // Título del mes
         FittedBox(
           child: Text(
-            'Julio 2026 - 4:00 PM',
+            'Julio 2026 - 3:40 PM',
             style: GoogleFonts.playfairDisplay(
               color: Colors.white,
               fontSize: size.width > 600 ? 28 : 22,
