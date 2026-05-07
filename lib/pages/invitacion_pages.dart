@@ -2196,7 +2196,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                                     color: Colors.black87),
                                                 decoration:
                                                     const InputDecoration(
-                                                  labelText: "Acompañante 1",
+                                                  labelText: "Nombre de acompañante",
                                                   filled: true,
                                                   fillColor: Colors.white70,
                                                   labelStyle: TextStyle(
@@ -2222,7 +2222,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                                     color: Colors.black87),
                                                 decoration:
                                                     const InputDecoration(
-                                                  labelText: "Acompañante 2",
+                                                  labelText: "Nombre de acompañante 2",
                                                   filled: true,
                                                   fillColor: Colors.white70,
                                                 ),
@@ -2238,7 +2238,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                                 controller: _acompanante3Ctrl,
                                                 decoration:
                                                     const InputDecoration(
-                                                  labelText: "Acompañante 3",
+                                                  labelText: "Nombre de acompañante 3",
                                                   filled: true,
                                                   fillColor: Colors.white70,
                                                 ),
