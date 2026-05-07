@@ -2,12 +2,8 @@ import 'dart:async';
 import 'dart:ui' as ui; // For platformViewRegistry (web)
 import 'dart:html' as html; // For IFrameElement (web)
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // kIsWeb
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -23,8 +19,7 @@ class InvitacionPage extends StatefulWidget {
   State<InvitacionPage> createState() => _InvitacionPageState();
 }
 
-class _InvitacionPageState extends State<InvitacionPage>
-    with TickerProviderStateMixin {
+class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStateMixin {
   // Cuenta regresiva estilo reloj (HH:MM:SS) hasta el 13 de diciembre de 2025
   Timer? _countdownTimer;
   int _d = 0, _h = 0, _m = 0, _s = 0;
@@ -65,17 +60,22 @@ class _InvitacionPageState extends State<InvitacionPage>
   final TextEditingController _acompananteCtrl = TextEditingController();
   final TextEditingController _acompanante2Ctrl = TextEditingController();
   final TextEditingController _acompanante3Ctrl = TextEditingController();
+
   int? _passesForTypedName;
   bool _soldOut = false;
   bool _isConfirming = false;
   bool _isProcessingConfirmation = false;
   bool _isSearchingNames = false;
+
   // Control de búsqueda al seleccionar una sugerencia
   String? _selectedNameDisplay;
   String? _selectedNameKey;
   bool _ignoreNextNameChange = false;
   Timer? _searchDebounce;
   List<Map<String, dynamic>> _nameSuggestions = [];
+
+  // GlobalKey para la sección de confirmación
+  final GlobalKey _confirmacionKey = GlobalKey();
 
   void _onNameChanged() {
     // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
@@ -209,6 +209,20 @@ class _InvitacionPageState extends State<InvitacionPage>
         "https://www.google.com/maps?vet=12ahUKEwipyfnhh7uSAxXkmbAFHYyRBMcQ8UF6BAgoEAI..i&lei=ZrqAaan-HeSzwt0PjKOSuAw&cs=1&um=1&ie=UTF-8&fb=1&gl=co&sa=X&geocode=KY_shlMAxTmOMbBiVo-qEDCw&daddr=Narino,+Palomestizo,+Tulu%C3%A1,+Valle+del+Cauca"; // cámbialo por tu ubicación real
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _scrollToConfirmacion() {
+    final RenderBox? renderBox = _confirmacionKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final scrollOffset = _scrollController.offset + position.dy - 100; // 100px de margen superior
+      
+      _scrollController.animateTo(
+        scrollOffset,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -531,17 +545,39 @@ class _InvitacionPageState extends State<InvitacionPage>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: _togglePlayPause,
-          backgroundColor: Color(0xFF001F54), // Azul navy
-          elevation: 5,
-          hoverElevation: 10,
-          focusElevation: 10,
-          highlightElevation: 10,
-          hoverColor: Colors.white,
-          tooltip: "Fonseca - Que Suerte Tenerte",
-          child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // Botón flotante para ir a confirmación
+            FloatingActionButton(
+              onPressed: _scrollToConfirmacion,
+              backgroundColor: const Color(0xFFB08D57), // Dorado
+              elevation: 5,
+              heroTag: "confirmacion",
+              tooltip: "Ir a Confirmación",
+              child: const Icon(
+                Icons.how_to_reg,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Botón flotante de música (existente)
+            FloatingActionButton(
+              onPressed: _togglePlayPause,
+              backgroundColor: const Color(0xFF001F54), // Azul navy
+              elevation: 5,
+              hoverElevation: 10,
+              focusElevation: 10,
+              highlightElevation: 10,
+              hoverColor: Colors.white,
+              heroTag: "musica",
+              tooltip: "Fonseca - Que Suerte Tenerte",
+              child: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
         body: Container(
           // 🔹 Fondo único en toda la pantalla
@@ -1635,6 +1671,7 @@ class _InvitacionPageState extends State<InvitacionPage>
                 ),
                 // Seccion 7 Tarjeta de Confirmación
                 Stack(
+                  key: _confirmacionKey,
                   children: [
                     Container(
                       height: size.width > 600 ? size.height * 4.2 : size.height * 0.8 + 0.08,
