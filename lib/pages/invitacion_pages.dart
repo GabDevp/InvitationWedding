@@ -76,6 +76,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
 
   // GlobalKey para la sección de confirmación
   final GlobalKey _confirmacionKey = GlobalKey();
+  
+  // Control para mostrar mensaje de confirmación previa
+  bool _mostrarMensajeConfirmado = false;
 
   void _onNameChanged() {
     // Evitar disparar búsqueda cuando acabamos de setear el texto por selección
@@ -103,6 +106,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
       setState(() {
         _nameSuggestions = [];
         _passesForTypedName = null;
+        _mostrarMensajeConfirmado = false; // Resetear para permitir mostrar mensaje en futuras búsquedas
         _isSearchingNames = false;
       });
       setDialogState?.call(); // Actualizar diálogo si está activo
@@ -138,6 +142,8 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
           setState(() {
             _passesForTypedName = p;
             final pp = p ?? 0;
+            
+                        
             if (pp < 2) {
               _acompananteCtrl.clear();
               _acompanante2Ctrl.clear();
@@ -155,6 +161,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
         if (mounted) {
           setState(() {
             _passesForTypedName = null;
+            _mostrarMensajeConfirmado = false; // Resetear para permitir mostrar mensaje en futuras búsquedas
             _acompananteCtrl.clear();
             _acompanante2Ctrl.clear();
             _acompanante3Ctrl.clear();
@@ -224,6 +231,89 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  void _mostrarDialogoPasesAgotados(String nombreInvitado) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // No se puede cerrar tocando fuera
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.event_busy,
+                color: const Color(0xFFB08D57),
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '¡Pases Agotados!',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFB08D57),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Estimado/a $nombreInvitado,',
+                style: GoogleFonts.roboto(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Lamentamos informarte que todos tus pases para este evento ya han sido confirmados y utilizados.',
+                style: GoogleFonts.roboto(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Si crees que esto es un error o necesitas asistencia adicional, por favor contacta directamente a los novios.',
+                style: GoogleFonts.roboto(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB08D57),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Entendido',
+                style: GoogleFonts.roboto(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<bool> _enviarWhatsApp(String nombre, String acompanante) async {
@@ -1789,7 +1879,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            "El plazo para confirmar es hasta el 30 de junio",
+                                            "El plazo para confirmar es hasta el 15 de junio",
                                             style: GoogleFonts.nunito(
                                               fontSize: 14,
                                               color: Colors.red[700],
@@ -1859,7 +1949,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
 
   // Metodo para mostrar diálogo de confirmación
   void _showConfirmacionDialog(BuildContext context) {
-    bool _isConfirt = false;
+    bool _isConfirt = true;
     showDialog(
       barrierDismissible: true,
       context: context,
@@ -2155,6 +2245,18 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                                         _acompananteCtrl
                                                             .clear();
                                                     });
+                                                    
+
+                                                    // Si los pases son 0, mostrar diálogo de pases agotados
+                                                    if (passesRem == 0) {
+                                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                        if (mounted) {
+                                                          _mostrarDialogoPasesAgotados(display);
+                                                        }
+                                                      });
+                                                    }
+                                                    
+
                                                     // Actualizar el diálogo para mostrar los campos de acompañantes
                                                     setDialogState(
                                                         () {});
@@ -2277,7 +2379,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                               ),
                             ),
                             // Botón confirmar
-                            if (!_soldOut)
+                            if (!_soldOut && _passesForTypedName != 0)
                               ElevatedButton(
                                 onPressed: _isConfirming || _isProcessingConfirmation
                                     ? null
@@ -2780,7 +2882,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                     context,
                     number: "3",
                     title: "Confirmar asistencia ✅",
-                    description: "Por favor confirma tu asistencia antes del\n30 de Junio para que podamos coordinar todo a la perfección.",
+                    description: "Por favor confirma tu asistencia antes del\n15 de Junio para que podamos coordinar todo a la perfección.",
                   ),
                   _buildRecommendationItem(
                     context,
