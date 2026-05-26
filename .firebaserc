@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "nuestraboda-31913"
-  }
+    "default": "invitations-305b0",
+    "invitations": "invitations-305b0"
+  },
+  "targets": {},
+  "etags": {}
 }

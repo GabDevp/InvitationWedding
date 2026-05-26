@@ -13,7 +13,7 @@ class WeddingInviteApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Nuestra Boda',
+      title: 'Invitación',
       debugShowCheckedModeBanner: false,
       initialRoute: 'sobre',
       onGenerateRoute: RouteGenerator.generateRoute,

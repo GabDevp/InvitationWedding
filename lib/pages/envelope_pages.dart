@@ -224,7 +224,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                       Text(
                         "CENA POR MOTIVO DE GRADO",
                         style: GoogleFonts.cinzel(
-                          fontSize: isMobile ? 30 : 40,
+                          fontSize: isMobile ? 24.5 : 35,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFFD4AF37),
                           shadows: [
@@ -242,10 +242,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                       Text(
                         "Ingeniero Electrónico",
                         style: GoogleFonts.playfairDisplay(
-                          fontSize: isMobile ? 26 : 32,
+                          fontSize: isMobile ? 22 : 28,
                           fontWeight: FontWeight.w400,
                           color: Colors.white,
-                          letterSpacing: 2,
+                          letterSpacing: 1,
                         ),
                       ),
                       SizedBox(height: isMobile ? 10 : 15),
@@ -336,7 +336,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                   // Birrete en esquina superior izquierda
                   Positioned(
                     top: -25,
-                    left: -15,
+                    left: -11.5,
                     child: Container(
                       decoration: BoxDecoration(
                         color: Color(0xFF0D0D0D),
