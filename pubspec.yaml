@@ -30,31 +30,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - lib/assets/fondo1.jpg
-    - lib/assets/qrphotos.jpeg
-    - lib/assets/hombres.png
-    - lib/assets/mujeres.png
-    - lib/assets/flores.png
-    - lib/assets/anillos.png
-    - lib/assets/copas.png
-    - lib/assets/corbatin.png
-    - lib/assets/tips.png
-    - lib/assets/regalo.gif
-    - lib/assets/1.jpeg
-    - lib/assets/2.jpeg
-    - lib/assets/3.jpeg
-    - lib/assets/4.jpeg
-    - lib/assets/5.jpeg
-    - lib/assets/6.jpeg
-    - lib/assets/7.jpeg
-    - lib/assets/8.jpeg
-    - lib/assets/9.jpeg
-    - lib/assets/10.jpeg
-    - lib/assets/11.jpeg
-    - lib/assets/12.jpeg
-    - lib/assets/13.jpeg
-    - lib/assets/14.jpeg
     - lib/assets/noniños.gif
-    - lib/assets/audio/Fonseca.mp3
-    - lib/assets/video/invitacion.mp4
-    - lib/assets/video/invitacion.webm

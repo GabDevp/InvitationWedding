@@ -1,10 +1,8 @@
 // ignore_for_file: unused_field
 
-import 'dart:ui' as ui;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:invitacion_boda/pages/pages.dart';
-import 'package:video_player/video_player.dart';
 class EnvelopeScreen extends StatefulWidget {
   final String? nombreInvitado;
   const EnvelopeScreen({super.key, this.nombreInvitado});
@@ -13,15 +11,71 @@ class EnvelopeScreen extends StatefulWidget {
   State<EnvelopeScreen> createState() => _EnvelopeScreenState();
 }
 
+class CircuitBoardPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0xFFD4AF37).withOpacity(0.15)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    final random = math.Random(42);
+    
+    // Dibujar líneas de circuito
+    for (int i = 0; i < 30; i++) {
+      final startX = random.nextDouble() * size.width;
+      final startY = random.nextDouble() * size.height;
+      
+      final path = Path();
+      path.moveTo(startX, startY);
+      
+      // Crear patrón de circuito
+      for (int j = 0; j < 4; j++) {
+        final direction = random.nextInt(4);
+        final length = 30 + random.nextDouble() * 50;
+        
+        switch (direction) {
+          case 0:
+            path.relativeLineTo(length, 0);
+            break;
+          case 1:
+            path.relativeLineTo(0, length);
+            break;
+          case 2:
+            path.relativeLineTo(-length, 0);
+            break;
+          case 3:
+            path.relativeLineTo(0, -length);
+            break;
+        }
+      }
+      
+      canvas.drawPath(path, paint);
+    }
+    
+    // Dibujar puntos de conexión
+    final dotPaint = Paint()
+      ..color = Color(0xFFD4AF37).withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+    
+    for (int i = 0; i < 20; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      canvas.drawCircle(Offset(x, y), 3, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
 class _EnvelopeScreenState extends State<EnvelopeScreen>
     with TickerProviderStateMixin {
   late AnimationController _arrowController;
   late Animation<double> _arrowAnimation;
-  late VideoPlayerController _videoController;
 
   bool opened = false;
   bool _dataLoaded = true; // Siempre true ya que no necesitamos cargar datos
-  bool _videoLoaded = false;
   String _nombreInvitado = '';
 
   @override
@@ -41,62 +95,34 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
         curve: Curves.easeInOut,
       ),
     );
-
-    // Inicializar el controller del video
-    _videoController = VideoPlayerController.asset('lib/assets/video/invitacion.mp4')
-      ..initialize().then((_) {
-        setState(() {
-          _videoLoaded = true;
-        });
-        _videoController.setLooping(true);
-        _videoController.setVolume(0.0); // Silenciar video para fondo
-        _videoController.play();
-      }).catchError((error) {
-        print('Error al cargar video: $error');
-        setState(() {
-          _videoLoaded = false;
-        });
-      });
   }
 
   @override
   void dispose() {
     _arrowController.dispose();
-    _videoController.dispose();
     super.dispose();
   }
 
-  void _toggleEnvelope() async {
-    if (opened) return;
-
-    setState(() => opened = true);
-
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 900),
-        pageBuilder: (_, animation, __) => const InvitacionPage(),
-        transitionsBuilder: (_, animation, __, child) {
-          final blur = Tween<double>(begin: 25, end: 0).animate(animation);
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (_, __) {
-              return BackdropFilter(
-                filter: ui.ImageFilter.blur(
-                  sigmaX: blur.value,
-                  sigmaY: blur.value,
-                ),
-                child: Opacity(
-                  opacity: animation.value,
-                  child: child,
-                ),
-              );
-            },
-          );
-        },
-      ),
+  Widget _buildInfoRow(String text, IconData icon, bool isMobile) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          color: Color(0xFFD4AF37),
+          size: isMobile ? 22 : 26,
+        ),
+        SizedBox(width: 12),
+        Text(
+          text,
+          style: GoogleFonts.roboto(
+            fontSize: isMobile ? 18 : 22,
+            fontWeight: FontWeight.w300,
+            color: Colors.white,
+            letterSpacing: 1,
+          ),
+        ),
+      ],
     );
   }
 
@@ -106,325 +132,239 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     final isMobile = size.width < 600;
 
     return Scaffold(
-      backgroundColor: Colors.black54,
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Fondo principal con video o fallback a imagen
-          SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            child: _videoLoaded && _videoController.value.isInitialized
-                ? VideoPlayer(_videoController)
-                : Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('lib/assets/4.jpeg'),
-                        fit: BoxFit.cover,
-                      ),
-                      color: Colors.black.withOpacity(0.3),
-                    ),
-                  ),
-          ),
-          
-          // Overlay oscuro sutil para mejorar legibilidad
+          // Fondo oscuro con patrón de circuito
           Container(
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0A0A0A),
+                  Color(0xFF1A1A1A),
+                  Color(0xFF0D0D0D),
+                ],
+              ),
+            ),
+            child: CustomPaint(
+              painter: CircuitBoardPainter(),
+              size: Size.infinite,
             ),
           ),
 
-          // Encabezado
-          if (!opened && _dataLoaded)
-            Positioned(
-              top: size.height * 0.01,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Invitado",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 4,
-                          offset: const Offset(1, 1),
-                        ),
-                      ],
-                      decorationThickness: 2,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    "Nuevas noticias",
-                    style: GoogleFonts.roboto(
-                      fontSize: 14,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 4,
-                          offset: const Offset(1, 1),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    "JULIO 2026",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 22,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w300,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 4,
-                          offset: const Offset(1, 1),
-                        ),
-                      ],
-                      decorationThickness: 2,
-                      decoration: TextDecoration.underline,
-                      decorationColor: Colors.white,
-                      decorationStyle: TextDecorationStyle.solid,
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
-            Positioned(
-              top: size.height * 0.05,
-              left: 0,
-              right: 0,
-              child: Divider(color: Colors.white, thickness: 3, height: 20),
-            ),
-
-          // Contenido central - Nombres y frase
+          // Contenido central - Invitación de Graduación
           if (!opened && _dataLoaded)
             Positioned(
-              top: size.height * 0.15,
-              left: 0,
-              right: 0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Nombres principales
-                  Column(
-                    children: [
-                      Divider(color: Colors.white, thickness: 2, height: 20, endIndent: 80, indent: 80),
-                      Text(
-                        "Gabriel",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.7),
-                              blurRadius: 6,
-                              offset: const Offset(2, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB08D57),
-                      borderRadius: BorderRadius.circular(45),
-                    ),
-                    padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
-                    child: Text(
-                      "&",
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 38,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.7),
-                            blurRadius: 6,
-                            offset: const Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  Column(
-                    children: [
-                      Text(
-                        "Daniela",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.7),
-                              blurRadius: 6,
-                              offset: const Offset(2, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Divider(color: Colors.white, thickness: 2, height: 20, endIndent: 50, indent: 50),
-                    ],
-                  ),
-                  Text(
-                    "¡Nuestra Boda!",
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: isMobile ? 32 : 42,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.7),
-                          blurRadius: 6,
-                          offset: const Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    "Te elijo hoy y por el resto de mi vida",
-                    style: GoogleFonts.dancingScript(
-                      fontSize: isMobile ? 24 : 32,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.7),
-                          blurRadius: 6,
-                          offset: const Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-
-          // Borde floral inferior con PNG
-          if (!opened && _dataLoaded)
-            Positioned(
-              bottom: -15,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: size.height * 0.15,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('lib/assets/flores.png'),
-                    fit: BoxFit.contain,
-                    alignment: Alignment.bottomCenter,
-                    repeat: ImageRepeat.repeatX,
-                    scale: 1.5,
-                  ),
-                ),
-              ),
-            ),
-          // Borde floral inferior con PNG
-          if (!opened && _dataLoaded)
-            Positioned(
-              bottom: -28,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: size.height * 0.15,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('lib/assets/flores.png'),
-                    fit: BoxFit.contain,
-                    alignment: Alignment.bottomCenter,
-                    repeat: ImageRepeat.repeatX,
-                    scale: 1.5,
-                  ),
-                ),
-              ),
-            ),
-          // Borde floral inferior con PNG
-          if (!opened && _dataLoaded)
-            Positioned(
-              bottom: -40,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: size.height * 0.15,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('lib/assets/flores.png'),
-                    fit: BoxFit.contain,
-                    alignment: Alignment.bottomCenter,
-                    repeat: ImageRepeat.repeatX,
-                    scale: 1.5,
-                  ),
-                ),
-              ),
-            ),
-
-          // Botón central de abrir invitación
-          if (!opened && _dataLoaded)
-            Positioned(
-              top: size.height * 0.65,
+              top: size.height * 0.12,
               left: 0,
               right: 0,
               child: Center(
-                child: GestureDetector(
-                  onTap: _toggleEnvelope,
-                  child: AnimatedBuilder(
-                    animation: _arrowAnimation,
-                    builder: (_, child) {
-                      return Transform.translate(
-                        offset: Offset(0, _arrowAnimation.value),
-                        child: child,
-                      );
-                    },
-                    child: Container(
-                      width: isMobile ? 100 : 120,
-                      height: isMobile ? 100 : 120,
+                child: Stack(
+                  children: [
+                    Container(
+                      width: isMobile ? size.width * 0.92 : size.width * 0.75,
+                      padding: EdgeInsets.all(isMobile ? 32 : 50),
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFFB08D57),
+                        color: Color(0xFF0D0D0D),
+                        border: Border.all(
+                          color: Color(0xFFD4AF37),
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
+                            color: Color(0xFFD4AF37).withOpacity(0.3),
+                            blurRadius: 20,
+                            spreadRadius: 2,
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Text(
-                          'ABRIR\nINVITACIÓN',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.cinzel(
-                            color: Colors.white,
-                            fontSize: isMobile ? 12 : 14,
-                            letterSpacing: 1.0,
-                            fontWeight: FontWeight.bold,
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Decoración superior
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.transparent, Color(0xFFD4AF37)],
+                              ),
+                            ),
                           ),
+                          SizedBox(width: 10),
+                          Icon(
+                            Icons.star,
+                            color: Color(0xFFD4AF37),
+                            size: isMobile ? 24 : 28,
+                          ),
+                          SizedBox(width: 10),
+                          Container(
+                            width: 40,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFFD4AF37), Colors.transparent],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: isMobile ? 20 : 30),
+                      
+                      // Título principal
+                      Text(
+                        "CENA POR MOTIVO DE GRADO",
+                        style: GoogleFonts.cinzel(
+                          fontSize: isMobile ? 30 : 40,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFD4AF37),
+                          shadows: [
+                            Shadow(
+                              color: Color(0xFFD4AF37).withOpacity(0.5),
+                              blurRadius: 10,
+                              offset: Offset(0, 0),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: isMobile ? 15 : 20),
+                      
+                      // Carrera
+                      Text(
+                        "Ingeniero Electrónico",
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: isMobile ? 26 : 32,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      SizedBox(height: isMobile ? 10 : 15),
+                      
+                      // Nombre del graduando
+                      Text(
+                        "Juan Esteban Lopez",
+                        style: GoogleFonts.roboto(
+                          fontSize: isMobile ? 20 : 24,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.white70,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      SizedBox(height: isMobile ? 20 : 25),
+                      
+                      // Línea dorada
+                      Container(
+                        height: 2,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.transparent,
+                              Color(0xFFD4AF37),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: isMobile ? 25 : 30),
+                      
+                      // Información del evento
+                      _buildInfoRow(
+                        "Fecha: 30 / 05 / 2026",
+                        Icons.calendar_today,
+                        isMobile,
+                      ),
+                      SizedBox(height: isMobile ? 20 : 25),
+                      _buildInfoRow(
+                        "Hora: 07:00 PM",
+                        Icons.access_time,
+                        isMobile,
+                      ),
+                      SizedBox(height: isMobile ? 20 : 25),
+                      _buildInfoRow(
+                        "Lugar: Calle 32 #35-33",
+                        Icons.location_on,
+                        isMobile,
+                      ),
+                      
+                      SizedBox(height: isMobile ? 20 : 25),
+                      
+                      // Decoración inferior
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 30,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.transparent, Color(0xFFD4AF37)],
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(
+                            Icons.star,
+                            color: Color(0xFFD4AF37),
+                            size: 16,
+                          ),
+                          SizedBox(width: 8),
+                          Container(
+                            width: 30,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xFFD4AF37), Colors.transparent],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                  // Birrete en esquina superior izquierda
+                  Positioned(
+                    top: -25,
+                    left: -15,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFF0D0D0D),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Color(0xFFD4AF37),
+                          width: 3,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xFFD4AF37).withOpacity(0.5),
+                            blurRadius: 15,
+                            spreadRadius: 3,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '🎓',
+                        style: TextStyle(
+                          fontSize: isMobile ? 65 : 75,
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
+          ),
         ],
       ),
     );
