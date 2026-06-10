@@ -219,6 +219,247 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
     }
   }
 
+  // Método para validar asistencia antes de mostrar ubicación
+  void _validarAsistenciaParaUbicacion(BuildContext context) {
+    TextEditingController nombreCtrl = TextEditingController();
+    bool isValidando = false;
+    bool? asistenciaConfirmada;
+
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        final size = MediaQuery.of(context).size;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              insetPadding: EdgeInsets.zero,
+              backgroundColor: Colors.transparent,
+              child: Container(
+                width: size.width * 0.9,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFB08D57),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Icono de ubicación
+                    Icon(
+                      Icons.location_on,
+                      size: 48,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(height: 16),
+                    // Título
+                    Text(
+                      "Validar Asistencia",
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    // Subtítulo
+                    Text(
+                      "Ingresa tu nombre para verificar si confirmaste tu asistencia",
+                      style: GoogleFonts.roboto(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    // Campo de nombre
+                    TextField(
+                      controller: nombreCtrl,
+                      decoration: InputDecoration(
+                        labelText: "Tu nombre",
+                        filled: true,
+                        fillColor: Colors.white70,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Estado de validación
+                    if (isValidando)
+                      Column(
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Validando...",
+                            style: GoogleFonts.roboto(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    // Resultado de validación
+                    if (asistenciaConfirmada == true && !isValidando)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 32,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "¡Asistencia confirmada!",
+                              style: GoogleFonts.roboto(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _abrirGoogleMaps();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: const Color(0xFFB08D57),
+                              ),
+                              child: const Text("Ver Ubicación"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (asistenciaConfirmada == false && !isValidando)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.red),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.cancel,
+                              color: Colors.red,
+                              size: 32,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Aún no has confirmado tu asistencia",
+                              style: GoogleFonts.roboto(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Por favor confirma tu asistencia primero",
+                              style: GoogleFonts.roboto(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    // Botón validar
+                    if (asistenciaConfirmada == null && !isValidando)
+                      ElevatedButton(
+                        onPressed: () async {
+                          final nombre = nombreCtrl.text.trim();
+                          if (nombre.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Por favor ingresa tu nombre'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          setDialogState(() => isValidando = true);
+
+                          // Buscar el nombre en las sugerencias
+                          final results = await SheetsService.search(nombre.toLowerCase());
+                          
+                          if (results.isEmpty) {
+                            setDialogState(() {
+                              isValidando = false;
+                              asistenciaConfirmada = false;
+                            });
+                            return;
+                          }
+
+                          // Obtener el primer resultado
+                          final guest = await SheetsService.getGuest(results[0]['key_normalized']);
+                          
+                          if (guest == null) {
+                            setDialogState(() {
+                              isValidando = false;
+                              asistenciaConfirmada = false;
+                            });
+                            return;
+                          }
+
+                          // Verificar si tiene pases restantes (significa que no ha confirmado)
+                          final passes = int.tryParse(guest['passesRemaining']?.toString() ?? '0') ?? 0;
+                          
+                          setDialogState(() {
+                            isValidando = false;
+                            // Si tiene pases restantes, significa que NO ha confirmado
+                            asistenciaConfirmada = passes == 0;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFFB08D57),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 12,
+                          ),
+                        ),
+                        child: const Text(
+                          "Validar",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    // Botón cerrar
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        "Cerrar",
+                        style: GoogleFonts.roboto(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _scrollToConfirmacion() {
     final RenderBox? renderBox = _confirmacionKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
@@ -1239,7 +1480,7 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                                     ),
                                     const SizedBox(height: 15),
                                     ElevatedButton(
-                                      onPressed: _abrirGoogleMaps,
+                                      onPressed: () => _validarAsistenciaParaUbicacion(context),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             const Color(0xFFB08D57),
