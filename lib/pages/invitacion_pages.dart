@@ -674,9 +674,9 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
       final scrollPosition = _scrollController.offset;
       final ceremonyTrigger = 300.0; // Posición para ceremonia
       final receptionTrigger = 700.0; // Posición para recepción
-      final carouselTrigger = 1700.0; // Posición para carrusel
-      final dressCodeTrigger = 2700.0; // Posición para dress code
-      final regalosTrigger = 3700.0; // Posición para regalos
+      final carouselTrigger = 300.0; // Posición para carrusel
+      final dressCodeTrigger = 700.0; // Posición para dress code
+      final regalosTrigger = 1700.0; // Posición para regalos
 
       // Controlar animación de ceremonia
       if (scrollPosition > ceremonyTrigger && !_fadeController.isCompleted) {
@@ -880,18 +880,18 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             // Botón flotante para ir a confirmación
-            FloatingActionButton(
-              onPressed: _scrollToConfirmacion,
-              backgroundColor: const Color(0xFFB08D57), // Dorado
-              elevation: 5,
-              heroTag: "confirmacion",
-              tooltip: "Ir a Confirmación",
-              child: const Icon(
-                Icons.how_to_reg,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 16),
+            // FloatingActionButton(
+            //   onPressed: _scrollToConfirmacion,
+            //   backgroundColor: const Color(0xFFB08D57), // Dorado
+            //   elevation: 5,
+            //   heroTag: "confirmacion",
+            //   tooltip: "Ir a Confirmación",
+            //   child: const Icon(
+            //     Icons.how_to_reg,
+            //     color: Colors.white,
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
             // Botón flotante de música (existente)
             FloatingActionButton(
               onPressed: _togglePlayPause,
@@ -1193,318 +1193,318 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                     ),
                   ],
                 ),
-                const SizedBox(height: 50),
-                // 🔹 Sección 2 con su propio borde floral
-                Container(
-                  height: size.width > 600 ? size.height * 4.2 : size.height * 1.8,
-                  width: double.infinity,
-                  child: Center(
-                    child: Column(
-                      children: [
-                        FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 1200),
-                            curve: Curves.easeInOut,
-                            height: size.height * 0.5,
-                            width: size.width * 0.8,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: Colors.white),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // PNG de anillos
-                                Container(
-                                  width: size.width * 0.3,
-                                  height: size.height * 0.12,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: Image.asset(
-                                      'lib/assets/anillos.png', // Asumiendo que tienes esta imagen
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                                // Título CEREMONIA
-                                Text(
-                                  "CEREMONIA",
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFFB08D57),
-                                    letterSpacing: 3,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                // Divider dorado
-                                Container(
-                                  width: size.width * 0.6,
-                                  height: 2,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFB08D57),
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                ),
-                                const SizedBox(height: 15),
-                                // Subtitulo del mes
-                                Text(
-                                  "Julio",
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 20,
-                                    color: const Color(0xFFB08D57),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                // Día, hora y día de semana
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    // Hora a la izquierda
-                                    Text(
-                                      "3:40 PM",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 22,
-                                        color: const Color(0xFFB08D57),
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 30),
-                                    // Día del mes centrado
-                                    Text(
-                                      "18",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 40,
-                                        color: const Color(0xFFB08D57),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 30),
-                                    // Día de semana a la derecha
-                                    Text(
-                                      "Sábado",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 22,
-                                        color: const Color(0xFFB08D57),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                // Año centrado
-                                Text(
-                                  "2026",
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 24,
-                                    color: const Color(0xFFB08D57),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                // Lugar
-                                Text(
-                                  "Villa Inés",
-                                  style: GoogleFonts.dancingScript(
-                                    fontSize: 28,
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 50,
-                        ),
-                        FadeTransition(
-                          opacity: _receptionFadeAnimation,
-                          child: Container(
-                            height: size.height * 1.1,
-                            width: size.width * 0.8,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // PNG de copas
-                                    Container(
-                                      width: size.width * 0.3,
-                                      height: size.height * 0.12,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: Image.asset(
-                                          'lib/assets/copas.png', // Asumiendo que tienes esta imagen
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                    // Título RECEPCIÓN
-                                    Text(
-                                      "RECEPCIÓN",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFFB08D57),
-                                        letterSpacing: 3,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    // Divider dorado
-                                    Container(
-                                      width: size.width,
-                                      height: 2,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFB08D57),
-                                        borderRadius: BorderRadius.circular(1),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 15),
-                                    // Subtitulo del mes
-                                    Text(
-                                      "Julio",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 20,
-                                        color: const Color(0xFFB08D57),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    // Día, hora y día de semana
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        // Día de semana a la izquierda
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              "Sábado",
-                                              style:
-                                                  GoogleFonts.playfairDisplay(
-                                                fontSize: 26,
-                                                color: const Color(0xFFB08D57),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 20),
-                                        // Día del mes centrado
-                                        Text(
-                                          "18",
-                                          style: GoogleFonts.playfairDisplay(
-                                            fontSize: 45,
-                                            color: const Color(0xFFB08D57),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        // const SizedBox(width: 20),
-                                        // // Hora a la derecha
-                                        // Column(
-                                        //   crossAxisAlignment:
-                                        //       CrossAxisAlignment.center,
-                                        //   children: [
-                                        //     Text(
-                                        //       "5:30 PM",
-                                        //       style:
-                                        //           GoogleFonts.playfairDisplay(
-                                        //         fontSize: 18,
-                                        //         color: const Color(0xFFB08D57),
-                                        //         fontWeight: FontWeight.w400,
-                                        //       ),
-                                        //     ),
-                                        //     const SizedBox(height: 4),
-                                        //     // Divider dorado debajo del texto
-                                        //     Container(
-                                        //       width: 95,
-                                        //       height: 2,
-                                        //       decoration: BoxDecoration(
-                                        //         color: const Color.fromARGB(
-                                        //             255, 132, 106, 66),
-                                        //         borderRadius:
-                                        //             BorderRadius.circular(1),
-                                        //       ),
-                                        //     ),
-                                        //   ],
-                                        // ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    // Año centrado
-                                    Text(
-                                      "2026",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 24,
-                                        color: const Color(0xFFB08D57),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    // Lugar
-                                    Text(
-                                      "Villa Inés",
-                                      style: GoogleFonts.dancingScript(
-                                        fontSize: 28,
-                                        color: Colors.black87,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        width: size.width > 600
-                                            ? size.width * 0.6
-                                            : size.width * 0.85,
-                                        height: 320,
-                                        decoration: BoxDecoration(
-                                          border:
-                                              Border.all(color: Colors.white24),
-                                        ),
-                                        child: const HtmlElementView(
-                                            viewType: 'gmap-iframe'),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 15),
-                                    ElevatedButton(
-                                      onPressed: () => _validarAsistenciaParaUbicacion(context),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(0xFFB08D57),
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 12),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(7),
-                                        ),
-                                      ),
-                                      child: const Text("Ver en Google Maps",
-                                          style:
-                                              TextStyle(color: Colors.white)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // const SizedBox(height: 50),
+                // // 🔹 Sección 2 con su propio borde floral
+                // Container(
+                //   height: size.width > 600 ? size.height * 4.2 : size.height * 1.8,
+                //   width: double.infinity,
+                //   child: Center(
+                //     child: Column(
+                //       children: [
+                //         FadeTransition(
+                //           opacity: _fadeAnimation,
+                //           child: AnimatedContainer(
+                //             duration: const Duration(milliseconds: 1200),
+                //             curve: Curves.easeInOut,
+                //             height: size.height * 0.5,
+                //             width: size.width * 0.8,
+                //             decoration: BoxDecoration(
+                //                 borderRadius: BorderRadius.circular(20),
+                //                 color: Colors.white),
+                //             child: Column(
+                //               crossAxisAlignment: CrossAxisAlignment.center,
+                //               children: [
+                //                 // PNG de anillos
+                //                 Container(
+                //                   width: size.width * 0.3,
+                //                   height: size.height * 0.12,
+                //                   child: ClipRRect(
+                //                     borderRadius: BorderRadius.circular(15),
+                //                     child: Image.asset(
+                //                       'lib/assets/anillos.png', // Asumiendo que tienes esta imagen
+                //                       fit: BoxFit.contain,
+                //                     ),
+                //                   ),
+                //                 ),
+                //                 // Título CEREMONIA
+                //                 Text(
+                //                   "CEREMONIA",
+                //                   style: GoogleFonts.playfairDisplay(
+                //                     fontSize: 28,
+                //                     fontWeight: FontWeight.bold,
+                //                     color: const Color(0xFFB08D57),
+                //                     letterSpacing: 3,
+                //                   ),
+                //                 ),
+                //                 const SizedBox(height: 12),
+                //                 // Divider dorado
+                //                 Container(
+                //                   width: size.width * 0.6,
+                //                   height: 2,
+                //                   decoration: BoxDecoration(
+                //                     color: const Color(0xFFB08D57),
+                //                     borderRadius: BorderRadius.circular(1),
+                //                   ),
+                //                 ),
+                //                 const SizedBox(height: 15),
+                //                 // Subtitulo del mes
+                //                 Text(
+                //                   "Julio",
+                //                   style: GoogleFonts.playfairDisplay(
+                //                     fontSize: 20,
+                //                     color: const Color(0xFFB08D57),
+                //                     fontWeight: FontWeight.w500,
+                //                   ),
+                //                 ),
+                //                 const SizedBox(height: 10),
+                //                 // Día, hora y día de semana
+                //                 Row(
+                //                   mainAxisAlignment: MainAxisAlignment.center,
+                //                   crossAxisAlignment: CrossAxisAlignment.end,
+                //                   children: [
+                //                     // Hora a la izquierda
+                //                     Text(
+                //                       "3:40 PM",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 22,
+                //                         color: const Color(0xFFB08D57),
+                //                         fontWeight: FontWeight.w400,
+                //                       ),
+                //                     ),
+                //                     const SizedBox(width: 30),
+                //                     // Día del mes centrado
+                //                     Text(
+                //                       "18",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 40,
+                //                         color: const Color(0xFFB08D57),
+                //                         fontWeight: FontWeight.bold,
+                //                       ),
+                //                     ),
+                //                     const SizedBox(width: 30),
+                //                     // Día de semana a la derecha
+                //                     Text(
+                //                       "Sábado",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 22,
+                //                         color: const Color(0xFFB08D57),
+                //                         fontWeight: FontWeight.w500,
+                //                       ),
+                //                     ),
+                //                   ],
+                //                 ),
+                //                 const SizedBox(height: 10),
+                //                 // Año centrado
+                //                 Text(
+                //                   "2026",
+                //                   style: GoogleFonts.playfairDisplay(
+                //                     fontSize: 24,
+                //                     color: const Color(0xFFB08D57),
+                //                     fontWeight: FontWeight.w600,
+                //                   ),
+                //                 ),
+                //                 const SizedBox(height: 10),
+                //                 // Lugar
+                //                 Text(
+                //                   "Villa Inés",
+                //                   style: GoogleFonts.dancingScript(
+                //                     fontSize: 28,
+                //                     color: Colors.black87,
+                //                     fontWeight: FontWeight.w600,
+                //                   ),
+                //                 ),
+                //               ],
+                //             ),
+                //           ),
+                //         ),
+                //         SizedBox(
+                //           height: 50,
+                //         ),
+                //         FadeTransition(
+                //           opacity: _receptionFadeAnimation,
+                //           child: Container(
+                //             height: size.height * 1.1,
+                //             width: size.width * 0.8,
+                //             decoration: BoxDecoration(
+                //               color: Colors.white,
+                //               borderRadius: BorderRadius.circular(20),
+                //             ),
+                //             child: Column(
+                //               crossAxisAlignment: CrossAxisAlignment.center,
+                //               children: [
+                //                 Column(
+                //                   crossAxisAlignment: CrossAxisAlignment.center,
+                //                   children: [
+                //                     // PNG de copas
+                //                     Container(
+                //                       width: size.width * 0.3,
+                //                       height: size.height * 0.12,
+                //                       child: ClipRRect(
+                //                         borderRadius: BorderRadius.circular(15),
+                //                         child: Image.asset(
+                //                           'lib/assets/copas.png', // Asumiendo que tienes esta imagen
+                //                           fit: BoxFit.contain,
+                //                         ),
+                //                       ),
+                //                     ),
+                //                     // Título RECEPCIÓN
+                //                     Text(
+                //                       "RECEPCIÓN",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 28,
+                //                         fontWeight: FontWeight.bold,
+                //                         color: const Color(0xFFB08D57),
+                //                         letterSpacing: 3,
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 12),
+                //                     // Divider dorado
+                //                     Container(
+                //                       width: size.width,
+                //                       height: 2,
+                //                       decoration: BoxDecoration(
+                //                         color: const Color(0xFFB08D57),
+                //                         borderRadius: BorderRadius.circular(1),
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 15),
+                //                     // Subtitulo del mes
+                //                     Text(
+                //                       "Julio",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 20,
+                //                         color: const Color(0xFFB08D57),
+                //                         fontWeight: FontWeight.w500,
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 10),
+                //                     // Día, hora y día de semana
+                //                     Row(
+                //                       mainAxisAlignment:
+                //                           MainAxisAlignment.center,
+                //                       crossAxisAlignment:
+                //                           CrossAxisAlignment.end,
+                //                       children: [
+                //                         // Día de semana a la izquierda
+                //                         Column(
+                //                           crossAxisAlignment:
+                //                               CrossAxisAlignment.center,
+                //                           children: [
+                //                             Text(
+                //                               "Sábado",
+                //                               style:
+                //                                   GoogleFonts.playfairDisplay(
+                //                                 fontSize: 26,
+                //                                 color: const Color(0xFFB08D57),
+                //                                 fontWeight: FontWeight.w500,
+                //                               ),
+                //                             ),
+                //                           ],
+                //                         ),
+                //                         const SizedBox(width: 20),
+                //                         // Día del mes centrado
+                //                         Text(
+                //                           "18",
+                //                           style: GoogleFonts.playfairDisplay(
+                //                             fontSize: 45,
+                //                             color: const Color(0xFFB08D57),
+                //                             fontWeight: FontWeight.bold,
+                //                           ),
+                //                         ),
+                //                         // const SizedBox(width: 20),
+                //                         // // Hora a la derecha
+                //                         // Column(
+                //                         //   crossAxisAlignment:
+                //                         //       CrossAxisAlignment.center,
+                //                         //   children: [
+                //                         //     Text(
+                //                         //       "5:30 PM",
+                //                         //       style:
+                //                         //           GoogleFonts.playfairDisplay(
+                //                         //         fontSize: 18,
+                //                         //         color: const Color(0xFFB08D57),
+                //                         //         fontWeight: FontWeight.w400,
+                //                         //       ),
+                //                         //     ),
+                //                         //     const SizedBox(height: 4),
+                //                         //     // Divider dorado debajo del texto
+                //                         //     Container(
+                //                         //       width: 95,
+                //                         //       height: 2,
+                //                         //       decoration: BoxDecoration(
+                //                         //         color: const Color.fromARGB(
+                //                         //             255, 132, 106, 66),
+                //                         //         borderRadius:
+                //                         //             BorderRadius.circular(1),
+                //                         //       ),
+                //                         //     ),
+                //                         //   ],
+                //                         // ),
+                //                       ],
+                //                     ),
+                //                     const SizedBox(height: 10),
+                //                     // Año centrado
+                //                     Text(
+                //                       "2026",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 24,
+                //                         color: const Color(0xFFB08D57),
+                //                         fontWeight: FontWeight.w600,
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 10),
+                //                     // Lugar
+                //                     Text(
+                //                       "Villa Inés",
+                //                       style: GoogleFonts.dancingScript(
+                //                         fontSize: 28,
+                //                         color: Colors.black87,
+                //                         fontWeight: FontWeight.w600,
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 12),
+                //                     ClipRRect(
+                //                       borderRadius: BorderRadius.circular(12),
+                //                       child: Container(
+                //                         width: size.width > 600
+                //                             ? size.width * 0.6
+                //                             : size.width * 0.85,
+                //                         height: 320,
+                //                         decoration: BoxDecoration(
+                //                           border:
+                //                               Border.all(color: Colors.white24),
+                //                         ),
+                //                         child: const HtmlElementView(
+                //                             viewType: 'gmap-iframe'),
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 15),
+                //                     ElevatedButton(
+                //                       onPressed: () => _validarAsistenciaParaUbicacion(context),
+                //                       style: ElevatedButton.styleFrom(
+                //                         backgroundColor:
+                //                             const Color(0xFFB08D57),
+                //                         padding: const EdgeInsets.symmetric(
+                //                             horizontal: 20, vertical: 12),
+                //                         shape: RoundedRectangleBorder(
+                //                           borderRadius:
+                //                               BorderRadius.circular(7),
+                //                         ),
+                //                       ),
+                //                       child: const Text("Ver en Google Maps",
+                //                           style:
+                //                               TextStyle(color: Colors.white)),
+                //                     ),
+                //                   ],
+                //                 ),
+                //               ],
+                //             ),
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
                 // 🔹 Sección 3 con su propio borde floral para la galeria de fotos
                 Stack(
                   children: [
@@ -2001,152 +2001,234 @@ class _InvitacionPageState extends State<InvitacionPage> with TickerProviderStat
                   ],
                 ),
                 // Seccion 7 Tarjeta de Confirmación
+                // Stack(
+                //   key: _confirmacionKey,
+                //   children: [
+                //     Container(
+                //       height: size.width > 600 ? size.height * 4.2 : size.height * 0.8 + 0.08,
+                //       width: double.infinity,
+                //       child: Center(
+                //         child: Column(
+                //           children: [
+                //             // Tarjeta de Confirmación
+                //             SlideTransition(
+                //               position: _regalosSlideAnimation,
+                //               child: AnimatedContainer(
+                //                 duration: const Duration(milliseconds: 1200),
+                //                 curve: Curves.easeInOut,
+                //                 height: size.height * 0.7,
+                //                 decoration: BoxDecoration(
+                //                   color: Colors.white,
+                //                 ),
+                //                 child: Column(
+                //                   crossAxisAlignment: CrossAxisAlignment.center,
+                //                   children: [
+                //                     // Título CONFIRMAR ASISTENCIA
+                //                     Text(
+                //                       "CONFIRMAR ASISTENCIA",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 28,
+                //                         fontWeight: FontWeight.bold,
+                //                         color: const Color(0xFFB08D57),
+                //                         letterSpacing: 3,
+                //                       ),
+                //                       textAlign: TextAlign.center,
+                //                     ),
+                //                     const SizedBox(height: 20),
+                //                     // Icono de confirmación
+                //                     Container(
+                //                       width: size.width * 0.2,
+                //                       height: size.height * 0.1,
+                //                       decoration: BoxDecoration(
+                //                         color: const Color(0xFFB08D57)
+                //                             .withOpacity(0.1),
+                //                         borderRadius: BorderRadius.circular(20),
+                //                       ),
+                //                       child: const Icon(
+                //                         Icons.check_circle_outline,
+                //                         size: 50,
+                //                         color: Color(0xFFB08D57),
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 20),
+                //                     // Subtítulo
+                //                     Text(
+                //                       "Confirma tu asistencia",
+                //                       style: GoogleFonts.playfairDisplay(
+                //                         fontSize: 20,
+                //                         color: const Color(0xFFB08D57),
+                //                         fontWeight: FontWeight.w500,
+                //                       ),
+                //                       textAlign: TextAlign.center,
+                //                     ),
+                //                     const SizedBox(height: 5),
+                //                     // Contenido
+                //                     Padding(
+                //                       padding: EdgeInsets.symmetric(
+                //                           horizontal: size.width * 0.1),
+                //                       child: Text(
+                //                         "Por favor confirma tu asistencia para que podamos prepararlo todo para ti. ¡Te esperamos! 💕",
+                //                         style: GoogleFonts.nunito(
+                //                           fontSize: 16,
+                //                           color: Colors.black87,
+                //                         ),
+                //                         textAlign: TextAlign.center,
+                //                       ),
+                //                     ),
+                //                     const SizedBox(height: 10),
+                //                     // Botón Confirmar Asistencia
+                //                     ElevatedButton(
+                //                       onPressed: () =>
+                //                           _showConfirmacionDialog(context),
+                //                       style: ElevatedButton.styleFrom(
+                //                         backgroundColor:
+                //                             const Color(0xFFB08D57),
+                //                         foregroundColor: Colors.white,
+                //                         padding: const EdgeInsets.symmetric(
+                //                             horizontal: 30, vertical: 15),
+                //                         shape: RoundedRectangleBorder(
+                //                           borderRadius:
+                //                               BorderRadius.circular(25),
+                //                         ),
+                //                       ),
+                //                       child: const Text(
+                //                         "Confirmar Asistencia",
+                //                         style: TextStyle(
+                //                             fontSize: 16,
+                //                             fontWeight: FontWeight.bold),
+                //                       ),
+                //                     ),
+                //                   const SizedBox(height: 10),
+                //                   // Aviso de plazo de confirmación
+                //                   Container(
+                //                     width: double.infinity,
+                //                     margin: EdgeInsets.symmetric(horizontal: size.width * 0.05),
+                //                     padding: const EdgeInsets.all(12),
+                //                     decoration: BoxDecoration(
+                //                       color: Colors.red.withOpacity(0.1),
+                //                       borderRadius: BorderRadius.circular(12),
+                //                       border: Border.all(color: Colors.red.withOpacity(0.3)),
+                //                     ),
+                //                     child: Row(
+                //                       mainAxisAlignment: MainAxisAlignment.center,
+                //                       children: [
+                //                         Icon(
+                //                           Icons.schedule,
+                //                           color: Colors.red[700],
+                //                           size: 20,
+                //                         ),
+                //                         const SizedBox(width: 8),
+                //                         Expanded(
+                //                           child: Text(
+                //                             "El plazo para confirmar es hasta el 15 de junio",
+                //                             style: GoogleFonts.nunito(
+                //                               fontSize: 14,
+                //                               color: Colors.red[700],
+                //                               fontWeight: FontWeight.w600,
+                //                             ),
+                //                             textAlign: TextAlign.center,
+                //                           ),
+                //                         ),
+                //                       ],
+                //                     ),
+                //                   ),
+                //                 ],
+                //               ),
+                //             ),
+                //             )
+                //           ],
+                //         ),
+                //       ),
+                //     ),
+                //     // Borde floral inferior para sección 7
+                //     Positioned(
+                //       left: 0,
+                //       right: 0,
+                //       bottom: 25,
+                //       child: Container(
+                //         height: size.height * 0.15,
+                //         decoration: const BoxDecoration(
+                //           image: DecorationImage(
+                //             image: AssetImage('lib/assets/flores.png'),
+                //             fit: BoxFit.contain,
+                //             alignment: Alignment.bottomCenter,
+                //             repeat: ImageRepeat.repeatX,
+                //             scale: 1.5,
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                // Sección de Agradecimiento
                 Stack(
-                  key: _confirmacionKey,
                   children: [
                     Container(
-                      height: size.width > 600 ? size.height * 4.2 : size.height * 0.8 + 0.08,
+                      height: size.height * 0.5,
                       width: double.infinity,
+                      color: Colors.white,
                       child: Center(
-                        child: Column(
-                          children: [
-                            // Tarjeta de Confirmación
-                            SlideTransition(
-                              position: _regalosSlideAnimation,
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 1200),
-                                curve: Curves.easeInOut,
-                                height: size.height * 0.7,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    // Título CONFIRMAR ASISTENCIA
-                                    Text(
-                                      "CONFIRMAR ASISTENCIA",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFFB08D57),
-                                        letterSpacing: 3,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 20),
-                                    // Icono de confirmación
-                                    Container(
-                                      width: size.width * 0.2,
-                                      height: size.height * 0.1,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFB08D57)
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: const Icon(
-                                        Icons.check_circle_outline,
-                                        size: 50,
-                                        color: Color(0xFFB08D57),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                    // Subtítulo
-                                    Text(
-                                      "Confirma tu asistencia",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 20,
-                                        color: const Color(0xFFB08D57),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 5),
-                                    // Contenido
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: size.width * 0.1),
-                                      child: Text(
-                                        "Por favor confirma tu asistencia para que podamos prepararlo todo para ti. ¡Te esperamos! 💕",
-                                        style: GoogleFonts.nunito(
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    // Botón Confirmar Asistencia
-                                    ElevatedButton(
-                                      onPressed: () =>
-                                          _showConfirmacionDialog(context),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(0xFFB08D57),
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 30, vertical: 15),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        "Confirmar Asistencia",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  const SizedBox(height: 10),
-                                  // Aviso de plazo de confirmación
-                                  Container(
-                                    width: double.infinity,
-                                    margin: EdgeInsets.symmetric(horizontal: size.width * 0.05),
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Colors.red.withOpacity(0.3)),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.schedule,
-                                          color: Colors.red[700],
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            "El plazo para confirmar es hasta el 15 de junio",
-                                            style: GoogleFonts.nunito(
-                                              fontSize: 14,
-                                              color: Colors.red[700],
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Icono de corazón
+                              Icon(
+                                Icons.favorite,
+                                size: 60,
+                                color: const Color(0xFFB08D57),
                               ),
-                            ),
-                            )
-                          ],
+                              const SizedBox(height: 24),
+                              // Título
+                              Text(
+                                "¡Muchas Gracias!",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFFB08D57),
+                                  letterSpacing: 2,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 20),
+                              // Mensaje de agradecimiento
+                              Text(
+                                "Muchas gracias por confirmar a tiempo y querer presenciar este gran paso que daremos, recuerda que nos veremos el 18 julio 2026",
+                                style: GoogleFonts.nunito(
+                                  fontSize: 18,
+                                  color: Colors.black87,
+                                  height: 1.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 24),
+                              // Decoración
+                              Container(
+                                width: 100,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.transparent,
+                                      const Color(0xFFB08D57),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                    // Borde floral inferior para sección 7
+                    // Borde floral inferior
                     Positioned(
                       left: 0,
                       right: 0,
-                      bottom: 25,
+                      bottom: 0,
                       child: Container(
-                        height: size.height * 0.15,
+                        height: size.height * 0.1,
                         decoration: const BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage('lib/assets/flores.png'),
