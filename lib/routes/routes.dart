@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:invitacion_boda/pages/pages.dart';
+import 'package:invitacion_boda/pages/envelope_pages.dart';
 
 class RouteGenerator {
     static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -25,15 +25,10 @@ class RouteGenerator {
           widget: const EnvelopeScreen(),
           routeName: 'sobre',
         );
-      case 'presentacion':
-        return GeneratePageRoute(
-          widget: const InvitacionPage(),
-          routeName: 'presentacion',
-        );
       default:
         return GeneratePageRoute(
           widget: const EnvelopeScreen(),
-          routeName: 'home',
+          routeName: 'sobre',
         );
     }
   }

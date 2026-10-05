@@ -1,6 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 // ...
@@ -13,7 +12,7 @@ class CarruselConDots extends StatefulWidget {
 }
 
 class _CarruselConDotsState extends State<CarruselConDots> {
-  final CarouselController _controller = CarouselController();
+  // final CarouselController _controller = CarouselController();
   int _activeIndex = 0;
 
   final List<Map<String, String>> items = [
@@ -45,7 +44,7 @@ class _CarruselConDotsState extends State<CarruselConDots> {
           height: size.width > 600 ? size.height * 0.75 : size.height * 0.6,
           width: size.width > 600 ? size.width * 0.8 : size.width * 1.1,
           child: CarouselSlider(
-            carouselController: _controller,
+            // carouselController: _controller,
             items: items.map((item) {
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -54,7 +53,7 @@ class _CarruselConDotsState extends State<CarruselConDots> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       blurRadius: 6,
                       offset: const Offset(2, 4),
                     ),
@@ -103,7 +102,7 @@ class _CarruselConDotsState extends State<CarruselConDots> {
             activeDotColor: Colors.pinkAccent,
             dotColor: Colors.grey.shade400,
           ),
-          onDotClicked: (index) => _controller.animateToPage(index),
+          // onDotClicked: (index) => _controller.animateToPage(index),
         ),
       ],
     );
