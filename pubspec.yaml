@@ -33,4 +33,8 @@ flutter:
     - lib/assets/hombres.png
     - lib/assets/mujeres.png
     - lib/assets/flores.png
+    - lib/assets/mariposa.png
+    - lib/assets/rosa.png
+    - lib/assets/PHOTO.jpg
+    - lib/assets/PHOTO-2.jpg
     - lib/assets/video/invitacion.mp4

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:video_player/video_player.dart';
+import 'package:invitacion_boda/widgets/floatingdecoration.dart';
 
 class EnvelopeScreen extends StatefulWidget {
   final String? nombreInvitado;
@@ -14,7 +14,6 @@ class EnvelopeScreen extends StatefulWidget {
 
 class _EnvelopeScreenState extends State<EnvelopeScreen>
     with TickerProviderStateMixin {
-  late VideoPlayerController _videoController;
   late ScrollController _scrollController;
   
   // Animation Controllers para cada sección
@@ -31,7 +30,6 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
   late Animation<Offset> _section4Animation;
   late Animation<Offset> _section5Animation;
   
-  bool _videoLoaded = false;
   String _nombreInvitado = '';
 
   @override
@@ -112,10 +110,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     // Listener del scroll para controlar animaciones
     _scrollController.addListener(() {
       final scrollPosition = _scrollController.offset;
-      final section2Trigger = 10.0;
-      final section3Trigger = 160.0;
-      final section4Trigger = 380.0;
-      final section5Trigger = 530.0;
+      final section2Trigger = 08.0;
+      final section3Trigger = 145.0;
+      final section4Trigger = 300.0;
+      final section5Trigger = 450.0;
 
       // Sección 1: Sin animación (estática)
 
@@ -147,22 +145,6 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
         _section5Controller.reverse();
       }
     });
-
-    // Inicializar el controller del video
-    _videoController = VideoPlayerController.asset('lib/assets/video/invitacion.mp4')
-      ..initialize().then((_) {
-        setState(() {
-          _videoLoaded = true;
-        });
-        _videoController.setLooping(true);
-        _videoController.setVolume(0.0); // Silenciar video para fondo
-        _videoController.play();
-      }).catchError((error) {
-        print('Error al cargar video: $error');
-        setState(() {
-          _videoLoaded = false;
-        });
-      });
   }
 
   @override
@@ -173,7 +155,6 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     _section3Controller.dispose();
     _section4Controller.dispose();
     _section5Controller.dispose();
-    _videoController.dispose();
     super.dispose();
   }
 
@@ -184,104 +165,6 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     return SlideTransition(
       position: animation,
       child: child,
-    );
-  }
-
-  void _showDressCodeDialog(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 600;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            width: isMobile ? size.width * 0.9 : size.width * 0.6,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFFB08D57),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Código de Vestimenta',
-                  style: GoogleFonts.playfairDisplay(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'lib/assets/hombres.png',
-                            height: isMobile ? 100 : 150,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Hombres',
-                            style: GoogleFonts.roboto(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'lib/assets/mujeres.png',
-                            height: isMobile ? 100 : 150,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Mujeres',
-                            style: GoogleFonts.roboto(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFFB08D57),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 12,
-                    ),
-                  ),
-                  child: const Text('Cerrar'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -299,17 +182,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
           SizedBox(
             width: double.infinity,
             height: double.infinity,
-            child: _videoLoaded && _videoController.value.isInitialized
-                ? VideoPlayer(_videoController)
-                : Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFF1a1a2e), Color(0xFF16213e)],
-                      ),
-                    ),
-                  ),
+            child: Image.asset(
+              'lib/assets/PHOTO-2.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
 
           // Overlay oscuro sutil
@@ -317,9 +193,11 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.pinkAccent.withValues(alpha: 0.1),
             ),
           ),
+
+          const FloatingFloralDecoration(),
 
           // Contenido principal - Scrollable
           SingleChildScrollView(
@@ -337,7 +215,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                       Text(
                         _nombreInvitado.isNotEmpty ? _nombreInvitado : 'Invitado Especial',
                         style: GoogleFonts.playfairDisplay(
-                          fontSize: isDesktop ? 32 : isTablet ? 28 : 24,
+                          fontSize: isDesktop ? 48 : isTablet ? 40 : 34,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           shadows: [
@@ -352,9 +230,9 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '18 de Julio 2026',
+                        '14 de Noviembre',
                         style: GoogleFonts.roboto(
-                          fontSize: isDesktop ? 20 : isTablet ? 18 : 16,
+                          fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
                           color: Colors.white,
                           shadows: [
                             Shadow(
@@ -369,18 +247,9 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                   ),
                 ),
 
-                // Separador floral
-                Container(
-                  height: size.height * 0.1,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('lib/assets/flores.png'),
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                      repeat: ImageRepeat.repeatX,
-                      scale: 1,
-                    ),
-                  ),
+                // Separador
+                SizedBox(
+                  height: size.height * 0.008,
                 ),
 
                 // Sección 2: Foto personal grande de la quinceañera
@@ -395,7 +264,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFFB08D57),
+                        color: const Color(0xFFF4B6C2),
                         width: 4,
                       ),
                       boxShadow: [
@@ -409,14 +278,13 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
-                        color: const Color(0xFFB08D57).withValues(alpha: 0.3),
+                        color: const Color(0xFFF4B6C2).withValues(alpha: 0.3),
                         child: Center(
-                          child: Text(
-                            'Foto de la Quinceañera',
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: isDesktop ? 24 : 18,
-                              color: Colors.white,
-                            ),
+                          child: Image.asset(
+                            'lib/assets/PHOTO.jpg',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
                           ),
                         ),
                       ),
@@ -424,18 +292,9 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                   ),
                 ),
 
-                // Separador floral
-                Container(
-                  height: size.height * 0.1,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('lib/assets/flores.png'),
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                      repeat: ImageRepeat.repeatX,
-                      scale: 1,
-                    ),
-                  ),
+                // Separador
+                SizedBox(
+                  height: size.height * 0.008,
                 ),
 
                 // Sección 3: Lugar + nombre del evento
@@ -448,10 +307,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                     ),
                     padding: EdgeInsets.all(isDesktop ? 30 : 20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFB08D57).withValues(alpha: 0.2),
+                      color: const Color(0xFFF4B6C2).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFFB08D57),
+                        color: const Color(0xFFF4B6C2),
                         width: 2,
                       ),
                     ),
@@ -460,7 +319,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                         Text(
                           'Mis XV Años',
                           style: GoogleFonts.playfairDisplay(
-                            fontSize: isDesktop ? 36 : isTablet ? 30 : 24,
+                            fontSize: isDesktop ? 56 : isTablet ? 48 : 40,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -468,18 +327,18 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                         ),
                         const SizedBox(height: 15),
                         Text(
-                          'Salón de Eventos El Jardín',
+                          'Finca Villa Palmas',
                           style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 20 : isTablet ? 18 : 16,
+                            fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
                             color: Colors.white,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Calle Principal #123, Tuluá, Valle',
+                          'Vía a San Carlos, entrada por Nariño',
                           style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
+                            fontSize: isDesktop ? 24 : isTablet ? 20 : 16,
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
                           textAlign: TextAlign.center,
@@ -489,21 +348,12 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                   ),
                 ),
 
-                // Separador floral
-                Container(
-                  height: size.height * 0.1,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('lib/assets/flores.png'),
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                      repeat: ImageRepeat.repeatX,
-                      scale: 1,
-                    ),
-                  ),
+                // Separador
+                SizedBox(
+                  height: size.height * 0.008,
                 ),
 
-                // Sección 4: Código de vestimenta
+                // Sección 4: Código de vestimenta y Lluvia de Sobres (en 2 columnas)
                 _buildSectionWithOffset(
                   animation: _section4Animation,
                   child: Container(
@@ -511,42 +361,126 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                       horizontal: isDesktop ? 100 : isTablet ? 50 : 20,
                       vertical: isDesktop ? 5 : 2,
                     ),
-                    child: ElevatedButton(
-                      onPressed: () => _showDressCodeDialog(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB08D57),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 40 : 30,
-                          vertical: isDesktop ? 20 : 15,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                    padding: EdgeInsets.all(isDesktop ? 30 : 20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4B6C2).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFFF4B6C2),
+                        width: 2,
                       ),
-                      child: Text(
-                        'Ver Código de Vestimenta',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: isDesktop ? 20 : isTablet ? 18 : 16,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    child: Row(
+                      children: [
+                        // Columna 1: Código de vestimenta
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                'Código de Vestimenta',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          'lib/assets/hombres.png',
+                                          height: isDesktop ? 120 : isTablet ? 100 : 80,
+                                          fit: BoxFit.contain,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Hombres',
+                                          style: GoogleFonts.roboto(
+                                            fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          'lib/assets/mujeres.png',
+                                          height: isDesktop ? 120 : isTablet ? 100 : 80,
+                                          fit: BoxFit.contain,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Mujeres',
+                                          style: GoogleFonts.roboto(
+                                            fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        // Divider vertical
+                        if (isDesktop || isTablet)
+                          VerticalDivider(
+                            thickness: 2,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            indent: 10,
+                            endIndent: 10,
+                          ),
+                        if (!isDesktop)
+                          Divider(
+                            thickness: 5,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            height: 100,
+                          ),
+                        // Columna 2: Lluvia de Sobres
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                "Lluvia de Sobres 💌",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Si deseas honrarme con un detalle, una lluvia de sobres sería muy especial.",
+                                style: GoogleFonts.nunito(
+                                  fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
 
-                // Separador floral
-                Container(
-                  height: size.height * 0.1,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('lib/assets/flores.png'),
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                      repeat: ImageRepeat.repeatX,
-                      scale: 1,
-                    ),
-                  ),
+                // Separador
+                SizedBox(
+                  height: size.height * 0.008,
                 ),
 
                 // Sección 5: Nota de agradecimiento con efecto de resaltar
@@ -559,7 +493,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                     ),
                     padding: EdgeInsets.all(isDesktop ? 30 : 20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFB08D57),
+                      color: const Color(0xFFF4B6C2),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -572,20 +506,11 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                     child: Column(
                       children: [
                         Text(
-                          'Nota de Agradecimiento',
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: isDesktop ? 28 : isTablet ? 24 : 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          'Gracias por ser parte de este momento tan especial en mi vida. '
-                          'Su presencia hace este día aún más memorable.',
+                          'Hay momentos inolvidables que se atesoran en el corazón '
+                          'para siempre, por esa razón quiero que compartas '
+                          'conmigo este día tan especial.',
                           style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 18 : isTablet ? 16 : 14,
+                            fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
                             color: Colors.white,
                             height: 1.5,
                           ),
@@ -595,15 +520,15 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                         Text(
                           'Con cariño,',
                           style: GoogleFonts.dancingScript(
-                            fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
+                            fontSize: isDesktop ? 40 : isTablet ? 34 : 30,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          _nombreInvitado.isNotEmpty ? _nombreInvitado : 'La Quinceañera',
+                          _nombreInvitado.isNotEmpty ? _nombreInvitado : 'Belén',
                           style: GoogleFonts.playfairDisplay(
-                            fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
+                            fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
