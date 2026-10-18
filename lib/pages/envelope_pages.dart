@@ -1,7 +1,13 @@
 // ignore_for_file: unused_field
 
+import 'dart:async';
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:invitacion_boda/widgets/floatingdecoration.dart';
 
 class EnvelopeScreen extends StatefulWidget {
@@ -15,7 +21,13 @@ class EnvelopeScreen extends StatefulWidget {
 class _EnvelopeScreenState extends State<EnvelopeScreen>
     with TickerProviderStateMixin {
   late ScrollController _scrollController;
-  
+
+  // Audio
+  late final AudioPlayer _player;
+  bool _isPlaying = false;
+  StreamSubscription<PlayerState>? _playerStateSub;
+  StreamSubscription? _firstGestureSub;
+
   // Animation Controllers para cada sección
   late AnimationController _section1Controller;
   late AnimationController _section2Controller;
@@ -61,6 +73,27 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
+
+    // Inicializar audio
+    _player = AudioPlayer();
+    _player.setReleaseMode(ReleaseMode.loop);
+    if (kIsWeb) {
+      _tryAutoplayWeb();
+    } else {
+      _startAudio();
+    }
+
+    // Escuchar cambios de estado del reproductor
+    _playerStateSub = _player.onPlayerStateChanged.listen((state) {
+      final playing = state == PlayerState.playing;
+      if (mounted && playing != _isPlaying) {
+        setState(() {
+          _isPlaying = playing;
+        });
+      }
+    }, onError: (e, st) {
+      debugPrint('Audio state error: $e');
+    });
 
     // Crear animaciones de deslizamiento
     // Sección 1: Sin animación (estática)
@@ -147,6 +180,183 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     });
   }
 
+  Future<void> _tryAutoplayWeb() async {
+    try {
+      await _player.setVolume(0.0);
+      await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
+      await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
+    } catch (e) {
+      _armFirstGestureToStart();
+    }
+  }
+
+  void _armFirstGestureToStart() {
+    _firstGestureSub?.cancel();
+    _firstGestureSub = html.document.onClick.listen((_) async {
+      try {
+        await _player.setVolume(0.0);
+        await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
+        await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1000);
+      } catch (e) {
+        debugPrint('Autoplay after first gesture error: $e');
+      } finally {
+        _firstGestureSub?.cancel();
+        _firstGestureSub = null;
+      }
+    });
+  }
+
+  Future<void> _fadeInVolume(
+      {required double target,
+      int steps = 8,
+      int totalDurationMs = 800}) async {
+    final double start = 0.0;
+    final double delta = (target - start) / steps;
+    final int stepDelay = (totalDurationMs / steps).round();
+    for (int i = 1; i <= steps; i++) {
+      await Future.delayed(Duration(milliseconds: stepDelay));
+      await _player.setVolume((start + delta * i).clamp(0.0, 1.0));
+    }
+  }
+
+  Future<void> _startAudio() async {
+    try {
+      await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
+    } catch (e) {
+      debugPrint('Start audio error: $e');
+    }
+  }
+
+  Future<void> _togglePlayPause() async {
+    try {
+      if (_isPlaying) {
+        await _player.pause();
+      } else {
+        if (kIsWeb) {
+          await _player.setVolume(1.0);
+          await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
+        } else {
+          if (_player.source == null) {
+            await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
+          } else {
+            await _player.resume();
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Play/Pause error: $e');
+    }
+  }
+
+  Future<bool> _enviarWhatsAppConfirmar(String nombre) async {
+    if (nombre.isEmpty) {
+      return false;
+    }
+    final String mensaje = "Hola👋🏻 soy $nombre y confirmo mi asistencia a los XV de Belén el 14 de Noviembre a las 8:00 PM";
+
+    final bool? confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Previsualización del mensaje'),
+        content: SingleChildScrollView(child: Text(mensaje)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return false;
+
+    final url = "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}";
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> _enviarWhatsAppNoAsistir(String nombre) async {
+    if (nombre.isEmpty) {
+      return false;
+    }
+    final String mensaje = "Hola😔 soy $nombre y lamento informarte que no podré asistir a los XV de Belén el 14 de Noviembre.";
+
+    final bool? confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Previsualización del mensaje'),
+        content: SingleChildScrollView(child: Text(mensaje)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return false;
+
+    final url = "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}";
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> _mostrarDialogoNombre({required bool confirmar}) async {
+    final TextEditingController nombreController = TextEditingController();
+    final bool? resultado = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(confirmar ? 'Confirmar Asistencia' : 'No Asistir'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nombreController,
+              decoration: const InputDecoration(
+                labelText: 'Tu nombre',
+                hintText: 'Ingresa tu nombre completo',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+
+    if (resultado == true && nombreController.text.isNotEmpty) {
+      if (confirmar) {
+        await _enviarWhatsAppConfirmar(nombreController.text);
+      } else {
+        await _enviarWhatsAppNoAsistir(nombreController.text);
+      }
+    }
+    nombreController.dispose();
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -155,6 +365,9 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     _section3Controller.dispose();
     _section4Controller.dispose();
     _section5Controller.dispose();
+    _playerStateSub?.cancel();
+    _firstGestureSub?.cancel();
+    _player.dispose();
     super.dispose();
   }
 
@@ -317,11 +530,30 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                     child: Column(
                       children: [
                         Text(
-                          'Mis XV Años',
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: isDesktop ? 56 : isTablet ? 48 : 40,
+                          'Belén Mis XV Años',
+                          style: GoogleFonts.dancingScript(
+                            fontSize: isDesktop ? 60 : isTablet ? 48 : 40,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            height: 1.2,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 15),
+                        Text(
+                          'Sábado 14 de noviembre 2026',
+                          style: GoogleFonts.roboto(
+                            fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Hora 8:00 PM',
+                          style: GoogleFonts.roboto(
+                            fontSize: isDesktop ? 28 : isTablet ? 24 : 20,
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -336,7 +568,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Vía a San Carlos, entrada por Nariño',
+                          'Vía San Carlos - Entrada por Nariño',
                           style: GoogleFonts.roboto(
                             fontSize: isDesktop ? 24 : isTablet ? 20 : 16,
                             color: Colors.white.withValues(alpha: 0.8),
@@ -370,108 +602,122 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                         width: 2,
                       ),
                     ),
-                    child: Row(
+                    child: Column(
                       children: [
-                        // Columna 1: Código de vestimenta
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                'Código de Vestimenta',
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        Row(
+                          children: [
+                            // Columna 1: Código de vestimenta
+                            Expanded(
+                              child: Column(
                                 children: [
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        Image.asset(
-                                          'lib/assets/hombres.png',
-                                          height: isDesktop ? 120 : isTablet ? 100 : 80,
-                                          fit: BoxFit.contain,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Hombres',
-                                          style: GoogleFonts.roboto(
-                                            fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
+                                  Text(
+                                    'Código de Vestimenta',
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        Image.asset(
-                                          'lib/assets/mujeres.png',
-                                          height: isDesktop ? 120 : isTablet ? 100 : 80,
-                                          fit: BoxFit.contain,
+                                  const SizedBox(height: 15),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Image.asset(
+                                              'lib/assets/hombres.png',
+                                              height: isDesktop ? 120 : isTablet ? 100 : 80,
+                                              fit: BoxFit.contain,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Hombres',
+                                              style: GoogleFonts.roboto(
+                                                fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Mujeres',
-                                          style: GoogleFonts.roboto(
-                                            fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Image.asset(
+                                              'lib/assets/mujeres.png',
+                                              height: isDesktop ? 120 : isTablet ? 100 : 80,
+                                              fit: BoxFit.contain,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Mujeres',
+                                              style: GoogleFonts.roboto(
+                                                fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                            // Divider vertical
+                            if (isDesktop || isTablet)
+                              VerticalDivider(
+                                thickness: 2,
+                                color: Colors.white.withValues(alpha: 0.3),
+                                indent: 10,
+                                endIndent: 10,
+                              ),
+                            if (!isDesktop)
+                              Divider(
+                                thickness: 5,
+                                color: Colors.white.withValues(alpha: 0.3),
+                                height: 100,
+                              ),
+                            // Columna 2: Lluvia de Sobres
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Lluvia de Sobres 💌",
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    "Si deseas honrarme con un detalle, una lluvia de sobres sería muy especial.",
+                                    style: GoogleFonts.nunito(
+                                      fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        // Divider vertical
-                        if (isDesktop || isTablet)
-                          VerticalDivider(
-                            thickness: 2,
-                            color: Colors.white.withValues(alpha: 0.3),
-                            indent: 10,
-                            endIndent: 10,
+                        const SizedBox(height: 20),
+                        Text(
+                          "Se reserva el color rosado en todas sus tonalidades",
+                          style: GoogleFonts.roboto(
+                            fontSize: isDesktop ? 20 : isTablet ? 16 : 14,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontStyle: FontStyle.italic,
                           ),
-                        if (!isDesktop)
-                          Divider(
-                            thickness: 5,
-                            color: Colors.white.withValues(alpha: 0.3),
-                            height: 100,
-                          ),
-                        // Columna 2: Lluvia de Sobres
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                "Lluvia de Sobres 💌",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                "Si deseas honrarme con un detalle, una lluvia de sobres sería muy especial.",
-                                style: GoogleFonts.nunito(
-                                  fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -533,6 +779,57 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 25),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () => _mostrarDialogoNombre(confirmar: true),
+                              icon: const Icon(Icons.check_circle, color: Colors.white),
+                              label: Text(
+                                'Confirmar Asistencia',
+                                style: GoogleFonts.roboto(
+                                  fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isDesktop ? 20 : 15,
+                                  vertical: isDesktop ? 12 : 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            ElevatedButton.icon(
+                              onPressed: () => _mostrarDialogoNombre(confirmar: false),
+                              icon: const Icon(Icons.cancel, color: Colors.white),
+                              label: Text(
+                                'No Asistir',
+                                style: GoogleFonts.roboto(
+                                  fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isDesktop ? 20 : 15,
+                                  vertical: isDesktop ? 12 : 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -542,9 +839,24 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
               ],
             ),
           ),
+
+          // Botón flotante de música
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: FloatingActionButton(
+              onPressed: _togglePlayPause,
+              backgroundColor: const Color(0xFFF4B6C2),
+              elevation: 5,
+              child: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
