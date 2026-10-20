@@ -1,14 +1,12 @@
 // ignore_for_file: unused_field
 
 import 'dart:async';
-import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:invitacion_boda/widgets/floatingdecoration.dart';
+import 'package:invitacion_boda/services/audio_service.dart';
 
 class EnvelopeScreen extends StatefulWidget {
   final String? nombreInvitado;
@@ -22,11 +20,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     with TickerProviderStateMixin {
   late ScrollController _scrollController;
 
-  // Audio
-  late final AudioPlayer _player;
-  bool _isPlaying = false;
-  StreamSubscription<PlayerState>? _playerStateSub;
-  StreamSubscription? _firstGestureSub;
+  // Audio - usar servicio global
+  final _audioService = AudioService();
+  bool _musicActivated = false;
+  bool _isActivatingMusic = false;
 
   // Animation Controllers para cada sección
   late AnimationController _section1Controller;
@@ -49,6 +46,11 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     super.initState();
 
     _nombreInvitado = widget.nombreInvitado ?? '';
+
+    // Inicializar audio sin bloquear
+    _audioService.initialize().catchError((e) {
+      debugPrint('Audio initialization error: $e');
+    });
 
     _scrollController = ScrollController();
 
@@ -73,28 +75,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-
-    // Inicializar audio
-    _player = AudioPlayer();
-    _player.setReleaseMode(ReleaseMode.loop);
-    if (kIsWeb) {
-      _tryAutoplayWeb();
-    } else {
-      _startAudio();
-    }
-
-    // Escuchar cambios de estado del reproductor
-    _playerStateSub = _player.onPlayerStateChanged.listen((state) {
-      final playing = state == PlayerState.playing;
-      if (mounted && playing != _isPlaying) {
-        setState(() {
-          _isPlaying = playing;
-        });
-      }
-    }, onError: (e, st) {
-      debugPrint('Audio state error: $e');
-    });
-
+    
     // Crear animaciones de deslizamiento
     // Sección 1: Sin animación (estática)
     _section1Animation = Tween<Offset>(
@@ -180,71 +161,40 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     });
   }
 
-  Future<void> _tryAutoplayWeb() async {
+
+
+  Future<void> _activateMusicOnFirstTap() async {
+    if (_musicActivated || _isActivatingMusic) return;
+
+    _isActivatingMusic = true;
+
     try {
-      await _player.setVolume(0.0);
-      await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
-      await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1200);
+      await _audioService.startMusic();
+
+      if (!mounted) return;
+
+      setState(() {
+        _musicActivated = _audioService.isPlaying;
+      });
     } catch (e) {
-      _armFirstGestureToStart();
+      debugPrint('Error al activar música: $e');
+    } finally {
+      _isActivatingMusic = false;
     }
   }
 
-  void _armFirstGestureToStart() {
-    _firstGestureSub?.cancel();
-    _firstGestureSub = html.document.onClick.listen((_) async {
-      try {
-        await _player.setVolume(0.0);
-        await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
-        await _fadeInVolume(target: 1.0, steps: 10, totalDurationMs: 1000);
-      } catch (e) {
-        debugPrint('Autoplay after first gesture error: $e');
-      } finally {
-        _firstGestureSub?.cancel();
-        _firstGestureSub = null;
-      }
-    });
-  }
-
-  Future<void> _fadeInVolume(
-      {required double target,
-      int steps = 8,
-      int totalDurationMs = 800}) async {
-    final double start = 0.0;
-    final double delta = (target - start) / steps;
-    final int stepDelay = (totalDurationMs / steps).round();
-    for (int i = 1; i <= steps; i++) {
-      await Future.delayed(Duration(milliseconds: stepDelay));
-      await _player.setVolume((start + delta * i).clamp(0.0, 1.0));
+  Future<void> _toggleMusic() async {
+    // Si todavía no se ha iniciado, este botón también
+    // puede activar la música por primera vez.
+    if (!_musicActivated) {
+      await _activateMusicOnFirstTap();
+      return;
     }
-  }
 
-  Future<void> _startAudio() async {
-    try {
-      await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
-    } catch (e) {
-      debugPrint('Start audio error: $e');
-    }
-  }
+    await _audioService.togglePlayPause();
 
-  Future<void> _togglePlayPause() async {
-    try {
-      if (_isPlaying) {
-        await _player.pause();
-      } else {
-        if (kIsWeb) {
-          await _player.setVolume(1.0);
-          await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
-        } else {
-          if (_player.source == null) {
-            await _player.play(UrlSource('assets/lib/assets/audio/potter_waltz.mp3'));
-          } else {
-            await _player.resume();
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Play/Pause error: $e');
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -274,7 +224,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
 
     if (confirmar != true) return false;
 
-    final url = "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}";
+    final url = "https://wa.me/573188084166?text=${Uri.encodeComponent(mensaje)}";
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       return true;
@@ -308,7 +258,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
 
     if (confirmar != true) return false;
 
-    final url = "https://wa.me/573164067016?text=${Uri.encodeComponent(mensaje)}";
+    final url = "https://wa.me/573188084166?text=${Uri.encodeComponent(mensaje)}";
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       return true;
@@ -365,9 +315,6 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     _section3Controller.dispose();
     _section4Controller.dispose();
     _section5Controller.dispose();
-    _playerStateSub?.cancel();
-    _firstGestureSub?.cancel();
-    _player.dispose();
     super.dispose();
   }
 
@@ -396,7 +343,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
             width: double.infinity,
             height: double.infinity,
             child: Image.asset(
-              'lib/assets/PHOTO-2.jpg',
+              'lib/assets/PHOTO.jpg',
               fit: BoxFit.cover,
             ),
           ),
@@ -406,437 +353,429 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.pinkAccent.withValues(alpha: 0.1),
+              // color: Colors.pinkAccent.withValues(alpha: 0.1),
             ),
           ),
 
-          const FloatingFloralDecoration(),
+          // const FloatingFloralDecoration(),
 
           // Contenido principal - Scrollable
-          SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              children: [
-                // Sección 1: Nombre de invitado + fecha (sin animación)
-                Container(
-                  padding: EdgeInsets.only(
-                    top: isDesktop ? 60 : 40,
-                    bottom: isDesktop ? 30 : 20,
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        _nombreInvitado.isNotEmpty ? _nombreInvitado : 'Invitado Especial',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: isDesktop ? 48 : isTablet ? 40 : 34,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              blurRadius: 4,
-                              offset: const Offset(1, 1),
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '14 de Noviembre',
-                        style: GoogleFonts.roboto(
-                          fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              blurRadius: 4,
-                              offset: const Offset(1, 1),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Separador
-                SizedBox(
-                  height: size.height * 0.008,
-                ),
-
-                // Sección 2: Foto personal grande de la quinceañera
-                _buildSectionWithOffset(
-                  animation: _section2Animation,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 100 : isTablet ? 50 : 10,
-                      vertical: isDesktop ? 5 : 2,
-                    ),
-                    height: isDesktop ? 500 : isTablet ? 700 : 500,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFF4B6C2),
-                        width: 4,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        color: const Color(0xFFF4B6C2).withValues(alpha: 0.3),
-                        child: Center(
-                          child: Image.asset(
-                            'lib/assets/PHOTO.jpg',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Separador
-                SizedBox(
-                  height: size.height * 0.008,
-                ),
-
-                // Sección 3: Lugar + nombre del evento
-                _buildSectionWithOffset(
-                  animation: _section3Animation,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 100 : isTablet ? 50 : 20,
-                      vertical: isDesktop ? 5 : 2,
-                    ),
-                    padding: EdgeInsets.all(isDesktop ? 30 : 20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4B6C2).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFF4B6C2),
-                        width: 2,
-                      ),
+          Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: (_) {
+              _activateMusicOnFirstTap();
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  // Sección 1: Nombre de invitado + fecha (sin animación)
+                  Container(
+                    padding: EdgeInsets.only(
+                      top: isDesktop ? 60 : 40,
+                      bottom: isDesktop ? 30 : 20,
                     ),
                     child: Column(
                       children: [
                         Text(
-                          'Belén Mis XV Años',
-                          style: GoogleFonts.dancingScript(
-                            fontSize: isDesktop ? 60 : isTablet ? 48 : 40,
+                          _nombreInvitado.isNotEmpty ? "Hola 🤗 ${_nombreInvitado},\nestas invitado/a\na mis quinceaños" : 'Invitado Especial',
+                          style: GoogleFonts.playwriteFrModerne(
+                            fontSize: isDesktop ? 48 : isTablet ? 40 : 34,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            height: 1.2,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          'Sábado 14 de noviembre 2026',
-                          style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Hora 8:00 PM',
-                          style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 28 : isTablet ? 24 : 20,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          'Finca Villa Palmas',
-                          style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Vía San Carlos - Entrada por Nariño',
-                          style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 24 : isTablet ? 20 : 16,
-                            color: Colors.white.withValues(alpha: 0.8),
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                blurRadius: 4,
+                                offset: const Offset(1, 1),
+                              ),
+                            ],
                           ),
                           textAlign: TextAlign.center,
                         ),
                       ],
                     ),
                   ),
-                ),
-
-                // Separador
-                SizedBox(
-                  height: size.height * 0.008,
-                ),
-
-                // Sección 4: Código de vestimenta y Lluvia de Sobres (en 2 columnas)
-                _buildSectionWithOffset(
-                  animation: _section4Animation,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 100 : isTablet ? 50 : 20,
-                      vertical: isDesktop ? 5 : 2,
-                    ),
-                    padding: EdgeInsets.all(isDesktop ? 30 : 20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4B6C2).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFF4B6C2),
-                        width: 2,
+            
+                  // Separador
+                  SizedBox(
+                    height: size.height * 0.008,
+                  ),
+            
+                  // Sección 2: Foto personal grande de la quinceañera
+                  _buildSectionWithOffset(
+                    animation: _section2Animation,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 100 : isTablet ? 50 : 10,
+                        vertical: isDesktop ? 5 : 2,
+                      ),
+                      height: isDesktop ? 500 : isTablet ? 700 : 500,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFFF4B6C2),
+                          width: 4,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          color: const Color(0xFFF4B6C2).withValues(alpha: 0.3),
+                          child: Center(
+                            child: Image.asset(
+                              'lib/assets/PHOTO-2.jpg',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            // Columna 1: Código de vestimenta
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Código de Vestimenta',
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 15),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Image.asset(
-                                              'lib/assets/hombres.png',
-                                              height: isDesktop ? 120 : isTablet ? 100 : 80,
-                                              fit: BoxFit.contain,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'Hombres',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                  ),
+            
+                  // Separador
+                  SizedBox(
+                    height: size.height * 0.008,
+                  ),
+            
+                  // Sección 3: Lugar + nombre del evento
+                  _buildSectionWithOffset(
+                    animation: _section3Animation,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 100 : isTablet ? 50 : 20,
+                        vertical: isDesktop ? 5 : 2,
+                      ),
+                      padding: EdgeInsets.all(isDesktop ? 30 : 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4B6C2).withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFFF4B6C2),
+                          width: 2,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Belén Mis XV Años',
+                            style: GoogleFonts.dancingScript(
+                              fontSize: isDesktop ? 60 : isTablet ? 48 : 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              height: 1.2,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            'Sábado 14 de noviembre 2026',
+                            style: GoogleFonts.roboto(
+                              fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Hora 8:00 PM',
+                            style: GoogleFonts.roboto(
+                              fontSize: isDesktop ? 28 : isTablet ? 24 : 20,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            'Finca Villa Palmas',
+                            style: GoogleFonts.roboto(
+                              fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Vía San Carlos - Entrada por Nariño',
+                            style: GoogleFonts.roboto(
+                              fontSize: isDesktop ? 24 : isTablet ? 20 : 16,
+                              color: Colors.white.withValues(alpha: 0.8),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+            
+                  // Separador
+                  SizedBox(
+                    height: size.height * 0.008,
+                  ),
+            
+                  // Sección 4: Código de vestimenta y Lluvia de Sobres (en 2 columnas)
+                  _buildSectionWithOffset(
+                    animation: _section4Animation,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 100 : isTablet ? 50 : 20,
+                        vertical: isDesktop ? 5 : 2,
+                      ),
+                      padding: EdgeInsets.all(isDesktop ? 30 : 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4B6C2).withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFFF4B6C2),
+                          width: 2,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              // Columna 1: Código de vestimenta
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Código de Vestimenta\nFormal',
+                                      style: GoogleFonts.playfairDisplay(
+                                        fontSize: isDesktop ? 34 : isTablet ? 28 : 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
-                                      Expanded(
-                                        child: Column(
-                                          children: [
-                                            Image.asset(
-                                              'lib/assets/mujeres.png',
-                                              height: isDesktop ? 120 : isTablet ? 100 : 80,
-                                              fit: BoxFit.contain,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'Mujeres',
-                                              style: GoogleFonts.roboto(
-                                                fontSize: isDesktop ? 24 : isTablet ? 20 : 18,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 15),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            children: [
+                                              Image.asset(
+                                                'lib/assets/hombres.png',
+                                                height: isDesktop ? 120 : isTablet ? 100 : 80,
+                                                fit: BoxFit.contain,
                                               ),
-                                            ),
-                                          ],
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                'Hombres',
+                                                style: GoogleFonts.roboto(
+                                                  fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Divider vertical
-                            if (isDesktop || isTablet)
-                              VerticalDivider(
-                                thickness: 2,
-                                color: Colors.white.withValues(alpha: 0.3),
-                                indent: 10,
-                                endIndent: 10,
-                              ),
-                            if (!isDesktop)
-                              Divider(
-                                thickness: 5,
-                                color: Colors.white.withValues(alpha: 0.3),
-                                height: 100,
-                              ),
-                            // Columna 2: Lluvia de Sobres
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "Lluvia de Sobres 💌",
-                                    style: GoogleFonts.playfairDisplay(
-                                      fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                        Expanded(
+                                          child: Column(
+                                            children: [
+                                              Image.asset(
+                                                'lib/assets/mujeres.png',
+                                                height: isDesktop ? 120 : isTablet ? 100 : 80,
+                                                fit: BoxFit.contain,
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                'Mujeres',
+                                                style: GoogleFonts.roboto(
+                                                  fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    "Si deseas honrarme con un detalle, una lluvia de sobres sería muy especial.",
-                                    style: GoogleFonts.nunito(
-                                      fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
-                                      color: Colors.white,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          "Se reserva el color rosado en todas sus tonalidades",
-                          style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 20 : isTablet ? 16 : 14,
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontStyle: FontStyle.italic,
+                              // Divider vertical
+                              if (isDesktop || isTablet)
+                                VerticalDivider(
+                                  thickness: 2,
+                                  color: Colors.white.withValues(alpha: 0.3),
+                                  indent: 10,
+                                  endIndent: 10,
+                                ),
+                              if (!isDesktop)
+                                Divider(
+                                  thickness: 5,
+                                  color: Colors.white.withValues(alpha: 0.3),
+                                  height: 100,
+                                ),
+                              // Columna 2: Reserva de color
+                              Expanded(
+                                child: Text(
+                                  "Se reserva el color rosado en todas sus tonalidades",
+                                  style: GoogleFonts.roboto(
+                                    fontSize: isDesktop ? 32 : isTablet ? 28 : 22,
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                          const SizedBox(height: 20),
+                          // Fila 2: Lluvia de sobres
+                          Column(
+                            children: [
+                              Text(
+                                "Lluvia de Sobres 💌",
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Si deseas honrarme con un detalle, una lluvia de sobres sería muy especial.",
+                                style: GoogleFonts.nunito(
+                                  fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-                // Separador
-                SizedBox(
-                  height: size.height * 0.008,
-                ),
-
-                // Sección 5: Nota de agradecimiento con efecto de resaltar
-                _buildSectionWithOffset(
-                  animation: _section5Animation,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 100 : isTablet ? 50 : 20,
-                      vertical: isDesktop ? 15 : 10,
-                    ),
-                    padding: EdgeInsets.all(isDesktop ? 30 : 20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4B6C2),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Hay momentos inolvidables que se atesoran en el corazón '
-                          'para siempre, por esa razón quiero que compartas '
-                          'conmigo este día tan especial.',
-                          style: GoogleFonts.roboto(
-                            fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
-                            color: Colors.white,
-                            height: 1.5,
+            
+                  // Separador
+                  SizedBox(
+                    height: size.height * 0.008,
+                  ),
+            
+                  // Sección 5: Nota de agradecimiento con efecto de resaltar
+                  _buildSectionWithOffset(
+                    animation: _section5Animation,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: isDesktop ? 100 : isTablet ? 50 : 20,
+                        vertical: isDesktop ? 15 : 10,
+                      ),
+                      padding: EdgeInsets.all(isDesktop ? 30 : 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4B6C2),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          'Con cariño,',
-                          style: GoogleFonts.dancingScript(
-                            fontSize: isDesktop ? 40 : isTablet ? 34 : 30,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          _nombreInvitado.isNotEmpty ? _nombreInvitado : 'Belén',
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 25),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: () => _mostrarDialogoNombre(confirmar: true),
-                              icon: const Icon(Icons.check_circle, color: Colors.white),
-                              label: Text(
-                                'Confirmar Asistencia',
-                                style: GoogleFonts.roboto(
-                                  fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: isDesktop ? 20 : 15,
-                                  vertical: isDesktop ? 12 : 10,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Hay momentos inolvidables que se atesoran en el corazón '
+                            'para siempre, por esa razón quiero que compartas '
+                            'conmigo este día tan especial.',
+                            style: GoogleFonts.roboto(
+                              fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
+                              color: Colors.white,
+                              height: 1.5,
                             ),
-                            const SizedBox(width: 15),
-                            ElevatedButton.icon(
-                              onPressed: () => _mostrarDialogoNombre(confirmar: false),
-                              icon: const Icon(Icons.cancel, color: Colors.white),
-                              label: Text(
-                                'No Asistir',
-                                style: GoogleFonts.roboto(
-                                  fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: isDesktop ? 20 : 15,
-                                  vertical: isDesktop ? 12 : 10,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            'Con cariño,',
+                            style: GoogleFonts.dancingScript(
+                              fontSize: isDesktop ? 40 : isTablet ? 34 : 30,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          Text(
+                            _nombreInvitado.isNotEmpty ? _nombreInvitado : 'Belén',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 25),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () => _mostrarDialogoNombre(confirmar: true),
+                                icon: const Icon(Icons.check_circle, color: Colors.white),
+                                label: Text(
+                                  'Confirmar Asistencia',
+                                  style: GoogleFonts.roboto(
+                                    fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isDesktop ? 20 : 15,
+                                    vertical: isDesktop ? 12 : 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              ElevatedButton.icon(
+                                onPressed: () => _mostrarDialogoNombre(confirmar: false),
+                                icon: const Icon(Icons.cancel, color: Colors.white),
+                                label: Text(
+                                  'No Asistir',
+                                  style: GoogleFonts.roboto(
+                                    fontSize: isDesktop ? 16 : isTablet ? 14 : 12,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isDesktop ? 20 : 15,
+                                    vertical: isDesktop ? 12 : 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                // Espacio al final
-                SizedBox(height: isDesktop ? 80 : 60),
-              ],
+                  // Espacio al final
+                  SizedBox(height: isDesktop ? 80 : 60),
+                ],
+              ),
             ),
           ),
 
@@ -845,11 +784,11 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
             bottom: 20,
             right: 20,
             child: FloatingActionButton(
-              onPressed: _togglePlayPause,
+              onPressed: _toggleMusic,
               backgroundColor: const Color(0xFFF4B6C2),
               elevation: 5,
               child: Icon(
-                _isPlaying ? Icons.pause : Icons.play_arrow,
+                _audioService.isPlaying ? Icons.pause : Icons.play_arrow,
                 color: Colors.white,
                 size: 30,
               ),

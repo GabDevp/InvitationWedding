@@ -53,7 +53,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/rosa.png',
                   size: 108,
                   rotation: math.sin(t) * 0.08,
-                  opacity: 0.45,
+                  opacity: 0.65,
                 ),
               ),
 
@@ -65,7 +65,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/mariposa.png',
                   size: 112,
                   rotation: math.sin(t * 1.3) * 0.15,
-                  opacity: 0.55,
+                  opacity: 0.90,
                 ),
               ),
 
@@ -77,7 +77,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/rosa.png',
                   size: 108,
                   rotation: -0.3 + math.sin(t) * 0.1,
-                  opacity: 0.35,
+                  opacity: 0.70,
                 ),
               ),
 
@@ -89,7 +89,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/mariposa.png',
                   size: 112,
                   rotation: math.sin(t) * 0.2,
-                  opacity: 0.45,
+                  opacity: 0.90,
                 ),
               ),
 
@@ -101,7 +101,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/rosa.png',
                   size: 108,
                   rotation: 0.25 + math.sin(t) * 0.08,
-                  opacity: 0.4,
+                  opacity: 0.70,
                 ),
               ),
 
@@ -113,7 +113,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/mariposa.png',
                   size: 112,
                   rotation: -0.2 + math.sin(t) * 0.18,
-                  opacity: 0.5,
+                  opacity: 0.90,
                 ),
               ),
 
@@ -125,7 +125,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/rosa.png',
                   size: 70,
                   rotation: math.sin(t) * 0.12,
-                  opacity: 0.30,
+                  opacity: 0.70,
                 ),
               ),
 
@@ -137,7 +137,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/mariposa.png',
                   size: 100,
                   rotation: math.sin(t * 1.5) * 0.25,
-                  opacity: 0.55,
+                  opacity: 0.90,
                 ),
               ),
 
@@ -149,7 +149,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/rosa.png',
                   size: 75,
                   rotation: -0.2 + math.sin(t) * 0.1,
-                  opacity: 0.55,
+                  opacity: 0.70,
                 ),
               ),
 
@@ -161,7 +161,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/mariposa.png',
                   size: 108,
                   rotation: math.sin(t) * 0.20,
-                  opacity: 0.55,
+                  opacity: 0.90,
                 ),
               ),
 
@@ -173,7 +173,7 @@ class _FloatingFloralDecorationState
                   asset: 'lib/assets/rosa.png',
                   size: 80,
                   rotation: 0.15 + math.sin(t) * 0.08,
-                  opacity: 0.60,
+                  opacity: 0.70,
                 ),
               ),
             ],
