@@ -379,7 +379,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                       children: [
                         Text(
                           _nombreInvitado.isNotEmpty ? "Hola 🤗 ${_nombreInvitado},\nestas invitado/a\na mis quinceaños" : 'Invitado Especial',
-                          style: GoogleFonts.playwriteFrModerne(
+                          style: GoogleFonts.playfairDisplay(
                             fontSize: isDesktop ? 48 : isTablet ? 40 : 34,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -710,7 +710,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             ),
                           ),
                           Text(
-                            _nombreInvitado.isNotEmpty ? _nombreInvitado : 'Belén',
+                            'Belén',
                             style: GoogleFonts.playfairDisplay(
                               fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
                               color: Colors.white,
