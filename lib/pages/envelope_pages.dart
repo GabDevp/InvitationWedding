@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:invitacion_boda/widgets/floatingdecoration.dart';
+// import 'package:invitacion_boda/widgets/floatingdecoration.dart';
 import 'package:invitacion_boda/services/audio_service.dart';
 
 class EnvelopeScreen extends StatefulWidget {
@@ -378,8 +378,8 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                     child: Column(
                       children: [
                         Text(
-                          _nombreInvitado.isNotEmpty ? "Hola 🤗 ${_nombreInvitado},\nestas invitado/a\na mis quinceaños" : 'Invitado Especial',
-                          style: GoogleFonts.playfairDisplay(
+                          _nombreInvitado.isNotEmpty ? "Hola ${_nombreInvitado},\nestas invitado/a\na mis quinceaños" : 'Invitado Especial',
+                          style: GoogleFonts.dancingScript(
                             fontSize: isDesktop ? 48 : isTablet ? 40 : 34,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -471,7 +471,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             style: GoogleFonts.dancingScript(
                               fontSize: isDesktop ? 60 : isTablet ? 48 : 40,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Colors.brown[800],
                               height: 1.2,
                             ),
                             textAlign: TextAlign.center,
@@ -481,7 +481,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             'Sábado 14 de noviembre 2026',
                             style: GoogleFonts.roboto(
                               fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
-                              color: Colors.white,
+                              color: Colors.brown[800],
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -490,7 +490,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             'Hora 8:00 PM',
                             style: GoogleFonts.roboto(
                               fontSize: isDesktop ? 28 : isTablet ? 24 : 20,
-                              color: Colors.white.withValues(alpha: 0.9),
+                              color: Colors.brown[800]!.withValues(alpha: 0.9),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -499,7 +499,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             'Finca Villa Palmas',
                             style: GoogleFonts.roboto(
                               fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
-                              color: Colors.white,
+                              color: Colors.brown[800],
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -508,7 +508,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             'Vía San Carlos - Entrada por Nariño',
                             style: GoogleFonts.roboto(
                               fontSize: isDesktop ? 24 : isTablet ? 20 : 16,
-                              color: Colors.white.withValues(alpha: 0.8),
+                              color: Colors.brown[800]!.withValues(alpha: 0.8),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -551,8 +551,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                                       'Código de Vestimenta\nFormal',
                                       style: GoogleFonts.playfairDisplay(
                                         fontSize: isDesktop ? 34 : isTablet ? 28 : 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: Colors.brown[800],
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -573,7 +572,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                                                 'Hombres',
                                                 style: GoogleFonts.roboto(
                                                   fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
-                                                  color: Colors.white,
+                                                  color: Colors.brown[800],
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -593,7 +592,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                                                 'Mujeres',
                                                 style: GoogleFonts.roboto(
                                                   fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
-                                                  color: Colors.white,
+                                                  color: Colors.brown[800],
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -609,14 +608,14 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                               if (isDesktop || isTablet)
                                 VerticalDivider(
                                   thickness: 2,
-                                  color: Colors.white.withValues(alpha: 0.3),
+                                  color: Colors.brown[800]!.withValues(alpha: 0.3),
                                   indent: 10,
                                   endIndent: 10,
                                 ),
                               if (!isDesktop)
                                 Divider(
                                   thickness: 5,
-                                  color: Colors.white.withValues(alpha: 0.3),
+                                  color: Colors.brown[800]!.withValues(alpha: 0.3),
                                   height: 100,
                                 ),
                               // Columna 2: Reserva de color
@@ -625,8 +624,9 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                                   "Se reserva el color rosado en todas sus tonalidades",
                                   style: GoogleFonts.roboto(
                                     fontSize: isDesktop ? 32 : isTablet ? 28 : 22,
-                                    color: Colors.white.withValues(alpha: 0.9),
+                                    color: Colors.brown[800],
                                     fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -635,27 +635,14 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                           ),
                           const SizedBox(height: 20),
                           // Fila 2: Lluvia de sobres
-                          Column(
-                            children: [
-                              Text(
-                                "Lluvia de Sobres 💌",
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                "Si deseas honrarme con un detalle, una lluvia de sobres sería muy especial.",
-                                style: GoogleFonts.nunito(
-                                  fontSize: isDesktop ? 22 : isTablet ? 18 : 16,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                          Text(
+                            "Lluvia de Sobres 💌",
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown[800],
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -695,7 +682,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             'conmigo este día tan especial.',
                             style: GoogleFonts.roboto(
                               fontSize: isDesktop ? 30 : isTablet ? 26 : 22,
-                              color: Colors.white,
+                              color: Colors.brown[800],
                               height: 1.5,
                             ),
                             textAlign: TextAlign.center,
@@ -705,7 +692,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             'Con cariño,',
                             style: GoogleFonts.dancingScript(
                               fontSize: isDesktop ? 40 : isTablet ? 34 : 30,
-                              color: Colors.white,
+                              color: Colors.brown[800],
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -713,7 +700,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
                             'Belén',
                             style: GoogleFonts.playfairDisplay(
                               fontSize: isDesktop ? 38 : isTablet ? 32 : 26,
-                              color: Colors.white,
+                              color: Colors.brown[800],
                               fontWeight: FontWeight.bold,
                             ),
                           ),
