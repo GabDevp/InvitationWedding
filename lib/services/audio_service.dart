@@ -39,11 +39,11 @@ class AudioService {
         // En web, usar UrlSource con la ruta correcta del asset
         if (kIsWeb) {
           await _player!.play(
-            UrlSource('assets/audio/potter_waltz.mp3'),
+            UrlSource('assets/lib/assets/audio/potter_waltz.mp3'),
           );
         } else {
           await _player!.play(
-            AssetSource('lib/assets/audio/potter_waltz.mp3'),
+            UrlSource('assets/lib/assets/audio/potter_waltz.mp3'),
           );
         }
       }

@@ -22,6 +22,7 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
 
   // Audio - usar servicio global
   final _audioService = AudioService();
+  bool _showOverlay = true;
 
   // Animation Controllers para cada sección
   late AnimationController _section1Controller;
@@ -44,6 +45,9 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     super.initState();
 
     _nombreInvitado = widget.nombreInvitado ?? '';
+
+    // No mostrar overlay si no hay nombre en la URL
+    _showOverlay = _nombreInvitado.isNotEmpty;
 
     _scrollController = ScrollController();
 
@@ -117,10 +121,10 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
     // Listener del scroll para controlar animaciones
     _scrollController.addListener(() {
       final scrollPosition = _scrollController.offset;
-      final section2Trigger = 08.0;
-      final section3Trigger = 145.0;
-      final section4Trigger = 300.0;
-      final section5Trigger = 450.0;
+      final section2Trigger = 00.0;
+      final section3Trigger = 125.0;
+      final section4Trigger = 285.0;
+      final section5Trigger = 350.0;
 
       // Sección 1: Sin animación (estática)
 
@@ -162,6 +166,27 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
       }
     } catch (e) {
       debugPrint('Error al controlar música: $e');
+    }
+  }
+
+  Future<void> _revealInvitation() async {
+    // Iniciar música con la interacción del usuario
+    try {
+      await _audioService.togglePlayPause();
+    } catch (e) {
+      debugPrint('Error al iniciar música: $e');
+    }
+
+    // Ocultar overlay
+    if (mounted) {
+      setState(() {
+        _showOverlay = false;
+      });
+    }
+
+    // Iniciar animación de la primera sección visible (sección 2 original)
+    if (mounted) {
+      _section2Controller.forward();
     }
   }
 
@@ -331,38 +356,38 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
             controller: _scrollController,
             child: Column(
               children: [
-                // Sección 1: Nombre de invitado + fecha (sin animación)
-                Container(
-                  padding: EdgeInsets.only(
-                    top: isDesktop ? 60 : 40,
-                    bottom: isDesktop ? 30 : 20,
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        _nombreInvitado.isNotEmpty ? "Hola ${_nombreInvitado},\nestas invitado/a\na mis quinceaños" : 'Invitado Especial',
-                        style: GoogleFonts.dancingScript(
-                          fontSize: isDesktop ? 48 : isTablet ? 40 : 34,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              blurRadius: 4,
-                              offset: const Offset(1, 1),
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
+                // // Sección 1: Nombre de invitado + fecha (sin animación)
+                // Container(
+                //   padding: EdgeInsets.only(
+                //     top: isDesktop ? 60 : 40,
+                //     bottom: isDesktop ? 30 : 20,
+                //   ),
+                //   child: Column(
+                //     children: [
+                //       Text(
+                //         _nombreInvitado.isNotEmpty ? "Hola ${_nombreInvitado},\nestas invitado/a\na mis quinceaños" : 'Invitado Especial',
+                //         style: GoogleFonts.dancingScript(
+                //           fontSize: isDesktop ? 48 : isTablet ? 40 : 34,
+                //           fontWeight: FontWeight.bold,
+                //           color: Colors.white,
+                //           shadows: [
+                //             Shadow(
+                //               color: Colors.black.withValues(alpha: 0.5),
+                //               blurRadius: 4,
+                //               offset: const Offset(1, 1),
+                //             ),
+                //           ],
+                //         ),
+                //         textAlign: TextAlign.center,
+                //       ),
+                //     ],
+                //   ),
+                // ),
           
-                // Separador
-                SizedBox(
-                  height: size.height * 0.008,
-                ),
+                // // Separador
+                // SizedBox(
+                //   height: size.height * 0.008,
+                // ),
           
                 // Sección 2: Foto personal grande de la quinceañera
                 _buildSectionWithOffset(
@@ -726,6 +751,77 @@ class _EnvelopeScreenState extends State<EnvelopeScreen>
               ],
             ),
           ),
+
+          // Overlay de bienvenida (solo si hay nombre en la URL)
+          if (_showOverlay && _nombreInvitado.isNotEmpty)
+            Positioned.fill(
+              child: Container(
+                color: const Color(0xFFF4B6C2).withValues(alpha: 0.65),
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: isDesktop ? 100 : 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Hola $_nombreInvitado',
+                          style: GoogleFonts.dancingScript(
+                            fontSize: isDesktop ? 64 : isTablet ? 52 : 42,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown[800],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Estás invitado/a a mis quinceaños',
+                          style: GoogleFonts.dancingScript(
+                            fontSize: isDesktop ? 64 : isTablet ? 52 : 42,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown[800],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 40),
+                        Container(
+                          width: isDesktop ? 130 : isTablet ? 110 : 100,
+                          height: isDesktop ? 130 : isTablet ? 110 : 100,
+                          decoration: BoxDecoration(
+                            color: Colors.brown[800],
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _revealInvitation,
+                              customBorder: const CircleBorder(),
+                              child: Center(
+                                child: Text(
+                                  'Abrir\nInvitación',
+                                  style: GoogleFonts.roboto(
+                                    fontSize: isDesktop ? 20 : isTablet ? 18 : 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
           // Botón flotante de música
           Positioned(
