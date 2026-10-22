@@ -13,17 +13,13 @@ class AudioService {
 
   bool _isPlaying = false;
   bool _isInitialized = false;
-  bool _isStarting = false;
 
   bool get isPlaying => _isPlaying;
 
-  Future<void> initialize() async {
+  Future<void> _ensureInitialized() async {
     if (_isInitialized) return;
 
-    if (_player == null) {
-      _player = AudioPlayer();
-    }
-
+    _player = AudioPlayer();
     await _player!.setReleaseMode(ReleaseMode.loop);
 
     _player!.onPlayerStateChanged.listen((state) {
@@ -33,50 +29,27 @@ class AudioService {
     _isInitialized = true;
   }
 
-  /// Inicia la música. Debe llamarse desde un gesto del usuario
-  /// en navegadores que bloquean la reproducción automática.
-  Future<void> startMusic() async {
-    if (_isStarting || _isPlaying) return;
-
-    _isStarting = true;
-
-    try {
-      await initialize();
-
-      await _player!.play(
-        UrlSource('assets/lib/assets/audio/potter_waltz.mp3'),
-      );
-
-      _isPlaying = true;
-    } catch (e) {
-      debugPrint('Error al iniciar la música: $e');
-    } finally {
-      _isStarting = false;
-    }
-  }
-
-  /// Alterna entre pausa y reproducción.
   Future<void> togglePlayPause() async {
-    await initialize();
+    await _ensureInitialized();
 
     try {
       if (_isPlaying) {
         await _player!.pause();
-        _isPlaying = false;
       } else {
-        // Si nunca se inició la canción, play() carga el recurso.
+        // En web, usar UrlSource con la ruta correcta del asset
         if (kIsWeb) {
           await _player!.play(
-            UrlSource('assets/lib/assets/audio/potter_waltz.mp3'),
+            UrlSource('assets/audio/potter_waltz.mp3'),
           );
         } else {
-          await _player!.resume();
+          await _player!.play(
+            AssetSource('lib/assets/audio/potter_waltz.mp3'),
+          );
         }
-
-        _isPlaying = true;
       }
     } catch (e) {
-      debugPrint('Error al controlar la música: $e');
+      debugPrint('AudioService error: $e');
+      rethrow;
     }
   }
 
@@ -86,6 +59,5 @@ class AudioService {
     _player = null;
     _isPlaying = false;
     _isInitialized = false;
-    _isStarting = false;
   }
 }
